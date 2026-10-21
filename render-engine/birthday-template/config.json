@@ -1,11 +1,13 @@
 {
   "background": "deep-green",
   "celebrantName": "Nur-Aina Ibrahim",
+  "closingEffect": "none",
   "closingLine": "Wishing you a year as warm and generous as you are.",
   "closingPaper": "classic",
   "closingSignOff": "With love, your YSE Family",
   "collage": {
     "photo": {
+      "effect": "none",
       "enabled": true,
       "heading": "Moments together",
       "photoIndexes": [
@@ -33,6 +35,7 @@
           "text": "We are lucky to work with you. Happy birthday!"
         }
       ],
+      "effect": "none",
       "enabled": false,
       "heading": "Kind words"
     }
@@ -45,11 +48,13 @@
   },
   "messages": [
     {
+      "effect": "none",
       "paper": "classic",
       "signedBy": "Your YSE Family",
       "text": "You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely."
     },
     {
+      "effect": "none",
       "paper": "classic",
       "signedBy": "From all of us at YSE",
       "text": "Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us."
@@ -91,5 +96,6 @@
     "photoCollage",
     "textCollage",
     "messages"
-  ]
+  ],
+  "titleEffect": "none"
 }

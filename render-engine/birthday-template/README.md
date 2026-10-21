@@ -151,6 +151,30 @@ six are light papers, so the dark ink stays readable on every one:
 Unknown keys fall back to `classic`. Text collage cards always use
 `classic`.
 
+## Card effects
+
+The title card, each message card, both collage scenes, and the closing
+card can each carry an optional animated effect: a layer of small
+animated assets over the scene backdrop, behind the card itself. Set
+`titleEffect` at the top level, `effect` on each `messages[]` entry,
+`effect` inside `collage.photo` and `collage.text`, and `closingEffect`
+at the top level. Photo scenes have no effect. The choices:
+
+- `none` (default everywhere): no effect layer.
+- `confetti`: about 26 small pieces in gold, cream, sage, and blush fall
+  the height of the frame with a sway and a spin.
+- `sparkles`: about 14 gold four-point stars scattered over the frame,
+  twinkling in place.
+- `hearts`: about 12 hearts rise from the bottom edge to about 70% of
+  the frame height, swaying and fading near the top.
+- `petals`: about 14 soft petals in blush and cream drift down and
+  sideways with a slow rotation.
+
+Unknown keys fall back to `none`. Placement is pseudo-random but
+deterministic (seeded from the card), so the same config always renders
+the same layout. Every asset loops in whole cycles planned against its
+scene's duration, so nothing animates past the end of its card.
+
 ## Scene order
 
 `sceneOrder` in `config.json` lists the four middle block keys in play

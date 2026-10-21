@@ -23,10 +23,6 @@
         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6h4"/></svg>
         Total runtime <strong class="text-ink font-semibold" id="totalRuntimeTop">0:00</strong>
       </span>
-      <button type="button" id="generateBtn" class="flex items-center gap-2 bg-brand text-white border-none rounded-lg px-[22px] py-2.5 text-sm font-semibold cursor-pointer whitespace-nowrap shadow-[0_1px_3px_rgba(139,61,255,0.35)] hover:bg-brand-dark disabled:opacity-50 disabled:cursor-default disabled:shadow-none">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
-        Generate Video
-      </button>
     </header>
 
     <div class="flex-1 flex min-h-0">
@@ -69,23 +65,31 @@
         </button>
       </nav>
 
-      <div class="flex-none w-[300px] bg-white border-r border-line overflow-y-auto min-w-0">
+      <div class="flex-none w-[360px] bg-white border-r border-line overflow-y-auto min-w-0">
         <section class="panel active p-[18px]" id="panelTemplates">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Templates</h2>
           <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Birthday is ready to use. The other event types are on the way.</p>
-          <label class="flex items-center gap-2.5 border-2 border-brand rounded-[10px] p-3.5 mb-2.5 bg-brand-soft text-sm font-semibold cursor-pointer"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#2c5c46,#17352b)]"></span><input type="radio" name="eventType" value="Birthday" checked class="accent-[#8b3dff]" /> Birthday</label>
-          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Appreciation" disabled class="accent-[#8b3dff]" /> Appreciation <span class="ml-auto text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
-          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Awards" disabled class="accent-[#8b3dff]" /> Awards <span class="ml-auto text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
-          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Retirement" disabled class="accent-[#8b3dff]" /> Retirement <span class="ml-auto text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
+          <label class="flex items-center gap-2.5 border-2 border-brand rounded-[10px] p-3.5 mb-2.5 bg-brand-soft text-sm font-semibold cursor-pointer"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#2c5c46,#17352b)]"></span><input type="radio" name="eventType" value="Birthday" checked class="accent-[#8b3dff] flex-none" /> <span class="min-w-0">Birthday</span></label>
+          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Appreciation" disabled class="accent-[#8b3dff] flex-none" /> <span class="min-w-0">Appreciation</span> <span class="ml-auto flex-none text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
+          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Awards" disabled class="accent-[#8b3dff] flex-none" /> <span class="min-w-0">Awards</span> <span class="ml-auto flex-none text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
+          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Retirement" disabled class="accent-[#8b3dff] flex-none" /> <span class="min-w-0">Retirement</span> <span class="ml-auto flex-none text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
         </section>
 
         <section class="panel p-[18px]" id="panelDetails">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Details</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">These words appear on the title card and the closing card of the video.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">These words appear on the title card and the closing card of the video. Each of those cards can also carry an optional animated effect: confetti, sparkles, hearts, or petals.</p>
           <label class="field-label" for="celebrantName">Celebrant name</label>
           <input type="text" class="field-input" id="celebrantName" value="" placeholder="e.g. Maria Clara Santos" />
           <label class="field-label" for="titleDuration">Title card seconds</label>
           <input type="number" class="field-input" id="titleDuration" value="5" min="3" max="10" step="1" />
+          <label class="field-label" for="titleEffect">Title card effect</label>
+          <select class="field-input" id="titleEffect">
+            <option value="none" selected>None</option>
+            <option value="confetti">Confetti</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="hearts">Hearts</option>
+            <option value="petals">Petals</option>
+          </select>
           <label class="field-label" for="closingLine">Closing line</label>
           <input type="text" class="field-input" id="closingLine" value="Wishing you a year as warm and generous as you are." />
           <label class="field-label" for="closingSignOff">Closing sign-off</label>
@@ -100,6 +104,14 @@
             <option value="blush">Blush pink</option>
             <option value="mint">Mint green</option>
             <option value="sky">Sky blue</option>
+          </select>
+          <label class="field-label" for="closingEffect">Closing card effect</label>
+          <select class="field-input" id="closingEffect">
+            <option value="none" selected>None</option>
+            <option value="confetti">Confetti</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="hearts">Hearts</option>
+            <option value="petals">Petals</option>
           </select>
         </section>
 
@@ -116,7 +128,7 @@
 
         <section class="panel p-[18px]" id="panelMessages">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Messages</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards. Set how long each card stays and which paper it is written on. Leave a message blank to skip it. Use the Scenes tab to choose where they play.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards. Set how long each card stays, which paper it is written on, and an optional animated effect. Leave a message blank to skip it. Use the Scenes tab to choose where they play.</p>
           <label class="field-label" for="message1Text">Message 1</label>
           <textarea class="field-input" id="message1Text">You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.</textarea>
           <label class="field-label" for="message1SignedBy">Signed by</label>
@@ -131,6 +143,14 @@
             <option value="blush">Blush pink</option>
             <option value="mint">Mint green</option>
             <option value="sky">Sky blue</option>
+          </select>
+          <label class="field-label" for="message1Effect">Message 1 effect</label>
+          <select class="field-input" id="message1Effect">
+            <option value="none" selected>None</option>
+            <option value="confetti">Confetti</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="hearts">Hearts</option>
+            <option value="petals">Petals</option>
           </select>
           <label class="field-label" for="message2Text">Message 2</label>
           <textarea class="field-input" id="message2Text">Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.</textarea>
@@ -147,11 +167,19 @@
             <option value="mint">Mint green</option>
             <option value="sky">Sky blue</option>
           </select>
+          <label class="field-label" for="message2Effect">Message 2 effect</label>
+          <select class="field-input" id="message2Effect">
+            <option value="none" selected>None</option>
+            <option value="confetti">Confetti</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="hearts">Hearts</option>
+            <option value="petals">Petals</option>
+          </select>
         </section>
 
         <section class="panel p-[18px]" id="panelCollage">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Collage</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Two optional scenes. Set how long each one stays. The photo collage shows 3 photos together as polaroids; the text collage shows greeting cards. Both can appear in the same video. Use the Scenes tab to choose where each one plays.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Two optional scenes. Set how long each one stays and an optional animated effect for each. The photo collage shows 3 photos together as polaroids; the text collage shows greeting cards. Both can appear in the same video. Use the Scenes tab to choose where each one plays.</p>
           <h3 class="m-0 mb-1 text-[13.5px] font-semibold">Photo collage</h3>
           <div class="flex items-center gap-2.5 mt-1">
             <input type="checkbox" id="collageEnabled" checked class="w-[18px] h-[18px] accent-[#8b3dff]" />
@@ -161,6 +189,14 @@
           <input type="text" class="field-input" id="collageHeading" value="Moments together" />
           <label class="field-label" for="photoCollageDuration">Photo collage seconds</label>
           <input type="number" class="field-input" id="photoCollageDuration" value="6" min="4" max="12" step="1" />
+          <label class="field-label" for="photoCollageEffect">Photo collage effect</label>
+          <select class="field-input" id="photoCollageEffect">
+            <option value="none" selected>None</option>
+            <option value="confetti">Confetti</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="hearts">Hearts</option>
+            <option value="petals">Petals</option>
+          </select>
           <div id="collagePhotoArea">
             <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Tick exactly 3 photos in the Photos tab for the polaroids.</p>
             <p class="warn" id="collageWarn">The photo collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
@@ -174,6 +210,14 @@
           <input type="text" class="field-input" id="textCollageHeading" value="Kind words" />
           <label class="field-label" for="textCollageDuration">Text collage seconds</label>
           <input type="number" class="field-input" id="textCollageDuration" value="6" min="4" max="12" step="1" />
+          <label class="field-label" for="textCollageEffect">Text collage effect</label>
+          <select class="field-input" id="textCollageEffect">
+            <option value="none" selected>None</option>
+            <option value="confetti">Confetti</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="hearts">Hearts</option>
+            <option value="petals">Petals</option>
+          </select>
           <div id="collageTextArea">
             <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped.</p>
             <label class="field-label" for="cardText1">Card 1</label>
@@ -328,14 +372,15 @@
       </div>
 
       <div class="flex-1 min-w-0 flex flex-col bg-canvas">
-        <div class="flex-1 min-h-0 flex flex-col items-center justify-center px-[26px] pt-[22px] pb-2">
+        <div class="flex-1 min-h-0 flex gap-4 px-[26px] pt-[22px] pb-2">
+          <div class="flex-1 min-w-0 flex flex-col items-center justify-center">
           <div class="stage" id="stage">
             <div class="stage-sizer" id="stageSizer">
               <iframe id="previewFrame" title="Exact preview of the video"></iframe>
               <div class="stage-placeholder" id="previewPlaceholder">Press Play or Update preview to build an exact preview.</div>
             </div>
           </div>
-          <div class="flex items-center gap-3 mt-3 text-[12.5px] text-muted">
+          <div class="flex flex-wrap items-center justify-center gap-3 mt-3 text-[12.5px] text-muted">
             <button type="button" class="transport-btn" id="previewBtn" aria-label="Play or pause the preview">
               <svg data-icon="play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>
               <svg data-icon="pause" style="display: none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></svg>
@@ -349,6 +394,42 @@
             <span id="previewLabel">No preview built yet</span>
           </div>
           <p class="m-0 mt-1.5 text-[11.5px] text-muted">Preview is the exact video design. Music is mixed in when you generate.</p>
+          </div>
+          <div class="flex-none w-[300px] min-h-0 overflow-y-auto flex flex-col gap-3.5">
+            <section class="border border-line rounded-[10px] px-4 py-3.5 bg-white" id="generate-card">
+              <h2 class="m-0 mb-1 text-sm font-semibold">Generate</h2>
+              <p class="m-0 mb-3 text-muted text-xs leading-normal">Rendering happens on this machine and usually takes a few minutes for a one minute video. When it is done, the video and the download button appear here.</p>
+              <button type="button" id="generateBtn" class="w-full flex items-center justify-center gap-2 bg-brand text-white border-none rounded-lg px-[22px] py-2.5 text-sm font-semibold cursor-pointer shadow-[0_1px_3px_rgba(139,61,255,0.35)] hover:bg-brand-dark disabled:opacity-50 disabled:cursor-default disabled:shadow-none">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
+                Generate Video
+              </button>
+              <ul class="output-list list-none m-0 p-0 mt-3 text-[13px]">
+                <li><span>Template</span><span>Birthday</span></li>
+                <li><span>Size</span><span>1920 x 1080</span></li>
+                <li><span>Length</span><span id="outputLength">0:00</span></li>
+              </ul>
+              <div class="status-box" id="statusBox"></div>
+              <div class="result-box" id="resultBox">
+                <video id="resultVideo" controls playsinline></video>
+                <a class="mt-2.5 flex items-center justify-center gap-2 text-center bg-brand text-white no-underline rounded-lg px-3 py-[11px] font-semibold text-sm hover:bg-brand-dark" id="downloadBtn" href="#" download>
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                  Download MP4
+                </a>
+              </div>
+            </section>
+            <section class="border border-line rounded-[10px] px-4 py-3.5 bg-white" id="summary-card">
+              <h2 class="m-0 mb-1 text-sm font-semibold">Video summary</h2>
+              <p class="m-0 mb-2.5 text-muted text-xs leading-normal">Scenes update as you add photos and change options.</p>
+              <ul class="scene-list list-none m-0 p-0 text-[13px]" id="sceneList"></ul>
+              <div class="flex justify-between items-center font-semibold mt-2.5 text-sm">
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6h4"/></svg>
+                  Total runtime
+                </span>
+                <span id="totalRuntime">0:00</span>
+              </div>
+            </section>
+          </div>
         </div>
         <div class="flex-none bg-white border-t border-line px-3.5 pt-2.5 pb-3">
           <div class="flex items-center gap-1.5 text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-2">
@@ -357,44 +438,6 @@
           </div>
           <div class="timeline-strip flex gap-2 overflow-x-auto overflow-y-hidden pb-1" id="timelineStrip"></div>
         </div>
-      </div>
-
-      <div class="flex-none w-[272px] bg-white border-l border-line overflow-y-auto p-4 min-w-0">
-        <section class="border border-line rounded-[10px] px-4 py-3.5 mb-3.5 bg-white" id="summary-card">
-          <h2 class="m-0 mb-1 text-sm font-semibold">Video summary</h2>
-          <p class="m-0 mb-2.5 text-muted text-xs leading-normal">Scenes update as you add photos and change options.</p>
-          <ul class="scene-list list-none m-0 p-0 text-[13px]" id="sceneList"></ul>
-          <div class="flex justify-between items-center font-semibold mt-2.5 text-sm">
-            <span class="flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6h4"/></svg>
-              Total runtime
-            </span>
-            <span id="totalRuntime">0:00</span>
-          </div>
-        </section>
-
-        <section class="border border-line rounded-[10px] px-4 py-3.5 mb-3.5 bg-white">
-          <h2 class="m-0 mb-1 text-sm font-semibold">Output</h2>
-          <ul class="output-list list-none m-0 p-0 text-[13px]">
-            <li><span>Template</span><span>Birthday</span></li>
-            <li><span>Size</span><span>1920 x 1080</span></li>
-            <li><span>Length</span><span id="outputLength">0:00</span></li>
-            <li><span>Format</span><span>MP4</span></li>
-          </ul>
-        </section>
-
-        <section class="border border-line rounded-[10px] px-4 py-3.5 mb-3.5 bg-white" id="generate-card">
-          <h2 class="m-0 mb-1 text-sm font-semibold">Generate</h2>
-          <p class="m-0 mb-2.5 text-muted text-xs leading-normal">Rendering happens on this machine and usually takes a few minutes for a one minute video. Use the Generate Video button at the top when you are ready.</p>
-          <div class="status-box" id="statusBox"></div>
-          <div class="result-box" id="resultBox">
-            <video id="resultVideo" controls playsinline></video>
-            <a class="mt-2.5 flex items-center justify-center gap-2 text-center bg-brand text-white no-underline rounded-lg px-3 py-[11px] font-semibold text-sm hover:bg-brand-dark" id="downloadBtn" href="#" download>
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
-              Download MP4
-            </a>
-          </div>
-        </section>
       </div>
     </div>
     <script>
@@ -761,10 +804,11 @@
 
       for (const id of ["collageEnabled", "textCollageEnabled", "message1Text", "message2Text",
         "celebrantName", "closingLine", "closingSignOff",
-        "titleDuration", "closingDuration", "closingPaper",
+        "titleDuration", "titleEffect", "closingDuration", "closingPaper", "closingEffect",
         "message1SignedBy", "message2SignedBy", "message1Duration", "message2Duration",
-        "message1Paper", "message2Paper",
+        "message1Paper", "message2Paper", "message1Effect", "message2Effect",
         "collageHeading", "textCollageHeading", "photoCollageDuration", "textCollageDuration",
+        "photoCollageEffect", "textCollageEffect",
         "cardText1", "cardText2", "cardText3", "cardText4",
         "cardFrom1", "cardFrom2", "cardFrom3", "cardFrom4"]) {
         $(id).addEventListener("input", refreshSummary);
@@ -848,6 +892,7 @@
         if (w > 0) $("previewFrame").style.transform = "scale(" + w / 1920 + ")";
       }
       window.addEventListener("resize", scalePreviewFrame);
+      window.addEventListener("load", scalePreviewFrame);
 
       function setPreviewButton(playing) {
         $("previewBtn").querySelector(".preview-btn-label").textContent = playing ? "Pause" : "Play";
@@ -974,16 +1019,20 @@
         const form = new FormData();
         form.append("celebrantName", $("celebrantName").value.trim());
         form.append("titleDuration", $("titleDuration").value);
+        form.append("titleEffect", $("titleEffect").value);
         form.append("closingDuration", $("closingDuration").value);
+        form.append("closingEffect", $("closingEffect").value);
         form.append("closingLine", $("closingLine").value.trim());
         form.append("closingSignOff", $("closingSignOff").value.trim());
         form.append("closingPaper", $("closingPaper").value);
         form.append("collageHeading", $("collageHeading").value.trim());
         form.append("collageEnabled", $("collageEnabled").checked ? "true" : "false");
         form.append("photoCollageDuration", $("photoCollageDuration").value);
+        form.append("photoCollageEffect", $("photoCollageEffect").value);
         form.append("textCollageEnabled", $("textCollageEnabled").checked ? "true" : "false");
         form.append("textCollageHeading", $("textCollageHeading").value.trim());
         form.append("textCollageDuration", $("textCollageDuration").value);
+        form.append("textCollageEffect", $("textCollageEffect").value);
         form.append("sceneOrder", $("sceneOrder").value);
         for (const n of [1, 2, 3, 4]) {
           form.append("cardTexts", $("cardText" + n).value);
@@ -1001,6 +1050,7 @@
           form.append("message" + n + "SignedBy", $("message" + n + "SignedBy").value);
           form.append("messageDurations", $("message" + n + "Duration").value);
           form.append("messagePapers", $("message" + n + "Paper").value);
+          form.append("messageEffects", $("message" + n + "Effect").value);
         }
         photos.forEach((p, i) => {
           form.append("photos", p.file, p.file.name);
@@ -1030,7 +1080,7 @@
           if (!resp.ok) throw new Error(job.error || "Could not read the job status.");
           if (job.status === "done") {
             clearInterval(pollTimer);
-            setStatus("Done. Your video is ready in the Generate panel on the right.", false);
+            setStatus("Done. Your video is ready in the Generate panel beside the preview.", false);
             if (job.musicWarning) {
               const note = document.createElement("p");
               note.style.cssText = "color: #b54708; margin: 6px 0 0;";

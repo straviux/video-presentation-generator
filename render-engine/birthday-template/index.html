@@ -63,6 +63,11 @@
       /* Gold accent shapes that pop in around the collage polaroids. */
       .accent { position: absolute; pointer-events: none; color: var(--accent); }
       .accent svg { display: block; width: 100%; height: 100%; }
+      /* Optional per-card effect layers (confetti, sparkles, hearts,
+         petals): full-canvas, clipped, decorative only. */
+      .fx-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+      .fx-piece { position: absolute; display: block; pointer-events: none; }
+      .fx-piece svg { display: block; width: 100%; height: 100%; }
       /* Soft edge darkening over photos, faded in by GSAP per scene. */
       .vignette {
         position: absolute; inset: 0; pointer-events: none; opacity: 0;

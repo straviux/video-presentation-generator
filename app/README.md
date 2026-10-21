@@ -48,7 +48,9 @@ no environment variables to set, on any platform.
    exactly as it should appear on the title card), how long the title
    and closing cards stay, the closing line and sign-off, and the
    closing card's paper: Classic cream, Clean white, Kraft tan, Blush
-   pink, Mint green, or Sky blue.
+   pink, Mint green, or Sky blue. The title and closing cards can each
+   also carry an optional animated Effect: Confetti, Sparkles, Hearts,
+   or Petals.
 3. **Photos.** Add JPG, PNG, or WebP photos.
    - Photos play in the order shown. Use the Up and Down buttons to
      reorder, Remove to drop one.
@@ -66,8 +68,8 @@ no environment variables to set, on any platform.
    - For the photo collage, tick exactly 3 photos, or untick the photo
      collage switch in the Collage tab to skip that scene entirely.
 4. **Messages.** Up to two message cards. Each one has its own length
-   (6 seconds by default) and its own paper, picked from the same six
-   papers as the closing card. Leave a message blank to skip it. The
+   (6 seconds by default), its own paper, picked from the same six
+   papers as the closing card, and its own optional Effect. Leave a message blank to skip it. The
    Scenes tab decides where in the video they play.
 5. **Fonts.** Use the Fonts tab to pick a font for each kind of text: the
    celebrant name, the headings, the captions, and the message text.
@@ -88,7 +90,7 @@ no environment variables to set, on any platform.
    polaroids under its own heading. The text collage shows up to 4 short
    greeting cards under its own heading instead; write at least 2 cards
    with text. Each scene runs 6 seconds by default and has its own
-   length setting and its own switch.
+   length setting, its own switch, and its own optional Effect.
 8. **Scenes.** In the Scenes tab, drag the middle scenes into the order
    you want with the Up and Down buttons: Photos, Photo collage, Text
    collage, and Messages. The title card always opens the video and the
@@ -113,7 +115,8 @@ no environment variables to set, on any platform.
    after changing anything; pressing Play after a change rebuilds it
    first on its own. Music is not part of the preview: it is mixed in
    when you generate.
-12. **Generate Video.** The page shows progress while the scenes are built and
+12. **Generate Video.** Use the Generate Video button in the panel
+   beside the preview. The page shows progress while the scenes are built and
    the video renders. Rendering usually takes a few minutes for a one minute
    video, so keep the page open. When it finishes, the video plays right on
    the page and the Download MP4 button saves the file.

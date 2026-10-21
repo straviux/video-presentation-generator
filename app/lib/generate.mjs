@@ -49,6 +49,19 @@ const CLOSING_PAPER = pickPaper(config.closingPaper ?? config.closing?.paper);
 // The closing eyebrow greets the celebrant by first name only.
 const FIRST_NAME = String(config.celebrantName ?? "").trim().split(/\s+/)[0] || "";
 
+// ------------------------------------------------------------ card effects --
+// Optional animated assets layered over a card scene: confetti, sparkles,
+// hearts, or petals. Each card picks its own (titleEffect, messages[].effect,
+// collage.photo.effect, collage.text.effect, closingEffect); the default is
+// "none" everywhere and unknown keys fall back to it. buildEffect below
+// does the layer construction.
+const EFFECT_KEYS = ["none", "confetti", "sparkles", "hearts", "petals"];
+function pickEffect(value) {
+  return EFFECT_KEYS.includes(value) ? value : "none";
+}
+const TITLE_EFFECT = pickEffect(config.titleEffect);
+const CLOSING_EFFECT = pickEffect(config.closingEffect);
+
 // ------------------------------------------------------- collage content ---
 // The two collages are separate scenes. collage.photo builds polaroids from
 // collage.photo.photoIndexes; collage.text builds greeting cards from
@@ -83,6 +96,8 @@ const PHOTO_COLLAGE_ON =
 const TEXT_COLLAGE_ON = textCfg.enabled === true && TEXT_CARDS.length > 0;
 const PHOTO_COLLAGE_DUR = clampNum(photoCfg.duration, 6, 4, 12);
 const TEXT_COLLAGE_DUR = clampNum(textCfg.duration, 6, 4, 12);
+const PHOTO_COLLAGE_EFFECT = pickEffect(photoCfg.effect);
+const TEXT_COLLAGE_EFFECT = pickEffect(textCfg.effect);
 
 // ---------------------------------------------------------- scene order ---
 // The four middle blocks can play in any order. config.sceneOrder lists
@@ -137,6 +152,7 @@ const MESSAGES = config.messages.map((message) => ({
   signedBy: message.signedBy,
   duration: clampNum(message.duration, 6, 4, 15),
   paper: pickPaper(message.paper),
+  effect: pickEffect(message.effect),
 }));
 const MSG_OFFSETS = [];
 {
@@ -226,6 +242,136 @@ function typeCharCount(text) {
 const ACCENT_HEART = '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>';
 const ACCENT_STAR = '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg>';
 const ACCENT_DOT = '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg>';
+
+// ----------------------------------------------------- effect layers -----
+// Deterministic pseudo-random stream (FNV-1a seed + mulberry32), so an
+// effect layer is identical on every render of the same config and in both
+// generators. Seeded from the layer id, which names the card.
+function effectRng(seedText) {
+  let h = 2166136261;
+  for (let i = 0; i < seedText.length; i++) {
+    h ^= seedText.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  let state = h >>> 0 || 1;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const fxRound = (n) => Math.round(n * 1000) / 1000;
+
+// Plan one looping asset inside a scene window: a cycle length in
+// [minCyc, maxCyc], a start offset inside the first cycle, and a whole
+// number of cycles, so offset + cycles * cycle never passes the window.
+function fxLoop(rng, span, minCyc, maxCyc) {
+  let cyc = minCyc + rng() * (maxCyc - minCyc);
+  if (cyc > span) cyc = span * (0.75 + rng() * 0.2);
+  const off = rng() * cyc * 0.9;
+  let cycles = Math.floor((span - off) / cyc);
+  if (cycles < 1) {
+    cycles = 1;
+    cyc = Math.max(0.4, span - off);
+  }
+  return { cyc: fxRound(cyc), off: fxRound(off), cycles };
+}
+
+const FX_HEART_PATH = "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z";
+const FX_STAR_PATH = "M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z";
+function fxSvg(path, color) {
+  return `<svg viewBox="0 0 24 24" fill="${color}" xmlns="http://www.w3.org/2000/svg"><path d="${path}"/></svg>`;
+}
+
+// Builds one effect layer for a scene starting at s with duration dur:
+// the layer markup (assets placed full-canvas) plus the GSAP statements
+// that animate them on the main timeline. Layers are inserted above the
+// scene background and orbs and below the card content, so assets spill
+// around the card edges. Returns empty parts for "none".
+function buildEffect(kind, layerId, s, dur) {
+  if (!EFFECT_KEYS.includes(kind) || kind === "none") return { html: "", tweens: [] };
+  const rng = effectRng(layerId);
+  const pieces = [];
+  const tweens = [];
+  const start = fxRound(s + 0.15);
+  const span = Math.max(0.5, dur - 0.3);
+  if (kind === "confetti") {
+    const colors = ["#e8c56e", "#f7f3e8", "#a9c19a", "#e8b4b8"];
+    for (let k = 0; k < 26; k++) {
+      const id = `${layerId}-a${k}`;
+      const w = Math.round(9 + rng() * 9);
+      const dot = rng() < 0.3;
+      const h = dot ? w : Math.round(14 + rng() * 12);
+      const op = fxRound(0.55 + rng() * 0.35);
+      pieces.push(`<span class="fx-piece" id="${id}" style="left: ${fxRound(2 + rng() * 94)}%; top: -70px; width: ${w}px; height: ${h}px; background: ${colors[k % colors.length]}; border-radius: ${dot ? "50%" : "2px"}; opacity: ${op}"></span>`);
+      const plan = fxLoop(rng, span, 2.4, 3.8);
+      const t0 = fxRound(start + plan.off);
+      const sway = Math.round(18 + rng() * 30);
+      const spin = Math.round(180 + rng() * 360) * (rng() < 0.5 ? -1 : 1);
+      tweens.push(
+        `tl.fromTo("#${id}", { y: 0 }, { y: 1240, duration: ${plan.cyc}, ease: "none", repeat: ${plan.cycles - 1} }, ${t0});`,
+        `tl.fromTo("#${id}", { x: ${-sway}, rotation: 0 }, { x: ${sway}, rotation: ${spin}, duration: ${fxRound(plan.cyc / 2)}, ease: "sine.inOut", yoyo: true, repeat: ${plan.cycles * 2 - 1} }, ${t0});`,
+      );
+    }
+  } else if (kind === "sparkles") {
+    const colors = ["#f5e2a0", "#e8c56e", "#fff3d6"];
+    for (let k = 0; k < 14; k++) {
+      const id = `${layerId}-a${k}`;
+      const size = Math.round(20 + rng() * 24);
+      const op = fxRound(0.55 + rng() * 0.35);
+      pieces.push(`<span class="fx-piece" id="${id}" style="left: ${fxRound(3 + rng() * 92)}%; top: ${fxRound(4 + rng() * 86)}%; width: ${size}px; height: ${size}px">${fxSvg(FX_STAR_PATH, colors[k % colors.length])}</span>`);
+      const plan = fxLoop(rng, span, 1.6, 3.0);
+      const t0 = fxRound(start + plan.off);
+      tweens.push(
+        `tl.fromTo("#${id}", { scale: 0.35, opacity: ${fxRound(op * 0.25)}, rotation: -14 }, { scale: 1, opacity: ${op}, rotation: 14, duration: ${fxRound(plan.cyc / 2)}, ease: "sine.inOut", yoyo: true, repeat: ${plan.cycles * 2 - 1}, transformOrigin: "50% 50%" }, ${t0});`,
+      );
+    }
+  } else if (kind === "hearts") {
+    const colors = ["#e88ca0", "#d96b84", "#f2b8c6"];
+    for (let k = 0; k < 12; k++) {
+      const id = `${layerId}-a${k}`;
+      const size = Math.round(20 + rng() * 18);
+      const op = fxRound(0.5 + rng() * 0.35);
+      pieces.push(`<span class="fx-piece" id="${id}" style="left: ${fxRound(3 + rng() * 92)}%; top: 1092px; width: ${size}px; height: ${size}px; opacity: ${op}">${fxSvg(FX_HEART_PATH, colors[k % colors.length])}</span>`);
+      const plan = fxLoop(rng, span, 2.8, 4.4);
+      const t0 = fxRound(start + plan.off);
+      const rise = Math.round(760 + rng() * 80);
+      const sway = Math.round(14 + rng() * 22);
+      tweens.push(
+        `tl.fromTo("#${id}", { y: 0 }, { y: ${-rise}, duration: ${plan.cyc}, ease: "sine.out", repeat: ${plan.cycles - 1} }, ${t0});`,
+        `tl.fromTo("#${id}", { x: ${-sway} }, { x: ${sway}, duration: ${fxRound(plan.cyc / 2)}, ease: "sine.inOut", yoyo: true, repeat: ${plan.cycles * 2 - 1} }, ${t0});`,
+        // Fade out over the last stretch of each rise, near the top.
+        `tl.fromTo("#${id}", { opacity: ${op} }, { opacity: 0, duration: ${fxRound(plan.cyc * 0.22)}, ease: "power1.in", repeat: ${plan.cycles - 1} }, ${fxRound(t0 + plan.cyc * 0.78)});`,
+      );
+    }
+  } else if (kind === "petals") {
+    const colors = ["#f6d9de", "#f9ecec", "#f3e3d3", "#eed7c8"];
+    for (let k = 0; k < 14; k++) {
+      const id = `${layerId}-a${k}`;
+      const w = Math.round(22 + rng() * 18);
+      const h = Math.round(w * 0.72);
+      const op = fxRound(0.5 + rng() * 0.35);
+      pieces.push(`<span class="fx-piece" id="${id}" style="left: ${fxRound(2 + rng() * 94)}%; top: -60px; width: ${w}px; height: ${h}px; background: ${colors[k % colors.length]}; border-radius: 62% 38% 62% 38% / 48% 58% 42% 52%; opacity: ${op}"></span>`);
+      const plan = fxLoop(rng, span, 3.4, 5.2);
+      const t0 = fxRound(start + plan.off);
+      const sway = Math.round(30 + rng() * 40);
+      const rot0 = Math.round(rng() * 360);
+      const spin = Math.round(120 + rng() * 180) * (rng() < 0.5 ? -1 : 1);
+      tweens.push(
+        `tl.fromTo("#${id}", { y: 0 }, { y: 1220, duration: ${plan.cyc}, ease: "sine.inOut", repeat: ${plan.cycles - 1} }, ${t0});`,
+        `tl.fromTo("#${id}", { x: ${-sway}, rotation: ${rot0} }, { x: ${sway}, rotation: ${rot0 + spin}, duration: ${fxRound(plan.cyc / 2)}, ease: "sine.inOut", yoyo: true, repeat: ${plan.cycles * 2 - 1} }, ${t0});`,
+      );
+    }
+  }
+  return {
+    html: `
+      <div class="fx-layer" id="${layerId}">${pieces.join("")}
+      </div>`,
+    tweens,
+  };
+}
 
 const scenes = []; // HTML strings, in timeline order
 const sceneMeta = []; // { key, label, start, duration } per scene, written to scenes.json
@@ -344,10 +490,11 @@ function buildTitle(s) {
   const nameParts = splitName(config.celebrantName);
   const titleLine2 = `<span class="name-chunk" id="title-name-left">${esc(nameParts.left)}</span>${nameParts.sep}<span class="name-chunk" id="title-name-right">${esc(nameParts.right)}!</span>`;
   const nameLineClass = FONT_SLOTS.name.script ? "name-line name-script" : "name-line";
+  const fx = buildEffect(TITLE_EFFECT, "fx-title", s, TITLE_DUR);
   scenes.push(`
     <section class="clip scene scene-card" id="scene-title" style="opacity: 0" data-start="${s}" data-duration="${TITLE_DUR + 0.5}" data-track-index="${nextTrack()}">
       ${ORB_A}
-      ${ORB_B}
+      ${ORB_B}${fx.html}
       <div class="card-inner">
         <div class="eyebrow" id="title-eyebrow">Happy ${esc(config.occasion)}</div>
         <h1 class="big-title" id="title-name"><span id="title-greeting">${titleLine1}</span><br /><span class="${nameLineClass}">${titleLine2}</span></h1>
@@ -358,6 +505,7 @@ function buildTitle(s) {
 
   timeline.push(
     `tl.fromTo("#scene-title", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
+    ...fx.tweens,
     ...(ORBS_ANIMATED ? [
       `tl.fromTo("#scene-title .orb-a", { x: 0, y: 0 }, { x: -51, y: 33, duration: ${TITLE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
       `tl.fromTo("#scene-title .orb-b", { x: 0, y: 0 }, { x: 39, y: -27, duration: ${TITLE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
@@ -481,6 +629,7 @@ function buildCollage(kind, s) {
   const prefix = isText ? "tc" : "pc";
   const sceneId = isText ? "scene-text-collage" : "scene-photo-collage";
   const headingId = `${prefix}-collage-heading`;
+  const fx = buildEffect(isText ? TEXT_COLLAGE_EFFECT : PHOTO_COLLAGE_EFFECT, isText ? "fx-tc" : "fx-pc", s, dur);
   const accentSpots = [
     { left: "6%", top: "16%", size: 56, shape: ACCENT_HEART },
     { left: "88%", top: "13%", size: 44, shape: ACCENT_STAR },
@@ -526,13 +675,14 @@ function buildCollage(kind, s) {
   scenes.push(`
     <section class="clip scene scene-card" id="${sceneId}" style="opacity: 0" data-start="${s}" data-duration="${dur + 0.5}" data-track-index="${nextTrack()}">
       ${ORB_A}
-      ${ORB_B}
+      ${ORB_B}${fx.html}
       <h2 class="collage-heading" id="${headingId}">${wordSpans(isText ? TEXT_COLLAGE_HEADING : PHOTO_COLLAGE_HEADING)}</h2>${collageInner}${accents}
     </section>`);
   sceneMeta.push({ key: isText ? "textCollage" : "photoCollage", label: isText ? "Text collage" : "Photo collage", start: s, duration: dur });
 
   timeline.push(
     `tl.fromTo("#${sceneId}", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
+    ...fx.tweens,
     ...(ORBS_ANIMATED ? [
       `tl.fromTo("#${sceneId} .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: ${dur + 0.5}, ease: "sine.inOut" }, ${s});`,
       `tl.fromTo("#${sceneId} .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: ${dur + 0.5}, ease: "sine.inOut" }, ${s});`,
@@ -609,9 +759,10 @@ function buildMessages(blockStart) {
   const typeStagger = typeCharTotal > 1 ? Number((typeSpan / (typeCharTotal - 1)).toFixed(4)) : 0;
   const typeStart = 1.0;
   const typeEnd = typeStart + typeSpan + 0.05;
+  const fx = buildEffect(message.effect, `fx-msg-${i}`, s, dur);
   scenes.push(`
     <section class="clip scene scene-card" id="scene-msg-${i}" style="opacity: 0" data-start="${s}" data-duration="${dur + 0.5}" data-track-index="${nextTrack()}">
-      ${ORB_A}
+      ${ORB_A}${fx.html}
       <div class="msg-card paper-${message.paper}" id="msg-card-${i}">
         <div class="msg-tape"></div>
         <div class="quote-mark" id="msg-quote-${i}">&ldquo;</div>
@@ -623,6 +774,7 @@ function buildMessages(blockStart) {
 
   timeline.push(
     `tl.fromTo("#scene-msg-${i}", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
+    ...fx.tweens,
     ...(ORBS_ANIMATED ? [
       `tl.fromTo("#scene-msg-${i} .orb-a", { x: 0, y: 0 }, { x: -33, y: 21, duration: ${dur + 0.5}, ease: "sine.inOut" }, ${s});`,
     ] : []),
@@ -636,10 +788,11 @@ function buildMessages(blockStart) {
 }
 
 function buildClosing(s) {
+  const fx = buildEffect(CLOSING_EFFECT, "fx-closing", s, CLOSING_DUR);
   scenes.push(`
     <section class="clip scene scene-card" id="scene-closing" style="opacity: 0" data-start="${s}" data-duration="${CLOSING_DUR}" data-track-index="${nextTrack()}">
       ${ORB_A}
-      ${ORB_B}
+      ${ORB_B}${fx.html}
       <div class="scrap-wrap" id="closing-card">
         <div class="scrap-card paper-${CLOSING_PAPER}">
           <div class="eyebrow scrap-eyebrow" id="closing-eyebrow">Happy ${esc(config.occasion)}, ${esc(FIRST_NAME)}</div>
@@ -655,6 +808,7 @@ function buildClosing(s) {
 
   timeline.push(
     `tl.fromTo("#scene-closing", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, ${s});`,
+    ...fx.tweens,
     ...(ORBS_ANIMATED ? [
       `tl.fromTo("#scene-closing .orb-a", { x: 0, y: 0 }, { x: -45, y: 30, duration: ${CLOSING_DUR}, ease: "sine.inOut" }, ${s});`,
       `tl.fromTo("#scene-closing .orb-b", { x: 0, y: 0 }, { x: 36, y: -24, duration: ${CLOSING_DUR}, ease: "sine.inOut" }, ${s});`,
@@ -753,6 +907,11 @@ const html = `<!doctype html>
       /* Gold accent shapes that pop in around the collage polaroids. */
       .accent { position: absolute; pointer-events: none; color: var(--accent); }
       .accent svg { display: block; width: 100%; height: 100%; }
+      /* Optional per-card effect layers (confetti, sparkles, hearts,
+         petals): full-canvas, clipped, decorative only. */
+      .fx-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+      .fx-piece { position: absolute; display: block; pointer-events: none; }
+      .fx-piece svg { display: block; width: 100%; height: 100%; }
       /* Soft edge darkening over photos, faded in by GSAP per scene. */
       .vignette {
         position: absolute; inset: 0; pointer-events: none; opacity: 0;

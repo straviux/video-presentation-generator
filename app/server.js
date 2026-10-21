@@ -286,6 +286,7 @@ const BACKGROUND_KEYS = [
 ];
 const PHOTO_FRAME_KEYS = ["full", "thin", "polaroid", "rounded", "gold"];
 const PAPER_KEYS = ["classic", "white", "kraft", "blush", "mint", "sky"];
+const EFFECT_KEYS = ["none", "confetti", "sparkles", "hearts", "petals"];
 
 function clampNumber(value, fallback, min, max) {
   const n = Number(value);
@@ -349,10 +350,11 @@ function parseForm(body, photoCount, { requirePhotos }) {
     ? text(body.background)
     : "deep-green";
 
-  // Per-message duration and paper, aligned with message 1 and 2 by the
-  // same index the fields were appended in.
+  // Per-message duration, paper, and effect, aligned with message 1 and
+  // 2 by the same index the fields were appended in.
   const messageDurations = asArray(body.messageDurations);
   const messagePapers = asArray(body.messagePapers);
+  const messageEffects = asArray(body.messageEffects);
   const messages = [];
   for (const n of [1, 2]) {
     const msgText = text(body[`message${n}Text`]);
@@ -365,9 +367,14 @@ function parseForm(body, photoCount, { requirePhotos }) {
         paper: PAPER_KEYS.includes(text(messagePapers[n - 1]))
           ? text(messagePapers[n - 1])
           : "classic",
+        effect: EFFECT_KEYS.includes(text(messageEffects[n - 1]))
+          ? text(messageEffects[n - 1])
+          : "none",
       });
     }
   }
+  const effectPick = (value) =>
+    EFFECT_KEYS.includes(text(value)) ? text(value) : "none";
 
   // Per-photo settings, aligned by photo index. Missing or invalid
   // values fall back to the defaults that reproduce the original
@@ -445,6 +452,10 @@ function parseForm(body, photoCount, { requirePhotos }) {
       closingPaper: PAPER_KEYS.includes(text(body.closingPaper))
         ? text(body.closingPaper)
         : "classic",
+      titleEffect: effectPick(body.titleEffect),
+      closingEffect: effectPick(body.closingEffect),
+      photoCollageEffect: effectPick(body.photoCollageEffect),
+      textCollageEffect: effectPick(body.textCollageEffect),
     },
   };
 }
@@ -454,7 +465,9 @@ function buildConfig(values) {
     background: values.background,
     celebrantName: values.celebrantName,
     titleDuration: values.titleDuration,
+    titleEffect: values.titleEffect,
     closingDuration: values.closingDuration,
+    closingEffect: values.closingEffect,
     closingLine:
       values.closingLine || "Wishing you a year as warm and generous as you are.",
     closingPaper: values.closingPaper,
@@ -465,12 +478,14 @@ function buildConfig(values) {
         heading: values.collageHeading || "Moments together",
         photoIndexes: values.collageEnabled ? values.collageIndexes : [],
         duration: values.photoCollageDuration,
+        effect: values.photoCollageEffect,
       },
       text: {
         enabled: values.textCollageEnabled,
         heading: values.textCollageHeading || "Kind words",
         cards: values.collageCards,
         duration: values.textCollageDuration,
+        effect: values.textCollageEffect,
       },
     },
     sceneOrder: values.sceneOrder,
