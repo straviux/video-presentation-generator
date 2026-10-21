@@ -1,338 +1,194 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Video Presentation Generator</title>
-    <style>
-      :root {
-        --green: #17352b;
-        --green-2: #2c5c46;
-        --gold: #ac8a21;
-        --ink: #22301f;
-        --muted: #5c6659;
-        --line: #d8ddd2;
-        --bg: #f4f5f1;
-        --card: #ffffff;
-        --soft: #eef2ea;
-        --danger: #a33327;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: var(--bg);
-        color: var(--ink);
-      }
-      header {
-        background: var(--green);
-        color: #f7f3e8;
-        padding: 22px 28px;
-      }
-      header h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 26px; }
-      header p { margin: 6px 0 0; color: #cfd8cc; font-size: 14px; }
-      main {
-        max-width: 1080px;
-        margin: 0 auto;
-        padding: 24px 20px 60px;
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 20px;
-        align-items: start;
-      }
-      @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-      .card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 20px 22px;
-        margin-bottom: 20px;
-      }
-      .card h2 {
-        margin: 0 0 4px;
-        font-size: 17px;
-        font-family: Georgia, "Times New Roman", serif;
-      }
-      .card .hint { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
-      label { display: block; font-size: 13px; font-weight: bold; margin: 12px 0 5px; }
-      label:first-of-type { margin-top: 0; }
-      input[type="text"], textarea {
-        width: 100%;
-        padding: 9px 11px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        font: inherit;
-        font-size: 14px;
-        background: #fff;
-      }
-      textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
-      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-      @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
-      .event-options { display: flex; flex-wrap: wrap; gap: 10px; }
-      .event-option {
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: #fff;
-      }
-      .event-option.selected { border-color: var(--green-2); background: var(--soft); font-weight: bold; }
-      .event-option.disabled { color: var(--muted); background: #fafafa; }
-      .badge {
-        font-size: 11px;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        background: #e8e4d2;
-        color: #6d5c14;
-        border-radius: 999px;
-        padding: 2px 8px;
-      }
-      /* Photos */
-      .photo-item {
-        display: grid;
-        grid-template-columns: 92px 1fr auto;
-        gap: 12px;
-        align-items: center;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 10px;
-        margin-bottom: 10px;
-        background: #fff;
-      }
-      .photo-item img {
-        width: 92px; height: 60px; object-fit: cover; border-radius: 6px; display: block;
-      }
-      .photo-item .caption { margin: 0; }
-      .photo-item .collage-check {
-        display: flex; align-items: center; gap: 6px;
-        font-size: 12px; font-weight: normal; margin: 7px 0 0; color: var(--muted);
-      }
-      .photo-actions { display: flex; flex-direction: column; gap: 6px; }
-      .mini-btn {
-        border: 1px solid var(--line);
-        background: #fff;
-        border-radius: 7px;
-        padding: 5px 10px;
-        font-size: 12px;
-        cursor: pointer;
-      }
-      .mini-btn:hover { background: var(--soft); }
-      .mini-btn.danger { color: var(--danger); }
-      .mini-btn:disabled { opacity: 0.4; cursor: default; }
-      .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
-      .toggle-row input { width: 18px; height: 18px; }
-      .toggle-row span { font-size: 14px; font-weight: bold; }
-      .warn { color: var(--danger); font-size: 13px; margin: 8px 0 0; display: none; }
-      /* Side column */
-      .side { position: sticky; top: 20px; }
-      @media (max-width: 900px) { .side { position: static; } }
-      .scene-list { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
-      .scene-list li {
-        display: flex; justify-content: space-between; gap: 10px;
-        padding: 6px 0; border-bottom: 1px solid #eceee7;
-      }
-      .scene-list li:last-child { border-bottom: none; }
-      .scene-list .dur { color: var(--muted); white-space: nowrap; }
-      .total {
-        display: flex; justify-content: space-between;
-        font-weight: bold; margin-top: 10px; font-size: 15px;
-      }
-      /* Preview */
-      .stage {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        background: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%);
-        border-radius: 10px;
-        overflow: hidden;
-        color: #f7f3e8;
-        font-family: Georgia, "Times New Roman", serif;
-      }
-      .stage .pv-scene {
-        position: absolute; inset: 0;
-        display: none;
-        align-items: center; justify-content: center;
-        text-align: center; padding: 18px;
-      }
-      .stage .pv-scene.active { display: flex; }
-      .stage .pv-title { font-size: 21px; font-weight: bold; line-height: 1.25; }
-      .stage .pv-small { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #e9e4d4; margin-top: 7px; }
-      .stage .pv-eyebrow {
-        font-family: Arial, Helvetica, sans-serif; font-size: 9px;
-        letter-spacing: 0.3em; text-transform: uppercase; color: #e8c56e; margin-bottom: 8px;
-      }
-      .stage img.pv-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-      .stage .pv-caption {
-        position: absolute; left: 0; right: 0; bottom: 0;
-        padding: 20px 14px 9px; text-align: left;
-        background: linear-gradient(to top, rgba(6,18,13,0.85), rgba(6,18,13,0));
-        font-family: Arial, Helvetica, sans-serif; font-size: 11.5px;
-      }
-      .stage .pv-collage { display: none; gap: 8px; align-items: center; justify-content: center; width: 100%; }
-      .stage .pv-collage.active { display: flex; }
-      .stage .pv-polaroid { background: #fdfcf8; padding: 5px 5px 3px; width: 31%; box-shadow: 0 8px 18px rgba(0,0,0,0.4); }
-      .stage .pv-polaroid img { width: 100%; height: 64px; object-fit: cover; display: block; }
-      .stage .pv-msg {
-        background: rgba(253,252,248,0.97); color: #22301f; border-radius: 10px;
-        padding: 16px 18px; font-size: 13px; line-height: 1.5; max-width: 88%;
-      }
-      .stage .pv-sign {
-        font-family: Arial, Helvetica, sans-serif; font-size: 9px;
-        letter-spacing: 0.08em; text-transform: uppercase; color: #7a6a35; margin-top: 8px;
-      }
-      .preview-meta {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-top: 10px; font-size: 12.5px; color: var(--muted);
-      }
-      /* Generate + status */
-      .generate-btn {
-        width: 100%;
-        background: var(--green-2);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        padding: 14px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .generate-btn:hover { background: var(--green); }
-      .generate-btn:disabled { opacity: 0.55; cursor: default; }
-      .status-box { display: none; margin-top: 14px; font-size: 14px; line-height: 1.55; }
-      .status-box.show { display: block; }
-      .status-box .spinner {
-        display: inline-block; width: 13px; height: 13px; margin-right: 7px;
-        border: 2px solid var(--line); border-top-color: var(--green-2);
-        border-radius: 50%; animation: spin 0.9s linear infinite; vertical-align: -2px;
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .status-box.error { color: var(--danger); }
-      .status-box pre {
-        background: #22281f; color: #e6e9df; border-radius: 8px;
-        padding: 10px 12px; font-size: 11.5px; overflow: auto; max-height: 180px;
-        white-space: pre-wrap; word-break: break-word;
-      }
-      .result-box { display: none; margin-top: 14px; }
-      .result-box.show { display: block; }
-      .result-box video { width: 100%; border-radius: 10px; background: #000; }
-      .download-btn {
-        display: block; text-align: center; margin-top: 10px;
-        background: var(--gold); color: #fff; text-decoration: none;
-        border-radius: 10px; padding: 12px; font-weight: bold; font-size: 15px;
-      }
-    </style>
+    <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
-    <header>
-      <h1>Video Presentation Generator</h1>
-      <p>Make a one minute celebration video for the office. Add the details and photos, then generate a real MP4.</p>
+  <body class="m-0 h-full font-sans bg-canvas text-ink flex flex-col overflow-hidden">
+    <header class="h-14 flex-none bg-white border-b border-line flex items-center gap-3.5 px-4 z-[5]">
+      <div class="w-[30px] h-[30px] rounded-lg bg-brand text-white flex items-center justify-center" aria-hidden="true">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/></svg>
+      </div>
+      <h1 class="m-0 text-base font-semibold whitespace-nowrap">Video Presentation Generator</h1>
+      <span class="text-xs text-muted border border-line rounded-full px-2.5 py-1 whitespace-nowrap bg-[#fafafc]">1920 x 1080 · MP4</span>
+      <div class="flex-1"></div>
+      <span class="flex items-center gap-1.5 text-[13px] text-muted whitespace-nowrap">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6h4"/></svg>
+        Total runtime <strong class="text-ink font-semibold" id="totalRuntimeTop">0:00</strong>
+      </span>
+      <button type="button" id="generateBtn" class="flex items-center gap-2 bg-brand text-white border-none rounded-lg px-[22px] py-2.5 text-sm font-semibold cursor-pointer whitespace-nowrap shadow-[0_1px_3px_rgba(139,61,255,0.35)] hover:bg-brand-dark disabled:opacity-50 disabled:cursor-default disabled:shadow-none">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
+        Generate Video
+      </button>
     </header>
-    <main>
-      <div class="builder">
-        <section class="card" id="step-event">
-          <h2>1. Event type</h2>
-          <p class="hint">Birthday is ready to use. The other event types are on the way.</p>
-          <div class="event-options">
-            <label class="event-option selected"><input type="radio" name="eventType" value="Birthday" checked /> Birthday</label>
-            <label class="event-option disabled"><input type="radio" name="eventType" value="Appreciation" disabled /> Appreciation <span class="badge">Coming soon</span></label>
-            <label class="event-option disabled"><input type="radio" name="eventType" value="Awards" disabled /> Awards <span class="badge">Coming soon</span></label>
-            <label class="event-option disabled"><input type="radio" name="eventType" value="Retirement" disabled /> Retirement <span class="badge">Coming soon</span></label>
-          </div>
+
+    <div class="flex-1 flex min-h-0">
+      <nav class="flex-none w-[68px] bg-white border-r border-line flex flex-col items-stretch py-2.5 px-1.5 gap-1" aria-label="Editor sections">
+        <button type="button" class="rail-btn active border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelTemplates">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/></svg>
+          Templates
+        </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelDetails">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
+          Details
+        </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelPhotos">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+          Photos
+        </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelMessages">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/></svg>
+          Messages
+        </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelCollage">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Collage
+        </button>
+      </nav>
+
+      <div class="flex-none w-[300px] bg-white border-r border-line overflow-y-auto min-w-0">
+        <section class="panel active p-[18px]" id="panelTemplates">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Templates</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Birthday is ready to use. The other event types are on the way.</p>
+          <label class="flex items-center gap-2.5 border-2 border-brand rounded-[10px] p-3.5 mb-2.5 bg-brand-soft text-sm font-semibold cursor-pointer"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#2c5c46,#17352b)]"></span><input type="radio" name="eventType" value="Birthday" checked class="accent-[#8b3dff]" /> Birthday</label>
+          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Appreciation" disabled class="accent-[#8b3dff]" /> Appreciation <span class="ml-auto text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
+          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Awards" disabled class="accent-[#8b3dff]" /> Awards <span class="ml-auto text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
+          <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Retirement" disabled class="accent-[#8b3dff]" /> Retirement <span class="ml-auto text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
         </section>
 
-        <section class="card" id="step-details">
-          <h2>2. Details</h2>
-          <p class="hint">These words appear on the title card and the closing card of the video.</p>
-          <label for="celebrantName">Celebrant name</label>
-          <input type="text" id="celebrantName" value="Nur-Aina Ibrahim" />
-          <div class="row">
-            <div>
-              <label for="celebrantShortName">Short name, used in the title</label>
-              <input type="text" id="celebrantShortName" value="Nur-Aina" />
-            </div>
-            <div>
-              <label for="role">Role</label>
-              <input type="text" id="role" value="Program Manager" />
-            </div>
-          </div>
-          <div class="row">
-            <div>
-              <label for="fromLine">From line, on the title card</label>
-              <input type="text" id="fromLine" value="From your YSE Family" />
-            </div>
-            <div>
-              <label for="closingSignOff">Closing sign-off</label>
-              <input type="text" id="closingSignOff" value="With love, your YSE Family" />
-            </div>
-          </div>
-          <label for="closingLine">Closing line</label>
-          <input type="text" id="closingLine" value="Wishing you a year as warm and generous as you are." />
-          <label for="collageHeading">Collage heading</label>
-          <input type="text" id="collageHeading" value="Moments together" />
+        <section class="panel p-[18px]" id="panelDetails">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Details</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">These words appear on the title card and the closing card of the video.</p>
+          <label class="field-label" for="celebrantName">Celebrant name</label>
+          <input type="text" class="field-input" id="celebrantName" value="Nur-Aina Ibrahim" />
+          <label class="field-label" for="celebrantShortName">Short name, used in the title</label>
+          <input type="text" class="field-input" id="celebrantShortName" value="Nur-Aina" />
+          <label class="field-label" for="role">Role</label>
+          <input type="text" class="field-input" id="role" value="Program Manager" />
+          <label class="field-label" for="fromLine">From line, on the title card</label>
+          <input type="text" class="field-input" id="fromLine" value="From your YSE Family" />
+          <label class="field-label" for="closingLine">Closing line</label>
+          <input type="text" class="field-input" id="closingLine" value="Wishing you a year as warm and generous as you are." />
+          <label class="field-label" for="closingSignOff">Closing sign-off</label>
+          <input type="text" class="field-input" id="closingSignOff" value="With love, your YSE Family" />
         </section>
 
-        <section class="card" id="step-photos">
-          <h2>3. Photos</h2>
-          <p class="hint">Add JPG, PNG, or WebP photos. Each photo gets 5 seconds in the montage. Use the arrows to change the order, and tick exactly 3 photos if you want the photo collage.</p>
-          <input type="file" id="photoInput" accept=".jpg,.jpeg,.png,.webp" multiple />
-          <div id="photoList" style="margin-top: 14px"></div>
-          <div class="toggle-row">
-            <input type="checkbox" id="collageEnabled" checked />
-            <span>Include the photo collage scene</span>
+        <section class="panel p-[18px]" id="panelPhotos">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Photos</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add JPG, PNG, or WebP photos. Each photo gets 5 seconds in the montage. Use the arrows to change the order, and tick photos here or in the Collage tab for the photo collage.</p>
+          <label for="photoInput" class="flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Add photos
+          </label>
+          <input type="file" class="sr-only" id="photoInput" accept=".jpg,.jpeg,.png,.webp" multiple />
+          <div id="photoList" class="mt-3.5"></div>
+        </section>
+
+        <section class="panel p-[18px]" id="panelMessages">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Messages</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards, shown near the end of the video. Each one gets 6 seconds. Leave a message blank to skip it.</p>
+          <label class="field-label" for="message1Text">Message 1</label>
+          <textarea class="field-input" id="message1Text">You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.</textarea>
+          <label class="field-label" for="message1SignedBy">Signed by</label>
+          <input type="text" class="field-input" id="message1SignedBy" value="Your YSE Family" />
+          <label class="field-label" for="message2Text">Message 2</label>
+          <textarea class="field-input" id="message2Text">Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.</textarea>
+          <label class="field-label" for="message2SignedBy">Signed by</label>
+          <input type="text" class="field-input" id="message2SignedBy" value="From all of us at YSE" />
+        </section>
+
+        <section class="panel p-[18px]" id="panelCollage">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Collage</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">A 6 second scene that shows 3 photos together as polaroids. Tick exactly 3 photos in the Photos tab to use it.</p>
+          <div class="flex items-center gap-2.5 mt-1">
+            <input type="checkbox" id="collageEnabled" checked class="w-[18px] h-[18px] accent-[#8b3dff]" />
+            <span class="text-[13.5px] font-semibold">Include the photo collage scene</span>
           </div>
+          <label class="field-label" for="collageHeading">Collage heading</label>
+          <input type="text" class="field-input" id="collageHeading" value="Moments together" />
           <p class="warn" id="collageWarn">The collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
-        </section>
-
-        <section class="card" id="step-messages">
-          <h2>4. Messages</h2>
-          <p class="hint">Up to two message cards, shown near the end of the video. Each one gets 6 seconds. Leave a message blank to skip it.</p>
-          <label for="message1Text">Message 1</label>
-          <textarea id="message1Text">You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.</textarea>
-          <label for="message1SignedBy">Signed by</label>
-          <input type="text" id="message1SignedBy" value="Your YSE Family" />
-          <label for="message2Text">Message 2</label>
-          <textarea id="message2Text">Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.</textarea>
-          <label for="message2SignedBy">Signed by</label>
-          <input type="text" id="message2SignedBy" value="From all of us at YSE" />
         </section>
       </div>
 
-      <div class="side">
-        <section class="card" id="summary-card">
-          <h2>Video summary</h2>
-          <p class="hint">Scenes update as you add photos and change options.</p>
-          <ul class="scene-list" id="sceneList"></ul>
-          <div class="total"><span>Total runtime</span><span id="totalRuntime">0:00</span></div>
-        </section>
-
-        <section class="card" id="preview-card">
-          <h2>Quick preview</h2>
-          <p class="hint">A simple slideshow of your content at real scene lengths. The finished video adds the animations.</p>
-          <div class="stage" id="stage"></div>
-          <div class="preview-meta">
-            <button type="button" class="mini-btn" id="previewBtn">Play preview</button>
+      <div class="flex-1 min-w-0 flex flex-col bg-canvas">
+        <div class="flex-1 min-h-0 flex flex-col items-center justify-center px-[26px] pt-[22px] pb-2">
+          <div class="stage" id="stage">
+            <div class="stage-placeholder">Your preview appears here. Add photos, then press Play preview.</div>
+          </div>
+          <div class="flex items-center gap-3 mt-3 text-[12.5px] text-muted">
+            <button type="button" class="transport-btn" id="previewBtn" aria-label="Play or stop the preview">
+              <svg data-icon="play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>
+              <svg data-icon="stop" style="display: none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+              <span class="preview-btn-label">Play preview</span>
+            </button>
             <span id="previewLabel">Nothing playing</span>
+          </div>
+        </div>
+        <div class="flex-none bg-white border-t border-line px-3.5 pt-2.5 pb-3">
+          <div class="flex items-center gap-1.5 text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-2">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>
+            Scenes
+          </div>
+          <div class="timeline-strip flex gap-2 overflow-x-auto overflow-y-hidden pb-1" id="timelineStrip"></div>
+        </div>
+      </div>
+
+      <div class="flex-none w-[272px] bg-white border-l border-line overflow-y-auto p-4 min-w-0">
+        <section class="border border-line rounded-[10px] px-4 py-3.5 mb-3.5 bg-white" id="summary-card">
+          <h2 class="m-0 mb-1 text-sm font-semibold">Video summary</h2>
+          <p class="m-0 mb-2.5 text-muted text-xs leading-normal">Scenes update as you add photos and change options.</p>
+          <ul class="scene-list list-none m-0 p-0 text-[13px]" id="sceneList"></ul>
+          <div class="flex justify-between items-center font-semibold mt-2.5 text-sm">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6h4"/></svg>
+              Total runtime
+            </span>
+            <span id="totalRuntime">0:00</span>
           </div>
         </section>
 
-        <section class="card" id="generate-card">
-          <h2>5. Generate</h2>
-          <p class="hint">Rendering happens on this machine and usually takes a few minutes for a one minute video.</p>
-          <button type="button" class="generate-btn" id="generateBtn">Generate Video</button>
+        <section class="border border-line rounded-[10px] px-4 py-3.5 mb-3.5 bg-white">
+          <h2 class="m-0 mb-1 text-sm font-semibold">Output</h2>
+          <ul class="output-list list-none m-0 p-0 text-[13px]">
+            <li><span>Template</span><span>Birthday</span></li>
+            <li><span>Size</span><span>1920 x 1080</span></li>
+            <li><span>Length</span><span>About 1 minute</span></li>
+            <li><span>Format</span><span>MP4</span></li>
+          </ul>
+        </section>
+
+        <section class="border border-line rounded-[10px] px-4 py-3.5 mb-3.5 bg-white" id="generate-card">
+          <h2 class="m-0 mb-1 text-sm font-semibold">Generate</h2>
+          <p class="m-0 mb-2.5 text-muted text-xs leading-normal">Rendering happens on this machine and usually takes a few minutes for a one minute video. Use the Generate Video button at the top when you are ready.</p>
           <div class="status-box" id="statusBox"></div>
           <div class="result-box" id="resultBox">
             <video id="resultVideo" controls playsinline></video>
-            <a class="download-btn" id="downloadBtn" href="#" download>Download MP4</a>
+            <a class="mt-2.5 flex items-center justify-center gap-2 text-center bg-brand text-white no-underline rounded-lg px-3 py-[11px] font-semibold text-sm hover:bg-brand-dark" id="downloadBtn" href="#" download>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+              Download MP4
+            </a>
           </div>
         </section>
       </div>
-    </main>
+    </div>
     <script>
       const $ = (id) => document.getElementById(id);
       const photos = []; // { file, url, caption, inCollage }
+
+      // Genuine Lucide icon paths (lucide v1.61.0, ISC), inlined as SVG.
+      const ICON_PATHS = {
+        clapperboard: '<path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/>',
+        layoutGrid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+        messageSquareText: '<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>',
+        sparkles: '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
+        chevronUp: '<path d="m18 15-6-6-6 6"/>',
+        chevronDown: '<path d="m6 9 6 6 6-6"/>',
+        trash2: '<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+      };
+      const svgIcon = (paths) =>
+        "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>" + paths + "</svg>";
 
       const TITLE_DUR = 5, PHOTO_DUR = 5, COLLAGE_DUR = 6, MESSAGE_DUR = 6, CLOSING_DUR = 8;
 
@@ -373,11 +229,58 @@
           })
           .join("");
         $("totalRuntime").textContent = fmt(t);
+        $("totalRuntimeTop").textContent = fmt(t);
         const count = photos.filter((p) => p.inCollage).length;
         $("collageCount").textContent = count;
         const bad = $("collageEnabled").checked && count !== 3;
         $("collageWarn").style.display = bad ? "block" : "none";
         $("generateBtn").disabled = bad || photos.length === 0;
+        renderTimeline(scenes);
+      }
+
+      // ------------------------------------------------------------ timeline --
+      function renderTimeline(scenes) {
+        const strip = $("timelineStrip");
+        strip.innerHTML = "";
+        const thumbIcons = {
+          title: svgIcon(ICON_PATHS.clapperboard),
+          collage: svgIcon(ICON_PATHS.layoutGrid),
+          message: svgIcon(ICON_PATHS.messageSquareText),
+          closing: svgIcon(ICON_PATHS.sparkles),
+        };
+        scenes.forEach((sc, i) => {
+          const tile = document.createElement("button");
+          tile.type = "button";
+          tile.className = "tl-tile";
+          tile.dataset.sceneIndex = i;
+          const thumb = document.createElement("span");
+          thumb.className = "tl-thumb";
+          if (sc.kind === "photo") {
+            const img = document.createElement("img");
+            img.src = photos[sc.index].url;
+            img.alt = "";
+            thumb.appendChild(img);
+          } else {
+            thumb.innerHTML = thumbIcons[sc.kind] || thumbIcons.title;
+          }
+          const name = document.createElement("span");
+          name.className = "tl-name";
+          name.textContent = sc.name;
+          const dur = document.createElement("span");
+          dur.className = "tl-dur";
+          dur.textContent = sc.dur + "s";
+          tile.appendChild(thumb);
+          tile.appendChild(name);
+          tile.appendChild(dur);
+          tile.addEventListener("click", () => startPreviewAt(i));
+          strip.appendChild(tile);
+        });
+      }
+
+      function markPlayingTile(idx) {
+        document.querySelectorAll(".tl-tile").forEach((tile) => {
+          tile.classList.toggle("playing", Number(tile.dataset.sceneIndex) === idx);
+        });
       }
 
       function renderPhotoList() {
@@ -393,9 +296,9 @@
               "<label class='collage-check'><input type='checkbox' class='collage-box' /> Include in the collage</label>" +
             "</div>" +
             "<div class='photo-actions'>" +
-              "<button type='button' class='mini-btn up'>Up</button>" +
-              "<button type='button' class='mini-btn down'>Down</button>" +
-              "<button type='button' class='mini-btn danger remove'>Remove</button>" +
+              "<button type='button' class='mini-btn up' aria-label='Move photo up'>" + svgIcon(ICON_PATHS.chevronUp) + "Up</button>" +
+              "<button type='button' class='mini-btn down' aria-label='Move photo down'>" + svgIcon(ICON_PATHS.chevronDown) + "Down</button>" +
+              "<button type='button' class='mini-btn danger remove' aria-label='Remove photo'>" + svgIcon(ICON_PATHS.trash2) + "Remove</button>" +
             "</div>";
           item.querySelector("img").src = p.url;
           const caption = item.querySelector(".caption");
@@ -437,11 +340,25 @@
         $(id).addEventListener("change", refreshSummary);
       }
 
+      // ------------------------------------------------------------ rail tabs --
+      document.querySelectorAll(".rail-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".rail-btn").forEach((b) => b.classList.toggle("active", b === btn));
+          document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === btn.dataset.tab));
+        });
+      });
+
       // ------------------------------------------------------ quick preview --
       let previewTimer = null;
+      function setPreviewButton(playing) {
+        $("previewBtn").querySelector(".preview-btn-label").textContent = playing ? "Stop preview" : "Play preview";
+        $("previewBtn").querySelector("[data-icon='play']").style.display = playing ? "none" : "";
+        $("previewBtn").querySelector("[data-icon='stop']").style.display = playing ? "" : "none";
+      }
       function stopPreview(label) {
         if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
-        $("previewBtn").textContent = "Play preview";
+        setPreviewButton(false);
+        markPlayingTile(-1);
         if (label) $("previewLabel").textContent = label;
       }
       function buildPreviewScenes(scenes) {
@@ -495,20 +412,25 @@
           return { el, scene: sc };
         });
       }
-      $("previewBtn").addEventListener("click", () => {
-        if (previewTimer) { stopPreview("Preview stopped"); return; }
+      function startPreviewAt(fromIdx) {
         if (photos.length === 0) { $("previewLabel").textContent = "Add photos first"; return; }
+        if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
         const built = buildPreviewScenes(computeScenes());
-        let idx = 0;
+        let idx = Math.min(Math.max(fromIdx, 0), built.length - 1);
         const show = () => {
           built.forEach((b) => b.el.classList.remove("active"));
           if (idx >= built.length) { stopPreview("Preview finished"); return; }
           built[idx].el.classList.add("active");
+          markPlayingTile(idx);
           $("previewLabel").textContent = built[idx].scene.name + " (" + built[idx].scene.dur + "s)";
           previewTimer = setTimeout(() => { idx += 1; show(); }, built[idx].scene.dur * 1000);
         };
-        $("previewBtn").textContent = "Stop preview";
+        setPreviewButton(true);
         show();
+      }
+      $("previewBtn").addEventListener("click", () => {
+        if (previewTimer) { stopPreview("Preview stopped"); return; }
+        startPreviewAt(0);
       });
 
       // ------------------------------------------------------------ generate --
@@ -525,7 +447,7 @@
           if (!resp.ok) throw new Error(job.error || "Could not read the job status.");
           if (job.status === "done") {
             clearInterval(pollTimer);
-            setStatus("Done. Your video is ready below.", false);
+            setStatus("Done. Your video is ready in the Generate panel on the right.", false);
             $("generateBtn").disabled = false;
             $("resultVideo").src = job.videoUrl;
             $("downloadBtn").href = job.downloadUrl;

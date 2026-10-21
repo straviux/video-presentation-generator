@@ -1,0 +1,427 @@
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-sans-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Custom rules that Tailwind utilities cannot express. Most of these  */
+/* style content the page JS builds at runtime (photo list, timeline   */
+/* tiles, preview scenes, status box), plus class-toggled states the   */
+/* JS drives (.active, .playing, .show).                               */
+/* ------------------------------------------------------------------ */
+
+/* Rail + panel switching (JS toggles .active) */
+.rail-btn.active {
+  background: #f1e8ff;
+  color: #7329d6;
+  font-weight: 600;
+}
+.panel {
+  display: none;
+}
+.panel.active {
+  display: block;
+}
+
+/* Collage warning (JS toggles inline display) */
+.warn {
+  color: #d92d20;
+  font-size: 12.5px;
+  margin: 10px 0 0;
+  display: none;
+  line-height: 1.5;
+}
+
+/* Photo list (built by JS) */
+.photo-item {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 10px;
+  border: 1px solid #e3e3ea;
+  border-radius: 10px;
+  padding: 9px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+.photo-item img {
+  width: 64px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+.photo-item .caption {
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  width: 100%;
+  border: 1px solid #e3e3ea;
+  border-radius: 8px;
+  background: #fff;
+}
+.photo-item .caption:focus {
+  outline: 2px solid #f1e8ff;
+  border-color: #8b3dff;
+}
+.photo-item .collage-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: normal;
+  margin: 7px 0 0;
+  color: #6b6b78;
+}
+.photo-item .collage-check input {
+  accent-color: #8b3dff;
+}
+.photo-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 6px;
+}
+.mini-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #e3e3ea;
+  background: #fff;
+  border-radius: 7px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.mini-btn:hover {
+  background: #f5f5f8;
+}
+.mini-btn.danger {
+  color: #d92d20;
+}
+.mini-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.mini-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Scene summary list (rows built by JS) */
+.scene-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f4;
+}
+.scene-list li:last-child {
+  border-bottom: none;
+}
+.scene-list .dur {
+  color: #6b6b78;
+  white-space: nowrap;
+}
+.output-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+.output-list li span:first-child {
+  color: #6b6b78;
+}
+
+/* Status + result boxes (JS toggles .show / .error) */
+.status-box {
+  display: none;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.status-box.show {
+  display: block;
+}
+.status-box .spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-right: 7px;
+  border: 2px solid #e3e3ea;
+  border-top-color: #8b3dff;
+  border-radius: 50%;
+  animation: vpg-spin 0.9s linear infinite;
+  vertical-align: -2px;
+}
+@keyframes vpg-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.status-box.error {
+  color: #d92d20;
+}
+.status-box pre {
+  background: #22222c;
+  color: #e6e6ee;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  overflow: auto;
+  max-height: 180px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.result-box {
+  display: none;
+  margin-top: 12px;
+}
+.result-box.show {
+  display: block;
+}
+.result-box video {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+}
+
+/* Timeline filmstrip (tiles built by JS) */
+.timeline-strip {
+  scrollbar-width: thin;
+  scrollbar-color: #c9c9d2 transparent;
+}
+.timeline-strip::-webkit-scrollbar {
+  height: 7px;
+}
+.timeline-strip::-webkit-scrollbar-thumb {
+  background: #c9c9d2;
+  border-radius: 999px;
+}
+.timeline-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tl-tile {
+  flex: 0 0 104px;
+  border: 2px solid #e3e3ea;
+  border-radius: 8px;
+  background: #fafafc;
+  padding: 0 0 6px;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: center;
+  font: inherit;
+}
+.tl-tile:hover {
+  border-color: #c9b8f5;
+}
+.tl-tile.playing {
+  border-color: #8b3dff;
+  background: #f1e8ff;
+}
+.tl-tile .tl-thumb {
+  height: 44px;
+  background: #17352b;
+  color: #f7f3e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+.tl-tile .tl-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tl-tile .tl-thumb svg {
+  width: 20px;
+  height: 20px;
+}
+.tl-tile .tl-name {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-tile .tl-dur {
+  display: block;
+  font-size: 10.5px;
+  color: #6b6b78;
+}
+
+/* ------------------------------------------------------------------ */
+/* Preview stage: this mirrors the rendered video's own typography     */
+/* (Georgia serif titles, Arial captions), so it intentionally does    */
+/* NOT use the Geist UI stack.                                         */
+/* ------------------------------------------------------------------ */
+.stage {
+  position: relative;
+  width: min(100%, calc((100vh - 290px) * 16 / 9));
+  min-width: 280px;
+  aspect-ratio: 16 / 9;
+  background: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  color: #f7f3e8;
+  font-family: Georgia, "Times New Roman", serif;
+  box-shadow: 0 10px 30px rgba(20, 20, 40, 0.18);
+}
+.stage .stage-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Geist", system-ui, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: rgba(247, 243, 232, 0.75);
+  text-align: center;
+  padding: 20px;
+}
+.stage .pv-scene {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 18px;
+}
+.stage .pv-scene.active {
+  display: flex;
+}
+.stage .pv-title {
+  font-size: 21px;
+  font-weight: bold;
+  line-height: 1.25;
+}
+.stage .pv-small {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  color: #e9e4d4;
+  margin-top: 7px;
+}
+.stage .pv-eyebrow {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #e8c56e;
+  margin-bottom: 8px;
+}
+.stage img.pv-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.stage .pv-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px 14px 9px;
+  text-align: left;
+  background: linear-gradient(to top, rgba(6, 18, 13, 0.85), rgba(6, 18, 13, 0));
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11.5px;
+}
+.stage .pv-collage {
+  display: none;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.stage .pv-collage.active {
+  display: flex;
+}
+.stage .pv-polaroid {
+  background: #fdfcf8;
+  padding: 5px 5px 3px;
+  width: 31%;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+.stage .pv-polaroid img {
+  width: 100%;
+  height: 64px;
+  object-fit: cover;
+  display: block;
+}
+.stage .pv-msg {
+  background: rgba(253, 252, 248, 0.97);
+  color: #22301f;
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 88%;
+}
+.stage .pv-sign {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a6a35;
+  margin-top: 8px;
+}
+
+/* Form fields (static markup uses these component classes) */
+.field-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 13px 0 5px;
+}
+.field-label:first-of-type {
+  margin-top: 0;
+}
+.field-input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid #e3e3ea;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13.5px;
+  background: #fff;
+}
+.field-input:focus {
+  outline: 2px solid #f1e8ff;
+  border-color: #8b3dff;
+}
+textarea.field-input {
+  min-height: 76px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Preview transport button (JS swaps its label text and icons) */
+.transport-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  border: 1px solid #e3e3ea;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+}
+.transport-btn:hover {
+  background: #f5f5f8;
+}
+.transport-btn svg {
+  width: 14px;
+  height: 14px;
+}

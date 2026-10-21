@@ -22,7 +22,7 @@ Scene pacing for the Birthday template (66 seconds total):
 | Message cards (2) | 12s |
 | Closing card | 8s |
 
-Output: 1280x720, 30fps, H.264 MP4. No music track yet (known v1 gap).
+Output: 1920x1080, 30fps, H.264 MP4, rendered with the delivery quality preset. No music track yet (known v1 gap).
 
 ## Quick start
 

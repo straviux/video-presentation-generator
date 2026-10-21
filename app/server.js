@@ -133,6 +133,8 @@ async function runJob(job) {
           ".",
           "-o",
           path.join("renders", "output.mp4"),
+          "--quality",
+          "delivery",
           "--frames-cache-dir",
           FRAMES_CACHE_DIR,
         ],

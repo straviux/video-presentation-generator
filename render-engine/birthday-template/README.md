@@ -1,8 +1,13 @@
 # Birthday Template: config-driven HyperFrames composition
 
 The first real template for the Video Presentation Generator. It renders a
-complete birthday video (1280x720, 30fps, about 1 minute) from a single
+complete birthday video (1920x1080, 30fps, about 1 minute) from a single
 `config.json`. No hand-editing HTML per person.
+
+The composition canvas is natively 1920x1080: the whole design (layout,
+typography, and GSAP motion offsets) is scaled 1.5x from the original 720p
+design, so text and graphics render sharp at 1080p instead of being upscaled
+by the encoder. Renders use the `delivery` quality preset.
 
 ## How it works
 
@@ -24,12 +29,12 @@ config.json  --(node generate.mjs)-->  index.html  --(hyperframes render)-->  re
 
 | Scene | Time | Duration | What happens |
 |---|---|---|---|
-| Title card | 0:00-0:05 | 5s | "Happy Birthday, [Name]!" with name, role, and from line, staggered entrance |
-| Photo montage | 0:05-0:40 | 7 x 5s = 35s | One photo per beat, slow Ken Burns zoom, caption fades in, gentle fade between photos |
-| Photo collage | 0:40-0:46 | 6s | 3 photos in polaroid frames pop in one by one under a heading |
-| Message card 1 | 0:46-0:52 | 6s | Greeting text on a card, signer line fades in |
-| Message card 2 | 0:52-0:58 | 6s | Second greeting and signer |
-| Closing card | 0:58-1:06 | 8s | Closing line and sign-off, held to the end |
+| Title card | 0:00-0:05 | 5s | "Happy Birthday, [Name]!" Title words stagger up one by one, gold rule grows from the center, name, role, and from line follow, background orbs drift |
+| Photo montage | 0:05-0:40 | 7 x 5s = 35s | One photo per beat, slow Ken Burns zoom with a brightness settle as each photo lands, soft vignette, caption bar slides up and the caption text follows, gentle fade between photos |
+| Photo collage | 0:40-0:46 | 6s | Heading words stagger in, 3 photos in polaroid frames pop in one by one with a rotation settle, then a gentle idle float |
+| Message card 1 | 0:46-0:52 | 6s | Card rises with a slight tilt, quote mark pops in, message sentences fade in one by one, signer line slides in last |
+| Message card 2 | 0:52-0:58 | 6s | Second greeting and signer, same choreography |
+| Closing card | 0:58-1:06 | 8s | Closing line words stagger up, rule grows, sign-off fades in, held to the end |
 | **Total** | | **66s** | |
 
 Sample content: a birthday video for Nur-Aina Ibrahim, Program Manager, with
@@ -54,10 +59,10 @@ TMPDIR=$HOME/workspace/video-presentation-generator/render-engine/.tmp \
 HYPERFRAMES_EXTRACT_CACHE_DIR=$HOME/workspace/video-presentation-generator/render-engine/.frames-cache \
 ../node_modules/.bin/hyperframes check
 
-# 3. Render the MP4
+# 3. Render the MP4 (native 1920x1080, delivery quality preset)
 TMPDIR=$HOME/workspace/video-presentation-generator/render-engine/.tmp \
 HYPERFRAMES_EXTRACT_CACHE_DIR=$HOME/workspace/video-presentation-generator/render-engine/.frames-cache \
-../node_modules/.bin/hyperframes render . -o renders/birthday-sample.mp4 --frames-cache-dir ../.frames-cache
+../node_modules/.bin/hyperframes render . -o renders/birthday-sample.mp4 --quality delivery --frames-cache-dir ../.frames-cache
 
 # 4. Verify the output
 ffprobe renders/birthday-sample.mp4
@@ -66,7 +71,8 @@ ffprobe renders/birthday-sample.mp4
 ## Make a video for another person
 
 1. Replace the files in `assets/photos/` with the new person's photos
-   (1280x720 or larger works; the composition crops to fill).
+   (1920x1080 or larger is ideal; smaller photos still work, the composition
+   crops to fill and photos simply gain no extra detail).
 2. Edit `config.json`:
    - `celebrantName`, `celebrantShortName`, `role`, `occasion`
    - `photos`: one entry per montage photo, `file` path plus `caption`

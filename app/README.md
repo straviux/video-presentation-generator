@@ -84,8 +84,9 @@ no environment variables to set, on any platform.
   is not a hosted website; anyone who wants to use it runs their own copy.
 - Photos are center-cropped to fill the 16:9 frame. There is no crop or
   position control yet.
-- Output is fixed at 1280x720, 30fps, about one minute depending on how many
-  photos and messages you add.
+- Output is fixed at 1920x1080, 30fps, rendered with the delivery quality
+  preset. The video runs about one minute depending on how many photos and
+  messages you add.
 
 ## Passing it to another machine
 
