@@ -57,8 +57,15 @@ app.use(express.static(path.join(APP_DIR, "public")));
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024, files: 20 },
+  limits: { fileSize: 20 * 1024 * 1024, files: 21 },
   fileFilter: (req, file, cb) => {
+    if (file.fieldname === "music") {
+      const okAudio =
+        ["audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/wav", "audio/x-wav", "audio/wave", "audio/ogg", "audio/vorbis"].includes(file.mimetype) ||
+        [".mp3", ".m4a", ".wav", ".ogg"].includes(path.extname(file.originalname || "").toLowerCase());
+      cb(okAudio ? null : new Error("Only MP3, M4A, WAV, or OGG music files are accepted."), okAudio);
+      return;
+    }
     const ok = ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype);
     cb(ok ? null : new Error("Only JPG, PNG, or WebP photos are accepted."), ok);
   },
@@ -74,6 +81,7 @@ function jobView(job) {
     status: job.status, // generating | rendering | done | error
     message: job.message,
     error: job.error || null,
+    musicWarning: job.musicWarning || null,
     logTail: job.logTail || null,
     totalSeconds: job.totalSeconds || null,
     downloadUrl: job.status === "done" ? `/api/jobs/${job.id}/download` : null,
@@ -99,6 +107,60 @@ function runProcess(command, args, options) {
     child.on("error", (err) => resolve({ code: -1, out: out + String(err) }));
     child.on("close", (code) => resolve({ code, out }));
   });
+}
+
+// Probe a media file's duration in seconds with ffprobe; null on failure.
+async function probeDurationSeconds(file) {
+  const probe = await runProcess("ffprobe", [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "csv=p=0",
+    file,
+  ]);
+  const seconds = Number.parseFloat(String(probe.out).trim());
+  return probe.code === 0 && Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+}
+
+// Mux the job's music track onto the rendered (silent) video with FFmpeg:
+// the track loops if it is shorter than the video, sits at the chosen
+// volume, fades in over the first second and out over the last 3.5
+// seconds, and is encoded as AAC while the video stream is copied. On any
+// failure the job keeps the silent video and gains a musicWarning.
+async function muxMusic(job, outputFile) {
+  const fail = (detail) => {
+    job.musicWarning =
+      "The music track could not be added, so this video is silent. " +
+      (detail ? `(${detail})` : "Try a different music file.");
+  };
+  const duration = await probeDurationSeconds(outputFile);
+  if (duration === null) {
+    fail("The rendered video could not be checked.");
+    return;
+  }
+  const volume = Math.min(1, Math.max(0, (job.musicVolume ?? 40) / 100));
+  const fadeOutStart = Math.max(0, duration - 3.5);
+  const tmpFile = path.join(job.dir, "renders", "output-music.mp4");
+  const mux = await runProcess("ffmpeg", [
+    "-y",
+    "-i", outputFile,
+    "-stream_loop", "-1",
+    "-i", path.join(job.dir, job.musicFile),
+    "-filter_complex",
+    `[1:a]volume=${volume.toFixed(2)},afade=t=in:st=0:d=1,afade=t=out:st=${fadeOutStart.toFixed(2)}:d=3.5[aout]`,
+    "-map", "0:v",
+    "-map", "[aout]",
+    "-c:v", "copy",
+    "-c:a", "aac",
+    "-b:a", "192k",
+    "-t", duration.toFixed(3),
+    tmpFile,
+  ]);
+  writeFileSync(path.join(job.dir, "music.log"), mux.out);
+  if (mux.code !== 0 || !existsSync(tmpFile)) {
+    fail(logTail(mux.out, 3) || "FFmpeg did not produce a video with music.");
+    return;
+  }
+  copyFileSync(tmpFile, outputFile);
 }
 
 async function runJob(job) {
@@ -169,6 +231,13 @@ async function runJob(job) {
       );
     }
 
+    // 3. Add the music track, if one was uploaded. A failed mux never
+    // fails the job: the silent video ships with a musicWarning instead.
+    if (job.musicFile) {
+      job.message = "Adding the music track to your video.";
+      await muxMusic(job, outputFile);
+    }
+
     job.status = "done";
     job.message = "Your video is ready.";
     job.error = null;
@@ -194,7 +263,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.post("/api/generate", upload.array("photos", 20), (req, res) => {
+app.post(
+  "/api/generate",
+  upload.fields([
+    { name: "photos", maxCount: 20 },
+    { name: "music", maxCount: 1 },
+  ]),
+  (req, res) => {
   try {
     if (activeJobId) {
       const active = jobs.get(activeJobId);
@@ -206,7 +281,8 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
     }
 
     const body = req.body || {};
-    const files = req.files || [];
+    const files = (req.files && req.files.photos) || [];
+    const musicUpload = ((req.files && req.files.music) || [])[0] || null;
     const text = (v) => (typeof v === "string" ? v.trim() : "");
     const celebrantName = text(body.celebrantName);
     if (!celebrantName) {
@@ -219,15 +295,50 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
     const asArray = (v) => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
     const captions = asArray(body.captions).map((c) => String(c ?? ""));
     const collageEnabled = text(body.collageEnabled) === "true";
+    const collageMode = text(body.collageMode) === "text" ? "text" : "photos";
     const collageIndexes = asArray(body.collageIndexes)
       .map((v) => Number.parseInt(v, 10))
       .filter((n) => Number.isInteger(n) && n >= 0 && n < files.length);
-    if (collageEnabled && collageIndexes.length !== 3) {
+    if (collageEnabled && collageMode === "photos" && collageIndexes.length !== 3) {
       return res.status(400).json({
         error:
           "The collage needs exactly 3 photos. Tick 3 photos for the collage, or turn the collage off.",
       });
     }
+
+    // Text collage cards: pair the card texts with their signers, cap at 4,
+    // and drop pairs where both are empty.
+    const cardTexts = asArray(body.cardTexts);
+    const cardFroms = asArray(body.cardFroms);
+    const collageCards = [];
+    for (let i = 0; i < Math.min(4, Math.max(cardTexts.length, cardFroms.length)); i++) {
+      const cardText = String(cardTexts[i] ?? "").trim();
+      const cardFrom = String(cardFroms[i] ?? "").trim();
+      if (cardText || cardFrom) collageCards.push({ text: cardText, from: cardFrom });
+    }
+    if (collageEnabled && collageMode === "text" && collageCards.filter((c) => c.text).length < 2) {
+      return res.status(400).json({
+        error:
+          "The text collage needs at least 2 greeting cards with text. Add more cards, or turn the collage off.",
+      });
+    }
+
+    // Music volume from the slider: an integer percent, clamped to 0-100.
+    const volumeParsed = Number.parseInt(body.musicVolume, 10);
+    const musicVolume = Number.isInteger(volumeParsed)
+      ? Math.min(100, Math.max(0, volumeParsed))
+      : 40;
+
+    // Background preset for the scenes. The key list mirrors the preset
+    // registry in lib/generate.mjs; unknown or missing keys fall back to
+    // "deep-green", the original look.
+    const BACKGROUND_KEYS = [
+      "deep-green", "emerald", "midnight", "royal",
+      "sunset", "charcoal", "cream", "sky",
+    ];
+    const background = BACKGROUND_KEYS.includes(text(body.background))
+      ? text(body.background)
+      : "deep-green";
 
     const messages = [];
     for (const n of [1, 2]) {
@@ -288,6 +399,7 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
     });
 
     const config = {
+      background,
       celebrantName,
       celebrantShortName: shortName,
       closingLine:
@@ -296,7 +408,9 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
       collage: {
         enabled: collageEnabled,
         heading: text(body.collageHeading) || "Moments together",
-        photoIndexes: collageEnabled ? collageIndexes : [],
+        mode: collageMode,
+        cards: collageCards,
+        photoIndexes: collageEnabled && collageMode === "photos" ? collageIndexes : [],
       },
       fromLine,
       fonts,
@@ -306,6 +420,28 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
       role: text(body.role),
     };
     writeFileSync(path.join(jobDir, "config.json"), JSON.stringify(config, null, 2));
+
+    // The uploaded music track, if any, waits in the job folder for the
+    // post-render mux step.
+    let musicFile = null;
+    if (musicUpload) {
+      const musicExtFromName = path.extname(musicUpload.originalname || "").toLowerCase();
+      const musicExtByMime = {
+        "audio/mpeg": ".mp3",
+        "audio/mp4": ".m4a",
+        "audio/x-m4a": ".m4a",
+        "audio/wav": ".wav",
+        "audio/x-wav": ".wav",
+        "audio/wave": ".wav",
+        "audio/ogg": ".ogg",
+        "audio/vorbis": ".ogg",
+      };
+      const musicExt = [".mp3", ".m4a", ".wav", ".ogg"].includes(musicExtFromName)
+        ? musicExtFromName
+        : musicExtByMime[musicUpload.mimetype] || ".mp3";
+      musicFile = `music${musicExt}`;
+      writeFileSync(path.join(jobDir, musicFile), musicUpload.buffer);
+    }
 
     // Composition support files inside the job folder: the generator, the
     // local GSAP copy (no CDN at render time), and the hyperframes config.
@@ -336,6 +472,9 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
       status: "generating",
       message: "Job created.",
       error: null,
+      musicFile,
+      musicVolume,
+      musicWarning: null,
       logTail: null,
       totalSeconds,
     };

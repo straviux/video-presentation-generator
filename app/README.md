@@ -60,13 +60,29 @@ no environment variables to set, on any platform.
    stage preview follows your picks. Picks beyond the two built-in stacks
    load from Google Fonts, so keep the machine online while rendering;
    offline, the video falls back to similar system fonts.
-6. **Check the summary.** The side panel lists every scene with its start
+6. **Background.** In the Background tab, pick one of eight backdrops
+   for the title, collage, message, and closing scenes: five animated
+   (Deep Green, Emerald, Midnight, Royal, Sunset), two flat colors
+   (Charcoal, Cream), and one light gradient (Sky). Cream and Sky are
+   light backdrops, so the words on them turn dark automatically. Photos
+   stay full screen in every backdrop, and the paper cards keep their
+   paper.
+7. **Collage.** In the Collage tab, pick the style. Photos shows the 3
+   ticked photos as polaroids. Text cards shows up to 4 short greeting
+   cards instead; write at least 2 cards with text. Either way the scene
+   runs 6 seconds, and the switch on the same tab can skip it entirely.
+8. **Music (optional).** In the Music tab, add one MP3, M4A, WAV, or OGG
+   track and set its volume. The track is added after the video renders:
+   it loops if it is shorter than the video, fades in at the start, and
+   fades out at the end. Leave it empty for a silent video, and only use
+   music you have the right to use.
+9. **Check the summary.** The side panel lists every scene with its start
    time and shows the total runtime. Title 5s, photos 5s each, collage 6s,
    messages 6s each, closing 8s. Seven photos with the collage and two
    messages comes to 1:06.
-7. **Quick preview (optional).** A simple slideshow of your photos and words
+10. **Quick preview (optional).** A simple slideshow of your photos and words
    at the real scene lengths. The finished video adds the animations.
-8. **Generate Video.** The page shows progress while the scenes are built and
+11. **Generate Video.** The page shows progress while the scenes are built and
    the video renders. Rendering usually takes a few minutes for a one minute
    video, so keep the page open. When it finishes, the video plays right on
    the page and the Download MP4 button saves the file.
@@ -84,7 +100,9 @@ no environment variables to set, on any platform.
 ## Known limits in v1
 
 - **Birthday template only.** The other event types are placeholders.
-- **No music track yet.** The video is silent, same as the template.
+- **Music is added after rendering.** If the music step fails (for
+  example a damaged audio file), the video still finishes, silent, and
+  the page shows a note that the music could not be added.
 - **One render at a time**, and the app runs on your local machine only. It
   is not a hosted website; anyone who wants to use it runs their own copy.
 - Photos are center-cropped to fill the 16:9 frame. There is no crop or

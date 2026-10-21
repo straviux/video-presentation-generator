@@ -55,6 +55,14 @@
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
           Fonts
         </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelMusic">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Music
+        </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelBackground">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+          Background
+        </button>
       </nav>
 
       <div class="flex-none w-[300px] bg-white border-r border-line overflow-y-auto min-w-0">
@@ -110,14 +118,42 @@
 
         <section class="panel p-[18px]" id="panelCollage">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Collage</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">A 6 second scene that shows 3 photos together as polaroids. Tick exactly 3 photos in the Photos tab to use it.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">A 6 second scene after the montage. Show 3 photos together as polaroids, or show greeting cards as text instead.</p>
           <div class="flex items-center gap-2.5 mt-1">
             <input type="checkbox" id="collageEnabled" checked class="w-[18px] h-[18px] accent-[#8b3dff]" />
-            <span class="text-[13.5px] font-semibold">Include the photo collage scene</span>
+            <span class="text-[13.5px] font-semibold">Include the collage scene</span>
           </div>
           <label class="field-label" for="collageHeading">Collage heading</label>
           <input type="text" class="field-input" id="collageHeading" value="Moments together" />
-          <p class="warn" id="collageWarn">The collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
+          <span class="field-label">Collage style</span>
+          <div class="flex gap-2" role="radiogroup" aria-label="Collage style">
+            <label class="mode-opt active" id="collageModePhotosWrap"><input type="radio" name="collageMode" id="collageModePhotos" value="photos" checked class="accent-[#8b3dff]" /> Photos</label>
+            <label class="mode-opt" id="collageModeTextWrap"><input type="radio" name="collageMode" id="collageModeText" value="text" class="accent-[#8b3dff]" /> Text cards</label>
+          </div>
+          <div id="collagePhotoArea">
+            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Tick exactly 3 photos in the Photos tab for the polaroids.</p>
+            <p class="warn" id="collageWarn">The collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
+          </div>
+          <div id="collageTextArea" style="display: none">
+            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the collage scene. Cards with blank text are skipped.</p>
+            <label class="field-label" for="cardText1">Card 1</label>
+            <input type="text" class="field-input" id="cardText1" value="Happiest birthday, Nur-Aina! Your kindness keeps this whole office going." />
+            <label class="field-label" for="cardFrom1">Signed by</label>
+            <input type="text" class="field-input" id="cardFrom1" value="The Programs Team" />
+            <label class="field-label" for="cardText2">Card 2</label>
+            <input type="text" class="field-input" id="cardText2" value="Thank you for leading with patience and heart. Enjoy your day, you have earned it." />
+            <label class="field-label" for="cardFrom2">Signed by</label>
+            <input type="text" class="field-input" id="cardFrom2" value="The Finance Team" />
+            <label class="field-label" for="cardText3">Card 3</label>
+            <input type="text" class="field-input" id="cardText3" value="Wishing you good health, good food, and zero paperwork today." />
+            <label class="field-label" for="cardFrom3">Signed by</label>
+            <input type="text" class="field-input" id="cardFrom3" value="The Field Team" />
+            <label class="field-label" for="cardText4">Card 4</label>
+            <input type="text" class="field-input" id="cardText4" value="We are lucky to work with you. Happy birthday!" />
+            <label class="field-label" for="cardFrom4">Signed by</label>
+            <input type="text" class="field-input" id="cardFrom4" value="Everyone at YSE" />
+            <p class="warn" id="collageTextWarn">The text collage needs at least 2 cards with text. Right now <span id="collageCardCount">0</span> cards have text.</p>
+          </div>
         </section>
 
         <section class="panel p-[18px]" id="panelFonts">
@@ -183,6 +219,64 @@
             <option value="outfit" style="font-family: 'Outfit', system-ui, sans-serif">Outfit</option>
             <option value="dmsans" style="font-family: 'DM Sans', system-ui, sans-serif">DM Sans</option>
           </select>
+        </section>
+
+        <section class="panel p-[18px]" id="panelMusic">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Music</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add one background music track to the finished video. It loops if it is shorter than the video, fades in at the start, and fades out over the last few seconds. Leave this empty and the video stays silent.</p>
+          <label for="musicInput" class="flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            Choose a music file
+          </label>
+          <input type="file" class="sr-only" id="musicInput" accept=".mp3,.m4a,.wav,.ogg" />
+          <div id="musicFileRow" class="items-center gap-2 mt-3" style="display: none">
+            <span id="musicFileName" class="text-[13px] flex-1 min-w-0" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap"></span>
+            <button type="button" id="musicRemove" class="mini-btn danger">Remove</button>
+          </div>
+          <label class="field-label" for="musicVolume">Music volume</label>
+          <input type="range" id="musicVolume" min="0" max="100" value="40" class="w-full accent-[#8b3dff]" />
+          <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Only use music you have the right to use, for example your own recording or a track whose license covers videos like this one.</p>
+        </section>
+
+        <section class="panel p-[18px]" id="panelBackground">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Background</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">The backdrop behind the title, collage, message, and closing scenes. Photos stay full screen in every backdrop, and the paper cards keep their paper.</p>
+          <div class="grid grid-cols-2 gap-2.5" id="backgroundGrid">
+            <button type="button" class="bg-card is-active" data-bg="deep-green">
+              <span class="bg-swatch" style="background: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%)"></span>
+              <span class="bg-meta"><span class="bg-name">Deep Green</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>Animated</span></span>
+            </button>
+            <button type="button" class="bg-card" data-bg="emerald">
+              <span class="bg-swatch" style="background: radial-gradient(circle at 20% 10%, #1f7a55 0%, #0d4d33 52%, #063a26 100%)"></span>
+              <span class="bg-meta"><span class="bg-name">Emerald</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>Animated</span></span>
+            </button>
+            <button type="button" class="bg-card" data-bg="midnight">
+              <span class="bg-swatch" style="background: radial-gradient(circle at 18% 12%, #2b3a6e 0%, #1a2450 55%, #0d1330 100%)"></span>
+              <span class="bg-meta"><span class="bg-name">Midnight</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>Animated</span></span>
+            </button>
+            <button type="button" class="bg-card" data-bg="royal">
+              <span class="bg-swatch" style="background: radial-gradient(circle at 18% 12%, #5b2a86 0%, #3a1663 55%, #22093f 100%)"></span>
+              <span class="bg-meta"><span class="bg-name">Royal</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>Animated</span></span>
+            </button>
+            <button type="button" class="bg-card" data-bg="sunset">
+              <span class="bg-swatch" style="background: radial-gradient(circle at 18% 12%, #93395f 0%, #5e2149 52%, #33102e 100%)"></span>
+              <span class="bg-meta"><span class="bg-name">Sunset</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>Animated</span></span>
+            </button>
+            <button type="button" class="bg-card" data-bg="charcoal">
+              <span class="bg-swatch" style="background: #201f1e"></span>
+              <span class="bg-meta"><span class="bg-name">Charcoal</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="4" rx="2"/></svg>Color</span></span>
+            </button>
+            <button type="button" class="bg-card" data-bg="cream">
+              <span class="bg-swatch" style="background: #f6eeda"></span>
+              <span class="bg-meta"><span class="bg-name">Cream</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="4" rx="2"/></svg>Color</span></span>
+            </button>
+            <button type="button" class="bg-card" data-bg="sky">
+              <span class="bg-swatch" style="background: linear-gradient(165deg, #eaf4fc 0%, #cfe6f7 55%, #aed2ef 100%)"></span>
+              <span class="bg-meta"><span class="bg-name">Sky</span><span class="bg-tag"><svg class="bg-tag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6"/></svg>Gradient</span></span>
+            </button>
+          </div>
+          <input type="hidden" id="backgroundValue" value="deep-green" />
+          <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Animated backdrops drift gently in the video. The stage preview shows the same colors without the motion.</p>
         </section>
       </div>
 
@@ -264,6 +358,22 @@
       const svgIcon = (paths) =>
         "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>" + paths + "</svg>";
 
+      // Gold accent shapes scattered around the preview collage, mirroring
+      // the rendered composition (same shapes, spots, and relative sizes).
+      const PV_ACCENT_SVGS = {
+        heart: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>',
+        star: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg>',
+        dot: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg>',
+      };
+      const PV_ACCENT_SPOTS = [
+        { left: "6%", top: "16%", size: "2.9%", shape: "heart" },
+        { left: "88%", top: "13%", size: "2.3%", shape: "star" },
+        { left: "11%", top: "77%", size: "1.8%", shape: "dot" },
+        { left: "85%", top: "73%", size: "3%", shape: "heart" },
+        { left: "46%", top: "85%", size: "2.1%", shape: "star" },
+        { left: "64%", top: "9%", size: "1.6%", shape: "dot" },
+      ];
+
       const TITLE_DUR = 5, PHOTO_DUR = 5, COLLAGE_DUR = 6, MESSAGE_DUR = 6, CLOSING_DUR = 8;
 
       function fmt(totalSeconds) {
@@ -281,11 +391,25 @@
         return out;
       }
 
+      function collageMode() {
+        return $("collageModeText").checked ? "text" : "photos";
+      }
+
+      function filledCards() {
+        const out = [];
+        for (const n of [1, 2, 3, 4]) {
+          const text = $("cardText" + n).value.trim();
+          if (text) out.push({ text, from: $("cardFrom" + n).value.trim() });
+        }
+        return out;
+      }
+
       function computeScenes() {
         const scenes = [{ name: "Title card", dur: TITLE_DUR, kind: "title" }];
         photos.forEach((p, i) => scenes.push({ name: "Photo " + (i + 1), dur: PHOTO_DUR, kind: "photo", index: i }));
         if ($("collageEnabled").checked) {
-          scenes.push({ name: "Photo collage", dur: COLLAGE_DUR, kind: "collage" });
+          const mode = collageMode();
+          scenes.push({ name: mode === "text" ? "Collage · Text" : "Collage · Photos", dur: COLLAGE_DUR, kind: "collage", mode });
         }
         filledMessages().forEach((m, i) => scenes.push({ name: "Message card " + (i + 1), dur: MESSAGE_DUR, kind: "message", index: i }));
         scenes.push({ name: "Closing card", dur: CLOSING_DUR, kind: "closing" });
@@ -304,11 +428,22 @@
           .join("");
         $("totalRuntime").textContent = fmt(t);
         $("totalRuntimeTop").textContent = fmt(t);
+        const isText = collageMode() === "text";
         const count = photos.filter((p) => p.inCollage).length;
         $("collageCount").textContent = count;
-        const bad = $("collageEnabled").checked && count !== 3;
+        const bad = $("collageEnabled").checked && !isText && count !== 3;
         $("collageWarn").style.display = bad ? "block" : "none";
-        $("generateBtn").disabled = bad || photos.length === 0;
+        const cardCount = filledCards().length;
+        $("collageCardCount").textContent = cardCount;
+        const textBad = $("collageEnabled").checked && isText && cardCount < 2;
+        $("collageTextWarn").style.display = textBad ? "block" : "none";
+        $("collagePhotoArea").style.display = isText ? "none" : "block";
+        $("collageTextArea").style.display = isText ? "block" : "none";
+        $("collageModePhotosWrap").classList.toggle("active", !isText);
+        $("collageModeTextWrap").classList.toggle("active", isText);
+        $("photoList").classList.toggle("text-mode", isText);
+        document.querySelectorAll(".collage-box").forEach((box) => { box.disabled = isText; });
+        $("generateBtn").disabled = bad || textBad || photos.length === 0;
         renderTimeline(scenes);
       }
 
@@ -334,6 +469,8 @@
             img.src = photos[sc.index].url;
             img.alt = "";
             thumb.appendChild(img);
+          } else if (sc.kind === "collage") {
+            thumb.innerHTML = sc.mode === "text" ? thumbIcons.message : thumbIcons.collage;
           } else {
             thumb.innerHTML = thumbIcons[sc.kind] || thumbIcons.title;
           }
@@ -409,10 +546,29 @@
         renderPhotoList();
       });
 
-      for (const id of ["collageEnabled", "message1Text", "message2Text"]) {
+      for (const id of ["collageEnabled", "message1Text", "message2Text",
+        "collageModePhotos", "collageModeText",
+        "cardText1", "cardText2", "cardText3", "cardText4",
+        "cardFrom1", "cardFrom2", "cardFrom3", "cardFrom4"]) {
         $(id).addEventListener("input", refreshSummary);
         $(id).addEventListener("change", refreshSummary);
       }
+
+      // -------------------------------------------------------------- music --
+      let musicFile = null;
+      $("musicInput").addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        event.target.value = "";
+        if (!file) return;
+        musicFile = file;
+        $("musicFileName").textContent = file.name;
+        $("musicFileRow").style.display = "flex";
+      });
+      $("musicRemove").addEventListener("click", () => {
+        musicFile = null;
+        $("musicFileName").textContent = "";
+        $("musicFileRow").style.display = "none";
+      });
 
       // ------------------------------------------------------------ rail tabs --
       document.querySelectorAll(".rail-btn").forEach((btn) => {
@@ -447,13 +603,45 @@
         const capStack = FONT_STACKS[$("fontCaptions").value] || FONT_STACKS.clean;
         const msgStack = FONT_STACKS[$("fontMessages").value] || FONT_STACKS.classic;
         stage.querySelectorAll(".pv-name").forEach((el) => { el.style.fontFamily = nameStack; });
-        stage.querySelectorAll(".pv-eyebrow, .pv-greeting, .pv-title").forEach((el) => { el.style.fontFamily = headStack; });
-        stage.querySelectorAll(".pv-caption").forEach((el) => { el.style.fontFamily = capStack; });
+        stage.querySelectorAll(".pv-eyebrow, .pv-greeting, .pv-title, .pv-gfrom").forEach((el) => { el.style.fontFamily = headStack; });
+        stage.querySelectorAll(".pv-caption, .pv-pol-cap").forEach((el) => { el.style.fontFamily = capStack; });
         stage.querySelectorAll(".pv-msg-text, .pv-sign").forEach((el) => { el.style.fontFamily = msgStack; });
       }
       for (const id of ["fontName", "fontHeadings", "fontCaptions", "fontMessages"]) {
         $(id).addEventListener("change", applyPreviewFonts);
       }
+
+      // ------------------------------------------------ background presets --
+      // Mirrors the background registry in lib/generate.mjs. The preview
+      // shows the same colors statically (no orb drift); light presets flip
+      // the on-background text to dark so it stays readable.
+      const PV_BACKGROUNDS = {
+        "deep-green": { bg: "radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%)", ink: "#f7f3e8", inkSoft: "#cfd8cc", line: "#e8c56e", accent: "#e8c56e" },
+        emerald: { bg: "radial-gradient(circle at 20% 10%, #1f7a55 0%, #0d4d33 52%, #063a26 100%)", ink: "#f4fbf6", inkSoft: "#cfe8d8", line: "#ffd98a", accent: "#ffd98a" },
+        midnight: { bg: "radial-gradient(circle at 18% 12%, #2b3a6e 0%, #1a2450 55%, #0d1330 100%)", ink: "#f2f4ff", inkSoft: "#c3cbe8", line: "#a9c2ff", accent: "#a9c2ff" },
+        royal: { bg: "radial-gradient(circle at 18% 12%, #5b2a86 0%, #3a1663 55%, #22093f 100%)", ink: "#faf5ff", inkSoft: "#ddccf2", line: "#e3b8ff", accent: "#e3b8ff" },
+        sunset: { bg: "radial-gradient(circle at 18% 12%, #93395f 0%, #5e2149 52%, #33102e 100%)", ink: "#fff6ec", inkSoft: "#f2d7c4", line: "#ffb45e", accent: "#ffb45e" },
+        charcoal: { bg: "#201f1e", ink: "#f5efe4", inkSoft: "#cbc2b2", line: "#d9b96a", accent: "#d9b96a" },
+        cream: { bg: "#f6eeda", ink: "#22371f", inkSoft: "#5c6650", line: "#a07d1e", accent: "#b08a1e" },
+        sky: { bg: "linear-gradient(165deg, #eaf4fc 0%, #cfe6f7 55%, #aed2ef 100%)", ink: "#173a52", inkSoft: "#47637a", line: "#256d9e", accent: "#c98f1f" },
+      };
+      function applyPreviewBackground() {
+        const preset = PV_BACKGROUNDS[$("backgroundValue").value] || PV_BACKGROUNDS["deep-green"];
+        const stage = $("stage");
+        stage.style.background = preset.bg;
+        stage.style.color = preset.ink;
+        stage.querySelectorAll(".pv-eyebrow:not(.pv-scrap-eyebrow)").forEach((el) => { el.style.color = preset.line; });
+        stage.querySelectorAll(".pv-small").forEach((el) => { el.style.color = preset.inkSoft; });
+        stage.querySelectorAll(".pv-rule").forEach((el) => { el.style.background = preset.line; });
+        stage.querySelectorAll(".pv-accent").forEach((el) => { el.style.color = preset.accent; });
+      }
+      document.querySelectorAll(".bg-card").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".bg-card").forEach((b) => b.classList.toggle("is-active", b === btn));
+          $("backgroundValue").value = btn.dataset.bg;
+          applyPreviewBackground();
+        });
+      });
 
       // ------------------------------------------------------ quick preview --
       let previewTimer = null;
@@ -487,14 +675,56 @@
             heading.textContent = $("collageHeading").value.trim() || "Moments together";
             heading.style.position = "absolute";
             heading.style.top = "12px";
+            heading.style.left = "0";
+            heading.style.right = "0";
+            heading.style.textAlign = "center";
             el.appendChild(heading);
-            photos.filter((p) => p.inCollage).forEach((p) => {
-              const fig = document.createElement("div");
-              fig.className = "pv-polaroid";
-              const img = document.createElement("img");
-              img.src = p.url; img.alt = "";
-              fig.appendChild(img);
-              el.appendChild(fig);
+            if (sc.mode === "text") {
+              const grid = document.createElement("div");
+              const cards = filledCards();
+              grid.className = "pv-cards cards-" + cards.length;
+              cards.forEach((card, ci) => {
+                const cell = document.createElement("div");
+                cell.className = "pv-gcard";
+                cell.style.transform = "rotate(" + [-2.5, 2, -1.5, 2.5][ci % 4] + "deg)";
+                const cardText = document.createElement("div");
+                cardText.className = "pv-gtext pv-msg-text";
+                cardText.textContent = card.text;
+                cell.appendChild(cardText);
+                if (card.from) {
+                  const cardFrom = document.createElement("div");
+                  cardFrom.className = "pv-gfrom";
+                  cardFrom.textContent = card.from;
+                  cell.appendChild(cardFrom);
+                }
+                grid.appendChild(cell);
+              });
+              el.appendChild(grid);
+            } else {
+              photos.filter((p) => p.inCollage).forEach((p, pi) => {
+                const fig = document.createElement("div");
+                fig.className = "pv-polaroid";
+                fig.style.transform = "rotate(" + [-5, 3, -3][pi % 3] + "deg)";
+                const img = document.createElement("img");
+                img.src = p.url; img.alt = "";
+                const cap = document.createElement("div");
+                cap.className = "pv-pol-cap";
+                cap.textContent = p.caption;
+                fig.appendChild(img);
+                fig.appendChild(cap);
+                el.appendChild(fig);
+              });
+            }
+            // Accents go on last so they sit above the photos and cards,
+            // matching the rendered scene's layering.
+            PV_ACCENT_SPOTS.forEach((spot) => {
+              const acc = document.createElement("span");
+              acc.className = "pv-accent";
+              acc.style.left = spot.left;
+              acc.style.top = spot.top;
+              acc.style.width = spot.size;
+              acc.innerHTML = PV_ACCENT_SVGS[spot.shape];
+              el.appendChild(acc);
             });
           } else if (sc.kind === "message") {
             el.className = "pv-scene";
@@ -524,6 +754,7 @@
         if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
         const built = buildPreviewScenes(computeScenes());
         applyPreviewFonts();
+        applyPreviewBackground();
         let idx = Math.min(Math.max(fromIdx, 0), built.length - 1);
         const show = () => {
           built.forEach((b) => b.el.classList.remove("active"));
@@ -556,6 +787,12 @@
           if (job.status === "done") {
             clearInterval(pollTimer);
             setStatus("Done. Your video is ready in the Generate panel on the right.", false);
+            if (job.musicWarning) {
+              const note = document.createElement("p");
+              note.style.cssText = "color: #b54708; margin: 6px 0 0;";
+              note.textContent = job.musicWarning;
+              $("statusBox").appendChild(note);
+            }
             $("generateBtn").disabled = false;
             $("resultVideo").src = job.videoUrl;
             $("downloadBtn").href = job.downloadUrl;
@@ -581,6 +818,10 @@
       $("generateBtn").addEventListener("click", async () => {
         if (photos.length === 0) { setStatus("Add at least one photo first.", true); return; }
         if (!$("celebrantName").value.trim()) { setStatus("Enter the celebrant name first.", true); return; }
+        if ($("collageEnabled").checked && collageMode() === "text" && filledCards().length < 2) {
+          setStatus("Add at least 2 greeting cards with text for the text collage, or switch the collage off.", true);
+          return;
+        }
         stopPreview("Nothing playing");
         $("resultBox").className = "result-box";
         const form = new FormData();
@@ -592,10 +833,18 @@
         form.append("closingSignOff", $("closingSignOff").value.trim());
         form.append("collageHeading", $("collageHeading").value.trim());
         form.append("collageEnabled", $("collageEnabled").checked ? "true" : "false");
+        form.append("collageMode", collageMode());
+        for (const n of [1, 2, 3, 4]) {
+          form.append("cardTexts", $("cardText" + n).value);
+          form.append("cardFroms", $("cardFrom" + n).value);
+        }
+        if (musicFile) form.append("music", musicFile, musicFile.name);
+        form.append("musicVolume", $("musicVolume").value);
         form.append("fontName", $("fontName").value);
         form.append("fontHeadings", $("fontHeadings").value);
         form.append("fontCaptions", $("fontCaptions").value);
         form.append("fontMessages", $("fontMessages").value);
+        form.append("background", $("backgroundValue").value);
         for (const n of [1, 2]) {
           form.append("message" + n + "Text", $("message" + n + "Text").value);
           form.append("message" + n + "SignedBy", $("message" + n + "SignedBy").value);

@@ -62,6 +62,7 @@ run small at the title size.
 | Title card | 0:00-0:05 | 5s | "Happy Birthday," greeting words stagger up first, then the celebrant name arrives as a split reveal: the first chunk slides in from the left, the rest from the right, and they meet at center as one line. Gold rule grows once the name settles, role and from line follow, background orbs drift |
 | Photo montage | 0:05-0:40 | 7 x 5s = 35s | One photo per beat, slow Ken Burns zoom with a brightness settle as each photo lands, soft vignette, caption bar slides up and the caption text follows. Between photos the picture fades through white (white ramps up over the last 0.35s and lifts over the first 0.35s of the next photo); the montage edges keep a plain crossfade |
 | Photo collage | 0:40-0:46 | 6s | Heading words stagger in, then the scene builds itself: 3 polaroid photos pop in one at a time about a second apart with a rotation settle, small gold hearts, stars, and dots pop in between them, the photo captions fade in late, then a gentle idle float |
+| Text collage (alternative) | 0:40-0:46 | 6s | Same heading and window, with greeting cards instead of polaroids: up to 4 paper cards build in one by one with a rotation settle, each showing a short greeting and who it is from, gold accents pop in between, then a gentle idle float |
 | Message card 1 | 0:46-0:52 | 6s | Card rises with a slight tilt, quote mark pops in, then the message types on character by character (fitted to finish in about 4.2s), signer line slides in after the typing |
 | Message card 2 | 0:52-0:58 | 6s | Second greeting and signer, same choreography |
 | Closing card | 0:58-1:06 | 8s | A scrapbook card lands at a slight tilt on the green background: warm paper with torn edges, two translucent tape strips settling onto its top corners. Closing line words stagger up on the paper, a deeper bronze rule grows, and the sign-off fades in last in italic serif like a handwritten note, held to the end |
@@ -71,6 +72,73 @@ Sample content: a birthday video for Nur-Aina Ibrahim, Program Manager, with
 messages from the YSE Family. Sample photos are seeded downloads from
 picsum.photos (1280x720), stored in `assets/photos/photo-1.jpg` to
 `photo-7.jpg`.
+
+## Text collage mode
+
+The collage scene has two modes, set by `collage.mode` in `config.json`:
+
+- `"photos"` (the default): the 3 polaroids from `collage.photoIndexes`,
+  as described above.
+- `"text"`: greeting cards instead of photos. Fill `collage.cards` with
+  up to 4 entries of `{ "text": "...", "from": "..." }`. Four cards land
+  in a 2x2 grid, 3 cards sit in one row, and 2 in a single centered row,
+  building in one by one. Card text uses the `messages` font slot and the
+  signer line the `headings` slot. Cards with blank text are skipped.
+
+The sample config carries 4 short greetings, so flipping `mode` to
+`"text"` is all it takes to demo the mode.
+
+## Backgrounds
+
+The `background` key in `config.json` picks the backdrop for the title,
+collage, message, and closing scenes. Eight presets ship in the
+generator:
+
+| Key | Type | Look |
+| --- | --- | --- |
+| `deep-green` | Animated | The original: deep green with gold-green drifting orbs, cream words. |
+| `emerald` | Animated | Richer green gradient, soft green orbs. |
+| `midnight` | Animated | Deep navy to indigo, soft blue orbs. |
+| `royal` | Animated | Deep purple gradient, violet orbs. |
+| `sunset` | Animated | Plum dusk gradient, warm amber orbs. |
+| `charcoal` | Color | Flat warm near-black, very faint static orbs. |
+| `cream` | Color | Flat warm cream, words turn deep green, accents turn bronze. No orbs. |
+| `sky` | Gradient | Pale blue gradient, words turn deep blue, subtle white orbs. |
+
+Animated presets drift their orbs; the others hold still. Photo scenes
+are full-bleed and never change, and the paper cards (messages, text
+collage, closing) keep their paper surface in every preset. An unknown
+or missing key falls back to `deep-green`, so leaving the key out keeps
+the original look.
+
+## Music (optional, post-render step)
+
+The render itself is silent. To add a background track, mux one onto the
+finished MP4 with FFmpeg afterwards. This is the same step the app runs
+automatically when a track is uploaded there.
+
+```bash
+ffmpeg -i renders/birthday-sample.mp4 -stream_loop -1 -i path/to/music.mp3 \
+  -filter_complex "[1:a]volume=0.40,afade=t=in:st=0:d=1,afade=t=out:st=62.5:d=3.5[aout]" \
+  -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k -t 66 \
+  renders/birthday-with-music.mp4
+```
+
+How to read the parameters:
+
+- `-stream_loop -1` loops the track if it is shorter than the video.
+- `volume=0.40` is the track level, from 0 to 1 (0.40 means 40 percent).
+- `afade=t=in:st=0:d=1` fades the music in over the first second.
+- `afade=t=out:st=62.5:d=3.5` fades it out over the last 3.5 seconds. The
+  start time is the video duration minus 3.5 (66 - 3.5 = 62.5 here);
+  adjust it, and the final `-t 66`, if your video runs longer or shorter.
+- The video stream is copied untouched (`-c:v copy`); only the audio is
+  encoded, as AAC at 192k.
+
+Only use music you have the right to use. The file
+`assets/music-test.mp3` in this folder is a synthetic test tone track (a
+generated sine chord pad) that exists only so this mux step can be
+tested; it is not a bundled music library.
 
 ## Commands
 
@@ -108,6 +176,9 @@ ffprobe renders/birthday-sample.mp4
    - `photos`: one entry per montage photo, `file` path plus `caption`
    - `collage.photoIndexes`: which photos (zero-based positions in the
      `photos` list) appear in the collage; exactly 3
+   - `collage.mode` and `collage.cards`: set `mode` to `"text"` to show
+     greeting cards instead of polaroids, with up to 4 `{ text, from }`
+     entries in `cards`
    - `messages`: exactly 2 entries, `text` plus `signedBy`
    - `fonts`: one pick per text slot (`name`, `headings`, `captions`,
      `messages`) from the pool in the Fonts section above
@@ -122,8 +193,9 @@ the new total when it runs.
 
 ## Known gaps (v1)
 
-- **No music or audio track.** The render is silent. Adding a royalty-free
-  background track (and an audio fade) is the top v2 item.
+- **Music is a post-render step.** The composition itself stays silent;
+  add a track with the FFmpeg mux in the Music section above (the app
+  runs the same step automatically when a track is uploaded there).
 - **Birthday template only.** Appreciation, Awards, and Retirement templates
   from the prototype are not built yet; they would follow this same
   config-to-composition pattern.

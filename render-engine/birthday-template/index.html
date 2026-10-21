@@ -11,6 +11,13 @@
         --font-headings: Georgia, "Times New Roman", serif;
         --font-captions: Arial, Helvetica, sans-serif;
         --font-messages: Georgia, "Times New Roman", serif;
+        --bg: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%);
+        --ink: #f7f3e8;
+        --ink-soft: #cfd8cc;
+        --line: #e8c56e;
+        --accent: #e8c56e;
+        --orb-a: rgba(232, 197, 110, 0.16);
+        --orb-b: rgba(255, 255, 255, 0.07);
       }
       html, body {
         margin: 0;
@@ -25,8 +32,8 @@
         height: 1080px;
         overflow: hidden;
         font-family: Georgia, "Times New Roman", serif;
-        background: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%);
-        color: #f7f3e8;
+        background: var(--bg);
+        color: var(--ink);
       }
       .scene {
         position: absolute;
@@ -36,11 +43,11 @@
         overflow: hidden;
       }
       .scene-card {
-        background: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%);
+        background: var(--bg);
       }
       .orb { position: absolute; border-radius: 999px; pointer-events: none; }
-      .orb-a { width: 510px; height: 510px; right: -135px; top: -165px; background: rgba(232, 197, 110, 0.16); }
-      .orb-b { width: 315px; height: 315px; left: -90px; bottom: -120px; background: rgba(255, 255, 255, 0.07); }
+      .orb-a { width: 510px; height: 510px; right: -135px; top: -165px; background: var(--orb-a); }
+      .orb-b { width: 315px; height: 315px; left: -90px; bottom: -120px; background: var(--orb-b); }
       /* Word spans GSAP staggers in: inline-block so transforms apply. */
       .w { display: inline-block; }
       /* Split name reveal: the two chunks form one continuous name line. */
@@ -53,7 +60,7 @@
       .tw-w { display: inline-block; }
       .tw-c { display: inline; }
       /* Gold accent shapes that pop in around the collage polaroids. */
-      .accent { position: absolute; pointer-events: none; }
+      .accent { position: absolute; pointer-events: none; color: var(--accent); }
       .accent svg { display: block; width: 100%; height: 100%; }
       /* Soft edge darkening over photos, faded in by GSAP per scene. */
       .vignette {
@@ -71,20 +78,20 @@
       .eyebrow {
         font-family: var(--font-headings);
         font-size: 28.5px; letter-spacing: 0.34em; text-transform: uppercase;
-        color: #e8c56e; margin-bottom: 39px;
+        color: var(--line); margin-bottom: 39px;
       }
       .big-title { font-size: 108px; line-height: 1.1; font-weight: 700; max-width: 1530px; }
       .rule {
         width: 270px; height: 6px; border-radius: 3px;
-        background: #e8c56e; margin: 45px 0 39px; transform-origin: center;
+        background: var(--line); margin: 45px 0 39px; transform-origin: center;
       }
       .subtitle {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 40.5px; line-height: 1.45; color: #e9e4d4; max-width: 1290px;
+        font-size: 40.5px; line-height: 1.45; color: var(--ink); max-width: 1290px;
       }
       .from-line {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 31.5px; letter-spacing: 0.06em; color: #cfd8cc; margin-top: 51px;
+        font-size: 31.5px; letter-spacing: 0.06em; color: var(--ink-soft); margin-top: 51px;
       }
       /* Photo montage */
       .scene-photo { background: #0a0f0d; }
@@ -102,7 +109,7 @@
       /* Collage */
       .collage-heading {
         position: absolute; top: 96px; left: 0; right: 0;
-        text-align: center; font-family: var(--font-headings); font-size: 66px; font-weight: 700; color: #f7f3e8;
+        text-align: center; font-family: var(--font-headings); font-size: 66px; font-weight: 700; color: var(--ink);
       }
       .collage-row {
         position: absolute; inset: 0;
@@ -122,16 +129,62 @@
         padding-top: 15px; min-height: 39px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
+      /* Collage, text mode: greeting cards in place of the polaroids. The
+         container wraps, so 4 cards land in a 2x2 grid, 3 in one row, and
+         2 or 1 in a single centered row. Card widths are set by count.
+         The cards wear the same paper treatment as the message cards. */
+      .collage-cards {
+        position: absolute; inset: 0;
+        display: flex; flex-wrap: wrap;
+        align-items: center; align-content: center; justify-content: center;
+        gap: 44px; padding: 190px 120px 56px;
+      }
+      .greet-card {
+        background:
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.18 0 0 0 0.05 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"),
+          linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%);
+        border-radius: 18px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(90, 70, 30, 0.18);
+        padding: 46px 50px 40px;
+        text-align: center;
+      }
+      .cards-1 .greet-card { width: 760px; }
+      .cards-2 .greet-card { width: 640px; }
+      .cards-3 .greet-card { width: 528px; }
+      .cards-4 .greet-card { width: 620px; }
+      .greet-text { font-family: var(--font-messages); font-size: 42px; line-height: 1.4; color: #22301f; }
+      .cards-3 .greet-text { font-size: 38px; }
+      .greet-from {
+        font-family: var(--font-headings);
+        font-size: 25.5px; letter-spacing: 0.07em; text-transform: uppercase;
+        color: #9a7b1c; margin-top: 24px;
+      }
       /* Message cards */
+      /* Message cards wear the same paper as the closing scrapbook card:
+         warm gradient plus a faint SVG-noise grain, so the text sits on
+         paper instead of plain white. Text colors stay dark for contrast. */
       .msg-card {
         position: absolute; top: 50%; left: 50%;
         transform: translate(-50%, -50%);
         width: 1320px;
-        background: rgba(253, 252, 248, 0.97);
+        background:
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.18 0 0 0 0.05 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"),
+          linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%);
         border-radius: 27px;
         padding: 87px 96px 72px;
         text-align: center;
         box-shadow: 0 45px 90px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(90, 70, 30, 0.18);
+      }
+      /* Tape strip across the top of the message card, same stock as the
+         closing card's tape. Static: it rides along with the card rise. */
+      .msg-tape {
+        position: absolute; top: -24px; left: 50%;
+        width: 246px; height: 56px;
+        transform: translateX(-50%) rotate(-2deg);
+        background: linear-gradient(100deg, rgba(238, 205, 116, 0.62), rgba(228, 190, 96, 0.5));
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
       }
       .quote-mark { font-family: var(--font-messages); font-size: 96px; line-height: 0.6; color: #ac8a21; margin-bottom: 39px; }
       .msg-text { font-family: var(--font-messages); font-size: 46.5px; line-height: 1.5; color: #22301f; }
@@ -249,11 +302,12 @@
           <img src="assets/photos/photo-5.jpg" alt="" />
           <figcaption id="polaroid-cap-2">Small celebrations, big gratitude</figcaption>
         </figure>
-      </div><span class="accent" id="accent-0" style="left: 6%; top: 16%; width: 56px; height: 56px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-1" style="left: 88%; top: 13%; width: 44px; height: 44px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-2" style="left: 11%; top: 77%; width: 34px; height: 34px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span><span class="accent" id="accent-3" style="left: 85%; top: 73%; width: 58px; height: 58px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-4" style="left: 46%; top: 85%; width: 40px; height: 40px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-5" style="left: 64%; top: 9%; width: 30px; height: 30px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span>
+      </div><span class="accent" id="accent-0" style="left: 6%; top: 16%; width: 56px; height: 56px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-1" style="left: 88%; top: 13%; width: 44px; height: 44px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-2" style="left: 11%; top: 77%; width: 34px; height: 34px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span><span class="accent" id="accent-3" style="left: 85%; top: 73%; width: 58px; height: 58px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-4" style="left: 46%; top: 85%; width: 40px; height: 40px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-5" style="left: 64%; top: 9%; width: 30px; height: 30px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span>
     </section>
     <section class="clip scene scene-card" id="scene-msg-0" style="opacity: 0" data-start="46" data-duration="6.5" data-track-index="10">
       <div class="orb orb-a"></div>
       <div class="msg-card" id="msg-card-0">
+        <div class="msg-tape"></div>
         <div class="quote-mark" id="msg-quote-0">&ldquo;</div>
         <p class="msg-text" id="msg-text-0"><span class="tw-w"><span class="tw-c">Y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">b</span><span class="tw-c">r</span><span class="tw-c">i</span><span class="tw-c">n</span><span class="tw-c">g</span></span> <span class="tw-w"><span class="tw-c">s</span><span class="tw-c">o</span></span> <span class="tw-w"><span class="tw-c">m</span><span class="tw-c">u</span><span class="tw-c">c</span><span class="tw-c">h</span></span> <span class="tw-w"><span class="tw-c">w</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">m</span><span class="tw-c">t</span><span class="tw-c">h</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">l</span><span class="tw-c">i</span><span class="tw-c">g</span><span class="tw-c">h</span><span class="tw-c">t</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">o</span></span> <span class="tw-w"><span class="tw-c">e</span><span class="tw-c">v</span><span class="tw-c">e</span><span class="tw-c">r</span><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">n</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">o</span><span class="tw-c">u</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">u</span><span class="tw-c">.</span></span> <span class="tw-w"><span class="tw-c">W</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">h</span><span class="tw-c">o</span><span class="tw-c">p</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">i</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">g</span><span class="tw-c">i</span><span class="tw-c">v</span><span class="tw-c">e</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">b</span><span class="tw-c">a</span><span class="tw-c">c</span><span class="tw-c">k</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">l</span><span class="tw-c">l</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">k</span><span class="tw-c">i</span><span class="tw-c">n</span><span class="tw-c">d</span><span class="tw-c">n</span><span class="tw-c">e</span><span class="tw-c">s</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">s</span><span class="tw-c">h</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">s</span><span class="tw-c">o</span></span> <span class="tw-w"><span class="tw-c">f</span><span class="tw-c">r</span><span class="tw-c">e</span><span class="tw-c">e</span><span class="tw-c">l</span><span class="tw-c">y</span><span class="tw-c">.</span></span></p>
         <p class="msg-sign" id="msg-sign-0">Your YSE Family</p>
@@ -262,6 +316,7 @@
     <section class="clip scene scene-card" id="scene-msg-1" style="opacity: 0" data-start="52" data-duration="6.5" data-track-index="11">
       <div class="orb orb-a"></div>
       <div class="msg-card" id="msg-card-1">
+        <div class="msg-tape"></div>
         <div class="quote-mark" id="msg-quote-1">&ldquo;</div>
         <p class="msg-text" id="msg-text-1"><span class="tw-w"><span class="tw-c">T</span><span class="tw-c">h</span><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">k</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">f</span><span class="tw-c">o</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">l</span><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">d</span><span class="tw-c">i</span><span class="tw-c">n</span><span class="tw-c">g</span></span> <span class="tw-w"><span class="tw-c">w</span><span class="tw-c">i</span><span class="tw-c">t</span><span class="tw-c">h</span></span> <span class="tw-w"><span class="tw-c">p</span><span class="tw-c">a</span><span class="tw-c">t</span><span class="tw-c">i</span><span class="tw-c">e</span><span class="tw-c">n</span><span class="tw-c">c</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">h</span><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">t</span><span class="tw-c">.</span></span> <span class="tw-w"><span class="tw-c">Y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">m</span><span class="tw-c">a</span><span class="tw-c">k</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">h</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">d</span><span class="tw-c">a</span><span class="tw-c">y</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">s</span><span class="tw-c">i</span><span class="tw-c">e</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">g</span><span class="tw-c">o</span><span class="tw-c">o</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">d</span><span class="tw-c">a</span><span class="tw-c">y</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">b</span><span class="tw-c">e</span><span class="tw-c">t</span><span class="tw-c">t</span><span class="tw-c">e</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">f</span><span class="tw-c">o</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">l</span><span class="tw-c">l</span></span> <span class="tw-w"><span class="tw-c">o</span><span class="tw-c">f</span></span> <span class="tw-w"><span class="tw-c">u</span><span class="tw-c">s</span><span class="tw-c">.</span></span></p>
         <p class="msg-sign" id="msg-sign-1">From all of us at YSE</p>
