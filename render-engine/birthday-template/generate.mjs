@@ -6,13 +6,17 @@
 // To make a video for someone else: edit config.json, replace the photos in
 // assets/photos/, then run `node generate.mjs` and render. Nothing else changes.
 //
-// Scene pacing:
-//   Title 5s | middle blocks 5s per photo, 6s per collage scene, 6s per
-//   message card | Closing 8s. The four middle blocks (photos,
+// Scene pacing: every card has its own duration from the config
+//   (titleDuration, photos[].duration, collage.photo.duration /
+//   collage.text.duration, messages[].duration, closingDuration), each
+//   defaulting to the original pacing: title 5s, photos 5s each, collages
+//   6s, messages 6s each, closing 8s. The four middle blocks (photos,
 //   photoCollage, textCollage, messages) play in config.sceneOrder, so the
 //   total duration is computed from the config, not fixed. With the sample
 //   config (7 photos, photo collage on, text collage off, 2 messages, in
-//   the default order) the total is 66s.
+//   the default order) the total is 66s. The generator also writes
+//   scenes.json (per-scene start and duration) next to index.html, which
+//   the app's exact preview uses for its transport and filmstrip.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
@@ -22,11 +26,30 @@ const here = dirname(fileURLToPath(import.meta.url));
 const config = JSON.parse(readFileSync(`${here}/config.json`, "utf8"));
 
 // ---------------------------------------------------------------- pacing ---
-const TITLE_DUR = 5;
-const PHOTO_DUR = 5;
-const COLLAGE_DUR = 6;
-const MESSAGE_DUR = 6;
-const CLOSING_DUR = 8;
+// Durations are per-card now: every value comes from the config, with a
+// default that reproduces the original pacing, clamped to a sane range.
+// Title and closing choreography stay anchored to the card start (the
+// sequences complete in about 2.6s and 3.2s), so extra seconds are hold.
+function clampNum(value, fallback, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+const TITLE_DUR = clampNum(config.titleDuration, 5, 3, 10);
+const CLOSING_DUR = clampNum(config.closingDuration, 8, 4, 15);
+
+// ----------------------------------------------------------- paper styles --
+// Light paper treatments for the message and closing cards. A card picks
+// one with paper: "<key>" in the config; anything unknown falls back to
+// classic (the original warm gradient plus grain). All six stay light, so
+// the existing dark ink remains valid on every one.
+const PAPER_KEYS = ["classic", "white", "kraft", "blush", "mint", "sky"];
+function pickPaper(value) {
+  return PAPER_KEYS.includes(value) ? value : "classic";
+}
+const CLOSING_PAPER = pickPaper(config.closingPaper ?? config.closing?.paper);
+// The closing eyebrow greets the celebrant by first name only.
+const FIRST_NAME = String(config.celebrantName ?? "").trim().split(/\s+/)[0] || "";
 
 // ------------------------------------------------------- collage content ---
 // The two collages are separate scenes. collage.photo builds polaroids from
@@ -60,6 +83,8 @@ const TEXT_CARDS = (Array.isArray(textCfg.cards)
 const PHOTO_COLLAGE_ON =
   (photoCfg.enabled ?? rawCollage.enabled) !== false && PHOTO_INDEXES.length > 0;
 const TEXT_COLLAGE_ON = textCfg.enabled === true && TEXT_CARDS.length > 0;
+const PHOTO_COLLAGE_DUR = clampNum(photoCfg.duration, 6, 4, 12);
+const TEXT_COLLAGE_DUR = clampNum(textCfg.duration, 6, 4, 12);
 
 // ---------------------------------------------------------- scene order ---
 // The four middle blocks can play in any order. config.sceneOrder lists
@@ -80,13 +105,57 @@ function sanitizeSceneOrder(raw) {
 }
 const SCENE_ORDER = sanitizeSceneOrder(config.sceneOrder);
 
+// ----------------------------------------------------- per-photo setup ---
+// Each photo carries its own display settings; missing fields fall back
+// to the values that reproduce the original montage exactly. Position
+// (focusX / focusY) picks which part of the photo stays in frame: it is
+// both the object-position of the crop and the transform-origin the
+// Ken Burns zoom pushes toward, so Vertical 100 keeps the bottom of the
+// photo visible and Vertical 0 keeps the top.
+const PHOTO_FRAMES = ["full", "thin", "polaroid", "rounded", "gold"];
+const PHOTOS = config.photos.map((photo) => ({
+  file: photo.file,
+  caption: photo.caption ?? "",
+  duration: clampNum(photo.duration, 5, 2, 12),
+  zoom: clampNum(photo.zoom, 115, 100, 150),
+  focusX: clampNum(photo.focusX, 50, 0, 100),
+  focusY: clampNum(photo.focusY, 50, 0, 100),
+  brightness: clampNum(photo.brightness, 100, 80, 120),
+  saturation: clampNum(photo.saturation, 100, 0, 150),
+  frame: PHOTO_FRAMES.includes(photo.frame) ? photo.frame : "full",
+}));
+const PHOTO_OFFSETS = [];
+{
+  let acc = 0;
+  for (const photo of PHOTOS) {
+    PHOTO_OFFSETS.push(acc);
+    acc += photo.duration;
+  }
+}
+
+// -------------------------------------------------- per-message setup ----
+const MESSAGES = config.messages.map((message) => ({
+  text: message.text,
+  signedBy: message.signedBy,
+  duration: clampNum(message.duration, 6, 4, 15),
+  paper: pickPaper(message.paper),
+}));
+const MSG_OFFSETS = [];
+{
+  let acc = 0;
+  for (const message of MESSAGES) {
+    MSG_OFFSETS.push(acc);
+    acc += message.duration;
+  }
+}
+
 // Block durations. A block that is off or empty contributes no seconds
-// and no scenes.
+// and no scenes. Photos and messages sum their per-card durations.
 const BLOCK_DUR = {
-  photos: config.photos.length * PHOTO_DUR,
-  photoCollage: PHOTO_COLLAGE_ON ? COLLAGE_DUR : 0,
-  textCollage: TEXT_COLLAGE_ON ? COLLAGE_DUR : 0,
-  messages: config.messages.length * MESSAGE_DUR,
+  photos: PHOTOS.reduce((sum, photo) => sum + photo.duration, 0),
+  photoCollage: PHOTO_COLLAGE_ON ? PHOTO_COLLAGE_DUR : 0,
+  textCollage: TEXT_COLLAGE_ON ? TEXT_COLLAGE_DUR : 0,
+  messages: MESSAGES.reduce((sum, message) => sum + message.duration, 0),
 };
 
 // Running start offsets: title first, then the middle blocks in scene
@@ -167,6 +236,7 @@ function hfId() {
 }
 
 const scenes = []; // HTML strings, in timeline order
+const sceneMeta = []; // { key, label, start, duration } per scene, written to scenes.json
 const timeline = []; // GSAP statements (strings), absolute positions in seconds
 let track = 0;
 function nextTrack() {
@@ -279,7 +349,7 @@ const ORB_B = HAS_ORBS ? `<div class="orb orb-b"></div>` : "";
 // ------------------------------------------------------------ title card ---
 function buildTitle(s) {
   const titleLine1 = wordSpans(`Happy ${config.occasion},`);
-  const nameParts = splitName(config.celebrantShortName || config.celebrantName);
+  const nameParts = splitName(config.celebrantName);
   const titleLine2 = `<span class="name-chunk" id="title-name-left">${esc(nameParts.left)}</span>${nameParts.sep}<span class="name-chunk" id="title-name-right">${esc(nameParts.right)}!</span>`;
   const nameLineClass = FONT_SLOTS.name.script ? "name-line name-script" : "name-line";
   scenes.push(`
@@ -290,10 +360,9 @@ function buildTitle(s) {
         <div class="eyebrow" id="title-eyebrow">Happy ${esc(config.occasion)}</div>
         <h1 class="big-title" id="title-name"><span id="title-greeting">${titleLine1}</span><br /><span class="${nameLineClass}">${titleLine2}</span></h1>
         <div class="rule" id="title-rule"></div>
-        <p class="subtitle" id="title-role">${esc(config.celebrantName)} &middot; ${esc(config.role)}</p>
-        <p class="from-line" id="title-from">${esc(config.fromLine)}</p>
       </div>
     </section>`);
+  sceneMeta.push({ key: "title", label: "Title card", start: s, duration: TITLE_DUR });
 
   timeline.push(
     `tl.fromTo("#scene-title", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
@@ -306,26 +375,61 @@ function buildTitle(s) {
     `tl.fromTo("#title-name-left", { opacity: 0, x: -1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.8});`,
     `tl.fromTo("#title-name-right", { opacity: 0, x: 1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.87});`,
     `tl.fromTo("#title-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, ${s + 1.8});`,
-    `tl.fromTo("#title-role", { opacity: 0, y: 33 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, ${s + 2.05});`,
-    `tl.fromTo("#title-from", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.7, ease: "power1.out" }, ${s + 2.6});`,
     `tl.to("#scene-title", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + TITLE_DUR});`,
   );
 }
 
-// ---------------------------------------------------------- photo montage --
 function buildPhotos(blockStart) {
-  config.photos.forEach((photo, i) => {
-  const s = blockStart + i * PHOTO_DUR;
-  const drift = i % 2 === 0 ? 27 : -27; // alternate Ken Burns drift direction
+  PHOTOS.forEach((photo, i) => {
+  const s = blockStart + PHOTO_OFFSETS[i];
+  const dur = photo.duration;
+  const framed = photo.frame === "polaroid" || photo.frame === "rounded" || photo.frame === "gold";
+  const drift = (i % 2 === 0 ? 1 : -1) * (framed ? 12 : 27); // alternate Ken Burns drift direction
   const isFirst = i === 0;
-  const isLast = i === config.photos.length - 1;
+  const isLast = i === PHOTOS.length - 1;
+  const brightStart = Number(((photo.brightness / 100) * 1.16).toFixed(3));
+  const brightEnd = photo.brightness / 100;
+  const imgTag = `<img class="photo-img" id="photo-img-${i}" src="${esc(photo.file)}" alt="" style="object-position: ${photo.focusX}% ${photo.focusY}%; filter: saturate(${photo.saturation / 100})" />`;
+  const clipInner = `<div class="photo-bright" id="bright-${i}">${imgTag}</div>
+      <div class="vignette" id="vignette-${i}"></div>`;
+  const captionBar = `<div class="caption-bar" id="caption-${i}"><span id="caption-text-${i}">${esc(photo.caption)}</span></div>`;
+  let inner;
+  if (photo.frame === "polaroid") {
+    inner = `
+      <figure class="photo-polaroid" id="photo-frame-${i}" style="rotate: ${i % 2 === 0 ? -2.5 : 2.5}deg">
+        <div class="photo-clip">${clipInner}
+        </div>
+        <figcaption class="photo-pol-cap" id="caption-text-${i}">${esc(photo.caption)}</figcaption>
+      </figure>`;
+  } else if (photo.frame === "rounded") {
+    inner = `
+      <div class="photo-rounded" id="photo-frame-${i}">
+        <div class="photo-clip">${clipInner}
+          ${captionBar}
+        </div>
+      </div>`;
+  } else if (photo.frame === "gold") {
+    inner = `
+      <div class="photo-gold" id="photo-frame-${i}">
+        <div class="photo-gold-mat">
+          <div class="photo-clip">${clipInner}
+            ${captionBar}
+          </div>
+        </div>
+      </div>`;
+  } else {
+    inner = `
+      ${clipInner}${photo.frame === "thin" ? `
+      <div class="frame-thin"></div>` : ""}
+      ${captionBar}`;
+  }
   scenes.push(`
-    <section class="clip scene scene-photo" id="scene-photo-${i}" style="opacity: 0" data-start="${s}" data-duration="${PHOTO_DUR + 0.5}" data-track-index="${nextTrack()}">
-      <img class="photo-img" id="photo-img-${i}" src="${esc(photo.file)}" alt="" />
-      <div class="vignette" id="vignette-${i}"></div>
-      <div class="caption-bar" id="caption-${i}"><span id="caption-text-${i}">${esc(photo.caption)}</span></div>
+    <section class="clip scene scene-photo${framed ? " scene-photo-framed" : ""}" id="scene-photo-${i}" style="opacity: 0" data-start="${s}" data-duration="${dur + 0.5}" data-track-index="${nextTrack()}">${framed ? `
+      ${ORB_A}
+      ${ORB_B}` : ""}${inner}
       <div class="white-fade" id="white-${i}" style="opacity: ${isFirst ? 0 : 1}"></div>
     </section>`);
+  sceneMeta.push({ key: `photo-${i}`, label: `Photo ${i + 1}`, start: s, duration: dur });
 
   timeline.push(
     // First photo crossfades in from the title card as before; later photos
@@ -333,11 +437,23 @@ function buildPhotos(blockStart) {
     isFirst
       ? `tl.fromTo("#scene-photo-${i}", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, ${s});`
       : `tl.fromTo("#scene-photo-${i}", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, ${s});`,
-    `tl.fromTo("#photo-img-${i}", { scale: 1.07, x: 0 }, { scale: 1.16, x: ${drift}, duration: ${PHOTO_DUR}, ease: "sine.inOut" }, ${s});`,
-    `tl.fromTo("#photo-img-${i}", { filter: "brightness(1.16) saturate(1.06)" }, { filter: "brightness(1) saturate(1)", duration: 1.2, ease: "power2.out" }, ${s});`,
+    // Ken Burns pushes in toward the chosen Position: the transform-origin
+    // is the same point the object-position crop keeps in frame.
+    `tl.fromTo("#photo-img-${i}", { scale: 1.05, x: 0 }, { scale: ${photo.zoom / 100}, x: ${drift}, duration: ${dur}, ease: "sine.inOut", transformOrigin: "${photo.focusX}% ${photo.focusY}%" }, ${s});`,
+    // The settle brightness rides on a wrapper so it composes with the
+    // per-photo brightness: from 16% over the chosen value down to it. The
+    // img itself carries only the static saturation.
+    `tl.fromTo("#bright-${i}", { filter: "brightness(${brightStart})" }, { filter: "brightness(${brightEnd})", duration: 1.2, ease: "power2.out" }, ${s});`,
     `tl.fromTo("#vignette-${i}", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, ${s + 0.3});`,
-    `tl.fromTo("#caption-${i}", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, ${s + 0.6});`,
-    `tl.fromTo("#caption-text-${i}", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, ${s + 0.85});`,
+    ...(photo.frame === "polaroid"
+      ? [
+          `tl.fromTo("#photo-frame-${i}", { scale: 0.96 }, { scale: 1, duration: 0.9, ease: "power2.out" }, ${s});`,
+          `tl.fromTo("#caption-text-${i}", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, ${s + 0.85});`,
+        ]
+      : [
+          `tl.fromTo("#caption-${i}", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, ${s + 0.6});`,
+          `tl.fromTo("#caption-text-${i}", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, ${s + 0.85});`,
+        ]),
   );
   if (!isFirst) {
     // Incoming half of the fade through white: the white layer lifts.
@@ -349,23 +465,27 @@ function buildPhotos(blockStart) {
     // Outgoing half: the white layer ramps up over the last 0.35s, then the
     // scene itself cuts out underneath the fully white frame.
     timeline.push(
-      `tl.to("#white-${i}", { opacity: 1, duration: 0.35, ease: "power1.in" }, ${s + PHOTO_DUR - 0.35});`,
-      `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.01, ease: "none" }, ${s + PHOTO_DUR});`,
+      `tl.to("#white-${i}", { opacity: 1, duration: 0.35, ease: "power1.in" }, ${s + dur - 0.35});`,
+      `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.01, ease: "none" }, ${s + dur});`,
     );
   } else {
     // Last photo keeps the plain crossfade into whatever scene follows.
     timeline.push(
-      `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + PHOTO_DUR});`,
+      `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + dur});`,
     );
   }
   });
 }
 
-// --------------------------------------------------------------- collage ---
-// One builder serves both collage scenes; they differ in heading, inner
-// content, and element ids. kind is "photo" or "text".
 function buildCollage(kind, s) {
   const isText = kind === "text";
+  const dur = isText ? TEXT_COLLAGE_DUR : PHOTO_COLLAGE_DUR;
+  // The choreography was authored against a 6s scene. ct/cd stretch or
+  // compress every internal time by the same factor, so the build pattern
+  // lands the same way at any duration and the 6s case is unchanged.
+  const f = dur / 6;
+  const ct = (t) => Number((s + t * f).toFixed(3));
+  const cd = (d) => Number((d * f).toFixed(3));
   const prefix = isText ? "tc" : "pc";
   const sceneId = isText ? "scene-text-collage" : "scene-photo-collage";
   const headingId = `${prefix}-collage-heading`;
@@ -398,7 +518,7 @@ function buildCollage(kind, s) {
   } else {
     const polaroids = PHOTO_INDEXES
       .map((photoIndex, k) => {
-        const photo = config.photos[photoIndex];
+        const photo = PHOTOS[photoIndex];
         return `
         <figure class="polaroid" id="polaroid-${k}">
           <img src="${esc(photo.file)}" alt="" />
@@ -412,19 +532,20 @@ function buildCollage(kind, s) {
   }
 
   scenes.push(`
-    <section class="clip scene scene-card" id="${sceneId}" style="opacity: 0" data-start="${s}" data-duration="${COLLAGE_DUR + 0.5}" data-track-index="${nextTrack()}">
+    <section class="clip scene scene-card" id="${sceneId}" style="opacity: 0" data-start="${s}" data-duration="${dur + 0.5}" data-track-index="${nextTrack()}">
       ${ORB_A}
       ${ORB_B}
       <h2 class="collage-heading" id="${headingId}">${wordSpans(isText ? TEXT_COLLAGE_HEADING : PHOTO_COLLAGE_HEADING)}</h2>${collageInner}${accents}
     </section>`);
+  sceneMeta.push({ key: isText ? "textCollage" : "photoCollage", label: isText ? "Text collage" : "Photo collage", start: s, duration: dur });
 
   timeline.push(
     `tl.fromTo("#${sceneId}", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
     ...(ORBS_ANIMATED ? [
-      `tl.fromTo("#${sceneId} .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: ${COLLAGE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
-      `tl.fromTo("#${sceneId} .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: ${COLLAGE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
+      `tl.fromTo("#${sceneId} .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: ${dur + 0.5}, ease: "sine.inOut" }, ${s});`,
+      `tl.fromTo("#${sceneId} .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: ${dur + 0.5}, ease: "sine.inOut" }, ${s});`,
     ] : []),
-    `tl.fromTo("#${headingId} .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out", stagger: 0.09, transformOrigin: "50% 100%" }, ${s + 0.2});`,
+    `tl.fromTo("#${headingId} .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: ${cd(0.55)}, ease: "power3.out", stagger: ${cd(0.09)}, transformOrigin: "50% 100%" }, ${ct(0.2)});`,
   );
   if (isText) {
     // The greeting cards build one by one like the polaroids do. The 1.1s
@@ -435,13 +556,13 @@ function buildCollage(kind, s) {
     const buildStart = 0.8 + Math.max(0, (3.3 - 1.1 * (TEXT_CARDS.length - 1)) / 2);
     TEXT_CARDS.forEach((card, k) => {
       const rot = cardRotations[k % cardRotations.length];
-      const popAt = Number((s + buildStart + k * 1.1).toFixed(3));
+      const popAt = ct(buildStart + k * 1.1);
       timeline.push(
-        `tl.fromTo("#greet-card-${k}", { opacity: 0, scale: 0.5, y: 39, rotation: ${rot - 12} }, { opacity: 1, scale: 1, y: 0, rotation: ${rot}, duration: 0.6, ease: "back.out(1.7)" }, ${popAt});`,
+        `tl.fromTo("#greet-card-${k}", { opacity: 0, scale: 0.5, y: 39, rotation: ${rot - 12} }, { opacity: 1, scale: 1, y: 0, rotation: ${rot}, duration: ${cd(0.6)}, ease: "back.out(1.7)" }, ${popAt});`,
       );
       if (card.from) {
         timeline.push(
-          `tl.fromTo("#greet-from-${k}", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.45, ease: "power1.out" }, ${Number((popAt + 0.35).toFixed(3))});`,
+          `tl.fromTo("#greet-from-${k}", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: ${cd(0.45)}, ease: "power1.out" }, ${Number((popAt + 0.35 * f).toFixed(3))});`,
         );
       }
     });
@@ -452,82 +573,84 @@ function buildCollage(kind, s) {
     const popTimes = [0.8, 1.9, 3.0];
     PHOTO_INDEXES.forEach((_, k) => {
       const rot = rotations[k % rotations.length];
-      const popAt = s + (popTimes[k] ?? 3.0 + (k - 2) * 1.1);
+      const popAt = ct(popTimes[k] ?? 3.0 + (k - 2) * 1.1);
       timeline.push(
-        `tl.fromTo("#polaroid-${k}", { opacity: 0, scale: 0.45, y: 39, rotation: ${rot - 14} }, { opacity: 1, scale: 1, y: 0, rotation: ${rot}, duration: 0.6, ease: "back.out(1.7)" }, ${popAt});`,
-        `tl.fromTo("#polaroid-cap-${k}", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, ${s + 4.6 + k * 0.12});`,
+        `tl.fromTo("#polaroid-${k}", { opacity: 0, scale: 0.45, y: 39, rotation: ${rot - 14} }, { opacity: 1, scale: 1, y: 0, rotation: ${rot}, duration: ${cd(0.6)}, ease: "back.out(1.7)" }, ${popAt});`,
+        `tl.fromTo("#polaroid-cap-${k}", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: ${cd(0.5)}, ease: "power1.out" }, ${ct(4.6 + k * 0.12)});`,
       );
     });
   }
   const accentTimes = [0.5, 1.45, 2.5, 3.55, 3.9, 4.25];
   accentTimes.forEach((t, k) => {
     timeline.push(
-      `tl.fromTo("#accent-${prefix}-${k}", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, ${s + t});`,
+      `tl.fromTo("#accent-${prefix}-${k}", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: ${cd(0.45)}, ease: "back.out(2)" }, ${ct(t)});`,
     );
   });
   if (isText) {
     timeline.push(
       // Gentle idle float after the last card lands, kept finite so the
       // timeline stays deterministic and ends inside the scene window.
-      `tl.to(".greet-card", { y: -9, duration: 0.65, ease: "sine.inOut", stagger: 0.08 }, ${s + 4.75});`,
-      `tl.to(".greet-card", { y: 0, duration: 0.5, ease: "sine.inOut", stagger: 0.08 }, ${s + 5.45});`,
-      `tl.to("#${sceneId}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + COLLAGE_DUR});`,
+      `tl.to(".greet-card", { y: -9, duration: ${cd(0.65)}, ease: "sine.inOut", stagger: ${cd(0.08)} }, ${ct(4.75)});`,
+      `tl.to(".greet-card", { y: 0, duration: ${cd(0.5)}, ease: "sine.inOut", stagger: ${cd(0.08)} }, ${ct(5.45)});`,
+      `tl.to("#${sceneId}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + dur});`,
     );
   } else {
     timeline.push(
       // Gentle idle float after the last polaroid lands, kept finite so the
       // timeline stays deterministic and ends inside the scene window.
-      `tl.to(".polaroid", { y: -10.5, duration: 0.9, ease: "sine.inOut", stagger: 0.1 }, ${s + 3.9});`,
-      `tl.to(".polaroid", { y: 0, duration: 0.8, ease: "sine.inOut", stagger: 0.1 }, ${s + 5.0});`,
-      `tl.to("#${sceneId}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + COLLAGE_DUR});`,
+      `tl.to(".polaroid", { y: -10.5, duration: ${cd(0.9)}, ease: "sine.inOut", stagger: ${cd(0.1)} }, ${ct(3.9)});`,
+      `tl.to(".polaroid", { y: 0, duration: ${cd(0.8)}, ease: "sine.inOut", stagger: ${cd(0.1)} }, ${ct(5.0)});`,
+      `tl.to("#${sceneId}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + dur});`,
     );
   }
 }
 
-// ----------------------------------------------------------- message cards -
 function buildMessages(blockStart) {
-  config.messages.forEach((message, i) => {
-  const s = blockStart + i * MESSAGE_DUR;
-  // Typewriter fit: characters appear one by one starting at 1s in, and the
-  // full text completes about 4.2s later, whatever the message length.
+  MESSAGES.forEach((message, i) => {
+  const s = blockStart + MSG_OFFSETS[i];
+  const dur = message.duration;
+  // Typewriter fit: characters appear one by one starting at 1s in. The
+  // typing window is the card duration minus 1.6s, so the full text lands
+  // by dur - 0.6s whatever the message length or the chosen duration.
   const typeCharTotal = typeCharCount(message.text);
-  const typeStagger = typeCharTotal > 1 ? Number((4.15 / (typeCharTotal - 1)).toFixed(4)) : 0;
+  const typeSpan = Math.max(0.5, dur - 1.85);
+  const typeStagger = typeCharTotal > 1 ? Number((typeSpan / (typeCharTotal - 1)).toFixed(4)) : 0;
   const typeStart = 1.0;
-  const typeEnd = typeStart + 4.2;
+  const typeEnd = typeStart + typeSpan + 0.05;
   scenes.push(`
-    <section class="clip scene scene-card" id="scene-msg-${i}" style="opacity: 0" data-start="${s}" data-duration="${MESSAGE_DUR + 0.5}" data-track-index="${nextTrack()}">
+    <section class="clip scene scene-card" id="scene-msg-${i}" style="opacity: 0" data-start="${s}" data-duration="${dur + 0.5}" data-track-index="${nextTrack()}">
       ${ORB_A}
-      <div class="msg-card" id="msg-card-${i}">
+      <div class="msg-card paper-${message.paper}" id="msg-card-${i}">
         <div class="msg-tape"></div>
         <div class="quote-mark" id="msg-quote-${i}">&ldquo;</div>
         <p class="msg-text" id="msg-text-${i}">${typewriterSpans(message.text)}</p>
         <p class="msg-sign" id="msg-sign-${i}">${esc(message.signedBy)}</p>
       </div>
     </section>`);
+  sceneMeta.push({ key: `message-${i}`, label: `Message card ${i + 1}`, start: s, duration: dur });
 
   timeline.push(
     `tl.fromTo("#scene-msg-${i}", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
     ...(ORBS_ANIMATED ? [
-      `tl.fromTo("#scene-msg-${i} .orb-a", { x: 0, y: 0 }, { x: -33, y: 21, duration: ${MESSAGE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
+      `tl.fromTo("#scene-msg-${i} .orb-a", { x: 0, y: 0 }, { x: -33, y: 21, duration: ${dur + 0.5}, ease: "sine.inOut" }, ${s});`,
     ] : []),
     `tl.fromTo("#msg-card-${i}", { opacity: 0, y: 66, scale: 0.97, rotationX: 6, transformPerspective: 1350 }, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.85, ease: "power3.out" }, ${s + 0.25});`,
     `tl.fromTo("#msg-quote-${i}", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)", transformOrigin: "50% 50%" }, ${s + 0.55});`,
     `tl.fromTo("#msg-text-${i} .tw-c", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05, ease: "none", stagger: ${typeStagger} }, ${s + typeStart});`,
     `tl.fromTo("#msg-sign-${i}", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, ${s + typeEnd + 0.15});`,
-    `tl.to("#scene-msg-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + MESSAGE_DUR});`,
+    `tl.to("#scene-msg-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + dur});`,
   );
   });
 }
 
-// ------------------------------------------------------------ closing card -
 function buildClosing(s) {
   scenes.push(`
     <section class="clip scene scene-card" id="scene-closing" style="opacity: 0" data-start="${s}" data-duration="${CLOSING_DUR}" data-track-index="${nextTrack()}">
       ${ORB_A}
       ${ORB_B}
       <div class="scrap-wrap" id="closing-card">
-        <div class="scrap-card">
-          <div class="eyebrow scrap-eyebrow" id="closing-eyebrow">Happy ${esc(config.occasion)}, ${esc(config.celebrantShortName)}</div>
+        <div class="scrap-card paper-${CLOSING_PAPER}">
+          <div class="eyebrow scrap-eyebrow" id="closing-eyebrow">Happy ${esc(config.occasion)}, ${esc(FIRST_NAME)}</div>
           <p class="closing-line" id="closing-line">${wordSpans(config.closingLine)}</p>
           <div class="rule scrap-rule" id="closing-rule"></div>
           <p class="closing-sign" id="closing-sign">${esc(config.closingSignOff)}</p>
@@ -536,6 +659,7 @@ function buildClosing(s) {
         <div class="tape tape-right" id="tape-right"></div>
       </div>
     </section>`);
+  sceneMeta.push({ key: "closing", label: "Closing card", start: s, duration: CLOSING_DUR });
 
   timeline.push(
     `tl.fromTo("#scene-closing", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, ${s});`,
@@ -589,7 +713,8 @@ const html = `<!doctype html>
         --ink: ${BACKGROUND.ink};
         --ink-soft: ${BACKGROUND.inkSoft};
         --line: ${BACKGROUND.line};
-        --accent: ${BACKGROUND.accent};${HAS_ORBS ? `
+        --accent: ${BACKGROUND.accent};
+        --paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.18 0 0 0 0.05 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");${HAS_ORBS ? `
         --orb-a: ${BACKGROUND.orbs.a};
         --orb-b: ${BACKGROUND.orbs.b};` : ""}
       }
@@ -659,20 +784,51 @@ const html = `<!doctype html>
         width: 270px; height: 6px; border-radius: 3px;
         background: var(--line); margin: 45px 0 39px; transform-origin: center;
       }
-      .subtitle {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 40.5px; line-height: 1.45; color: var(--ink); max-width: 1290px;
-      }
-      .from-line {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 31.5px; letter-spacing: 0.06em; color: var(--ink-soft); margin-top: 51px;
-      }
-      /* Photo montage */
+      /* Photo montage. Every photo sits in a brightness wrapper (the
+         settle tween animates the wrapper) around the img itself, which
+         carries the static saturation and the Position crop
+         (object-position, set inline per photo). Framed variants center
+         the photo on the scene background instead of bleeding edge to
+         edge; the white fade layer still covers the whole canvas. */
       .scene-photo { background: #0a0f0d; }
+      .scene-photo-framed { background: var(--bg); }
+      .photo-bright { position: absolute; inset: 0; }
       .photo-img {
-        position: absolute; inset: 0;
-        width: 1920px; height: 1080px; object-fit: cover;
+        position: absolute; inset: 0; display: block;
+        width: 100%; height: 100%; object-fit: cover;
       }
+      .photo-clip { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      .frame-thin {
+        position: absolute; inset: 26px; pointer-events: none;
+        border: 3px solid rgba(255, 255, 255, 0.85);
+      }
+      .photo-polaroid {
+        position: absolute; top: 50%; left: 50%; translate: -50% -50%;
+        width: 920px; padding: 26px 26px 18px;
+        background: #fdfcf8;
+        box-shadow: 0 36px 75px rgba(0, 0, 0, 0.45);
+      }
+      .photo-polaroid .photo-clip { height: 660px; }
+      .photo-pol-cap {
+        font-family: var(--font-captions);
+        font-size: 33px; color: #44503f; text-align: center;
+        padding-top: 18px; min-height: 44px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .photo-rounded {
+        position: absolute; top: 50%; left: 50%; translate: -50% -50%;
+        width: 1560px; height: 880px;
+        border-radius: 40px; overflow: hidden;
+        box-shadow: 0 45px 90px rgba(0, 0, 0, 0.45);
+      }
+      .photo-gold {
+        position: absolute; top: 50%; left: 50%; translate: -50% -50%;
+        padding: 16px;
+        background: linear-gradient(135deg, #8a6a14 0%, #e8c56e 30%, #b08a1e 55%, #f0d488 80%, #96761a 100%);
+        box-shadow: 0 45px 90px rgba(0, 0, 0, 0.5);
+      }
+      .photo-gold-mat { background: #f8f2df; padding: 34px; }
+      .photo-gold .photo-clip { width: 1400px; height: 740px; }
       .caption-bar {
         position: absolute; left: 0; right: 0; bottom: 0;
         padding: 96px 84px 51px;
@@ -735,6 +891,14 @@ const html = `<!doctype html>
         font-size: 25.5px; letter-spacing: 0.07em; text-transform: uppercase;
         color: #9a7b1c; margin-top: 24px;
       }
+      /* Paper styles for the message and closing cards: the shared grain
+         layer plus a light gradient, one class per registry key. */
+      .paper-classic { background: var(--paper-grain), linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%); }
+      .paper-white { background: var(--paper-grain), linear-gradient(165deg, #fffef9 0%, #faf7ef 58%, #f1ecdd 100%); }
+      .paper-kraft { background: var(--paper-grain), linear-gradient(165deg, #eddcae 0%, #dfc48c 58%, #d0af6e 100%); }
+      .paper-blush { background: var(--paper-grain), linear-gradient(165deg, #fceff1 0%, #f7dee1 58%, #f0cdd2 100%); }
+      .paper-mint { background: var(--paper-grain), linear-gradient(165deg, #f0f8ed 0%, #dff0da 58%, #cbe5c6 100%); }
+      .paper-sky { background: var(--paper-grain), linear-gradient(165deg, #eef5fc 0%, #dcedf8 58%, #c6dff2 100%); }
       /* Message cards */
       /* Message cards wear the same paper as the closing scrapbook card:
          warm gradient plus a faint SVG-noise grain, so the text sits on
@@ -743,9 +907,6 @@ const html = `<!doctype html>
         position: absolute; top: 50%; left: 50%;
         transform: translate(-50%, -50%);
         width: 1320px;
-        background:
-          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.18 0 0 0 0.05 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"),
-          linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%);
         border-radius: 27px;
         padding: 87px 96px 72px;
         text-align: center;
@@ -776,7 +937,6 @@ const html = `<!doctype html>
         filter: drop-shadow(0 42px 54px rgba(0, 0, 0, 0.45));
       }
       .scrap-card {
-        background: linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%);
         clip-path: polygon(1% 3%, 6% 1%, 12% 2.4%, 20% 0.8%, 29% 2%, 38% 1%, 47% 2.2%, 56% 0.9%, 65% 2%, 74% 1.1%, 83% 2.3%, 91% 1%, 98.6% 2.6%, 99.4% 12%, 98.7% 24%, 99.5% 38%, 98.8% 52%, 99.4% 66%, 98.7% 80%, 99.3% 92%, 97% 98.6%, 88% 99.3%, 78% 98.5%, 68% 99.4%, 58% 98.6%, 48% 99.5%, 38% 98.7%, 28% 99.3%, 18% 98.5%, 9% 99.4%, 1.6% 98.2%, 0.6% 88%, 1.3% 74%, 0.5% 60%, 1.2% 45%, 0.6% 30%, 1.3% 16%);
         padding: 88px 100px 80px;
         text-align: center;
@@ -820,6 +980,10 @@ ${timeline.map((line) => `      ${line}`).join("\n")}
 `;
 
 writeFileSync(`${here}/index.html`, html);
+writeFileSync(
+  `${here}/scenes.json`,
+  JSON.stringify({ total: TOTAL, scenes: sceneMeta }, null, 2),
+);
 console.log(`Wrote index.html for ${config.celebrantName}`);
 const blockSummary = SCENE_ORDER
   .filter((key) => BLOCK_DUR[key] > 0)

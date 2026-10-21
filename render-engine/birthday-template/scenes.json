@@ -1,0 +1,77 @@
+{
+  "total": 66,
+  "scenes": [
+    {
+      "key": "title",
+      "label": "Title card",
+      "start": 0,
+      "duration": 5
+    },
+    {
+      "key": "photo-0",
+      "label": "Photo 1",
+      "start": 5,
+      "duration": 5
+    },
+    {
+      "key": "photo-1",
+      "label": "Photo 2",
+      "start": 10,
+      "duration": 5
+    },
+    {
+      "key": "photo-2",
+      "label": "Photo 3",
+      "start": 15,
+      "duration": 5
+    },
+    {
+      "key": "photo-3",
+      "label": "Photo 4",
+      "start": 20,
+      "duration": 5
+    },
+    {
+      "key": "photo-4",
+      "label": "Photo 5",
+      "start": 25,
+      "duration": 5
+    },
+    {
+      "key": "photo-5",
+      "label": "Photo 6",
+      "start": 30,
+      "duration": 5
+    },
+    {
+      "key": "photo-6",
+      "label": "Photo 7",
+      "start": 35,
+      "duration": 5
+    },
+    {
+      "key": "photoCollage",
+      "label": "Photo collage",
+      "start": 40,
+      "duration": 6
+    },
+    {
+      "key": "message-0",
+      "label": "Message card 1",
+      "start": 46,
+      "duration": 6
+    },
+    {
+      "key": "message-1",
+      "label": "Message card 2",
+      "start": 52,
+      "duration": 6
+    },
+    {
+      "key": "closing",
+      "label": "Closing card",
+      "start": 58,
+      "duration": 8
+    }
+  ]
+}

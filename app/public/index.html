@@ -83,22 +83,29 @@
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Details</h2>
           <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">These words appear on the title card and the closing card of the video.</p>
           <label class="field-label" for="celebrantName">Celebrant name</label>
-          <input type="text" class="field-input" id="celebrantName" value="Nur-Aina Ibrahim" />
-          <label class="field-label" for="celebrantShortName">Short name, used in the title</label>
-          <input type="text" class="field-input" id="celebrantShortName" value="Nur-Aina" />
-          <label class="field-label" for="role">Role</label>
-          <input type="text" class="field-input" id="role" value="Program Manager" />
-          <label class="field-label" for="fromLine">From line, on the title card</label>
-          <input type="text" class="field-input" id="fromLine" value="From your YSE Family" />
+          <input type="text" class="field-input" id="celebrantName" value="" placeholder="e.g. Maria Clara Santos" />
+          <label class="field-label" for="titleDuration">Title card seconds</label>
+          <input type="number" class="field-input" id="titleDuration" value="5" min="3" max="10" step="1" />
           <label class="field-label" for="closingLine">Closing line</label>
           <input type="text" class="field-input" id="closingLine" value="Wishing you a year as warm and generous as you are." />
           <label class="field-label" for="closingSignOff">Closing sign-off</label>
           <input type="text" class="field-input" id="closingSignOff" value="With love, your YSE Family" />
+          <label class="field-label" for="closingDuration">Closing card seconds</label>
+          <input type="number" class="field-input" id="closingDuration" value="8" min="4" max="15" step="1" />
+          <label class="field-label" for="closingPaper">Closing card paper</label>
+          <select class="field-input" id="closingPaper">
+            <option value="classic" selected>Classic cream</option>
+            <option value="white">Clean white</option>
+            <option value="kraft">Kraft tan</option>
+            <option value="blush">Blush pink</option>
+            <option value="mint">Mint green</option>
+            <option value="sky">Sky blue</option>
+          </select>
         </section>
 
         <section class="panel p-[18px]" id="panelPhotos">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Photos</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add JPG, PNG, or WebP photos. Each photo gets 5 seconds in the montage. Use the arrows to change the order, and tick photos here or in the Collage tab for the photo collage.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add JPG, PNG, or WebP photos. Every photo has its own controls under it: how long it stays, its frame, and its Position. Position picks which part of the photo stays in frame, so a subject low in the shot is not cropped out. Use the arrows to change the order, and tick photos here or in the Collage tab for the photo collage.</p>
           <label for="photoInput" class="flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff]">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             Add photos
@@ -109,20 +116,42 @@
 
         <section class="panel p-[18px]" id="panelMessages">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Messages</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards. Each one gets 6 seconds. Leave a message blank to skip it. Use the Scenes tab to choose where they play.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards. Set how long each card stays and which paper it is written on. Leave a message blank to skip it. Use the Scenes tab to choose where they play.</p>
           <label class="field-label" for="message1Text">Message 1</label>
           <textarea class="field-input" id="message1Text">You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.</textarea>
           <label class="field-label" for="message1SignedBy">Signed by</label>
           <input type="text" class="field-input" id="message1SignedBy" value="Your YSE Family" />
+          <label class="field-label" for="message1Duration">Message 1 seconds</label>
+          <input type="number" class="field-input" id="message1Duration" value="6" min="4" max="15" step="1" />
+          <label class="field-label" for="message1Paper">Message 1 paper</label>
+          <select class="field-input" id="message1Paper">
+            <option value="classic" selected>Classic cream</option>
+            <option value="white">Clean white</option>
+            <option value="kraft">Kraft tan</option>
+            <option value="blush">Blush pink</option>
+            <option value="mint">Mint green</option>
+            <option value="sky">Sky blue</option>
+          </select>
           <label class="field-label" for="message2Text">Message 2</label>
           <textarea class="field-input" id="message2Text">Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.</textarea>
           <label class="field-label" for="message2SignedBy">Signed by</label>
           <input type="text" class="field-input" id="message2SignedBy" value="From all of us at YSE" />
+          <label class="field-label" for="message2Duration">Message 2 seconds</label>
+          <input type="number" class="field-input" id="message2Duration" value="6" min="4" max="15" step="1" />
+          <label class="field-label" for="message2Paper">Message 2 paper</label>
+          <select class="field-input" id="message2Paper">
+            <option value="classic" selected>Classic cream</option>
+            <option value="white">Clean white</option>
+            <option value="kraft">Kraft tan</option>
+            <option value="blush">Blush pink</option>
+            <option value="mint">Mint green</option>
+            <option value="sky">Sky blue</option>
+          </select>
         </section>
 
         <section class="panel p-[18px]" id="panelCollage">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Collage</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Two optional scenes, each 6 seconds. The photo collage shows 3 photos together as polaroids; the text collage shows greeting cards. Both can appear in the same video. Use the Scenes tab to choose where each one plays.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Two optional scenes. Set how long each one stays. The photo collage shows 3 photos together as polaroids; the text collage shows greeting cards. Both can appear in the same video. Use the Scenes tab to choose where each one plays.</p>
           <h3 class="m-0 mb-1 text-[13.5px] font-semibold">Photo collage</h3>
           <div class="flex items-center gap-2.5 mt-1">
             <input type="checkbox" id="collageEnabled" checked class="w-[18px] h-[18px] accent-[#8b3dff]" />
@@ -130,6 +159,8 @@
           </div>
           <label class="field-label" for="collageHeading">Photo collage heading</label>
           <input type="text" class="field-input" id="collageHeading" value="Moments together" />
+          <label class="field-label" for="photoCollageDuration">Photo collage seconds</label>
+          <input type="number" class="field-input" id="photoCollageDuration" value="6" min="4" max="12" step="1" />
           <div id="collagePhotoArea">
             <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Tick exactly 3 photos in the Photos tab for the polaroids.</p>
             <p class="warn" id="collageWarn">The photo collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
@@ -141,6 +172,8 @@
           </div>
           <label class="field-label" for="textCollageHeading">Text collage heading</label>
           <input type="text" class="field-input" id="textCollageHeading" value="Kind words" />
+          <label class="field-label" for="textCollageDuration">Text collage seconds</label>
+          <input type="number" class="field-input" id="textCollageDuration" value="6" min="4" max="12" step="1" />
           <div id="collageTextArea">
             <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped.</p>
             <label class="field-label" for="cardText1">Card 1</label>
@@ -172,7 +205,7 @@
 
         <section class="panel p-[18px]" id="panelFonts">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Fonts</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Pick a different font for each kind of text in the video. The stage preview follows your picks. The fonts load from Google Fonts, so the preview and the render need an internet connection; without one, each pick falls back to a similar system font.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Pick a different font for each kind of text in the video. Press Update preview above the stage to see your picks in the real design. The fonts load from Google Fonts, so the preview and the render need an internet connection; without one, each pick falls back to a similar system font.</p>
           <label class="field-label" for="fontName">Name, the celebrant name on the title card</label>
           <select class="field-input" id="fontName">
             <option value="classic" style="font-family: Georgia, 'Times New Roman', serif" selected>Classic Serif</option>
@@ -290,23 +323,32 @@
             </button>
           </div>
           <input type="hidden" id="backgroundValue" value="deep-green" />
-          <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Animated backdrops drift gently in the video. The stage preview shows the same colors without the motion.</p>
+          <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Animated backdrops drift gently in the video. Framed photos (Polaroid, Rounded, Gold frame) sit on this backdrop; full-bleed photos fill the screen in every backdrop.</p>
         </section>
       </div>
 
       <div class="flex-1 min-w-0 flex flex-col bg-canvas">
         <div class="flex-1 min-h-0 flex flex-col items-center justify-center px-[26px] pt-[22px] pb-2">
           <div class="stage" id="stage">
-            <div class="stage-placeholder">Your preview appears here. Add photos, then press Play preview.</div>
+            <div class="stage-sizer" id="stageSizer">
+              <iframe id="previewFrame" title="Exact preview of the video"></iframe>
+              <div class="stage-placeholder" id="previewPlaceholder">Press Play or Update preview to build an exact preview.</div>
+            </div>
           </div>
           <div class="flex items-center gap-3 mt-3 text-[12.5px] text-muted">
-            <button type="button" class="transport-btn" id="previewBtn" aria-label="Play or stop the preview">
+            <button type="button" class="transport-btn" id="previewBtn" aria-label="Play or pause the preview">
               <svg data-icon="play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>
-              <svg data-icon="stop" style="display: none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
-              <span class="preview-btn-label">Play preview</span>
+              <svg data-icon="pause" style="display: none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></svg>
+              <span class="preview-btn-label">Play</span>
             </button>
-            <span id="previewLabel">Nothing playing</span>
+            <button type="button" class="transport-btn" id="updatePreviewBtn" aria-label="Rebuild the preview from the current form">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+              <span>Update preview</span>
+            </button>
+            <span id="previewTime">0:00 / 0:00</span>
+            <span id="previewLabel">No preview built yet</span>
           </div>
+          <p class="m-0 mt-1.5 text-[11.5px] text-muted">Preview is the exact video design. Music is mixed in when you generate.</p>
         </div>
         <div class="flex-none bg-white border-t border-line px-3.5 pt-2.5 pb-3">
           <div class="flex items-center gap-1.5 text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-2">
@@ -357,7 +399,7 @@
     </div>
     <script>
       const $ = (id) => document.getElementById(id);
-      const photos = []; // { file, url, caption, inCollage }
+      const photos = []; // { file, url, caption, inCollage, duration, zoom, frame, focusX, focusY, brightness, saturation }
 
       // Genuine Lucide icon paths (lucide v1.61.0, ISC), inlined as SVG.
       const ICON_PATHS = {
@@ -372,27 +414,23 @@
       const svgIcon = (paths) =>
         "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>" + paths + "</svg>";
 
-      // Gold accent shapes scattered around the preview collage, mirroring
-      // the rendered composition (same shapes, spots, and relative sizes).
-      const PV_ACCENT_SVGS = {
-        heart: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>',
-        star: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg>',
-        dot: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg>',
-      };
-      const PV_ACCENT_SPOTS = [
-        { left: "6%", top: "16%", size: "2.9%", shape: "heart" },
-        { left: "88%", top: "13%", size: "2.3%", shape: "star" },
-        { left: "11%", top: "77%", size: "1.8%", shape: "dot" },
-        { left: "85%", top: "73%", size: "3%", shape: "heart" },
-        { left: "46%", top: "85%", size: "2.1%", shape: "star" },
-        { left: "64%", top: "9%", size: "1.6%", shape: "dot" },
-      ];
-
-      const TITLE_DUR = 5, PHOTO_DUR = 5, COLLAGE_DUR = 6, MESSAGE_DUR = 6, CLOSING_DUR = 8;
+      // Per-card durations come from the form. These readers mirror the
+      // server and generator clamps, so the summary math below matches
+      // the composition the preview builds.
+      function numVal(id, fallback, min, max) {
+        const n = Number.parseInt($(id).value, 10);
+        if (!Number.isFinite(n)) return fallback;
+        return Math.min(max, Math.max(min, n));
+      }
+      const titleDur = () => numVal("titleDuration", 5, 3, 10);
+      const closingDur = () => numVal("closingDuration", 8, 4, 15);
+      const photoCollageDur = () => numVal("photoCollageDuration", 6, 4, 12);
+      const textCollageDur = () => numVal("textCollageDuration", 6, 4, 12);
+      const messageDur = (n) => numVal("message" + n + "Duration", 6, 4, 15);
 
       function fmt(totalSeconds) {
         const m = Math.floor(totalSeconds / 60);
-        const s = totalSeconds % 60;
+        const s = Math.floor(totalSeconds % 60);
         return m + ":" + String(s).padStart(2, "0");
       }
 
@@ -400,7 +438,7 @@
         const out = [];
         for (const n of [1, 2]) {
           const text = $("message" + n + "Text").value.trim();
-          if (text) out.push({ text, signedBy: $("message" + n + "SignedBy").value.trim() });
+          if (text) out.push({ text, signedBy: $("message" + n + "SignedBy").value.trim(), duration: messageDur(n) });
         }
         return out;
       }
@@ -420,30 +458,30 @@
       }
 
       function computeScenes() {
-        const scenes = [{ name: "Title card", dur: TITLE_DUR, kind: "title" }];
+        const scenes = [{ name: "Title card", dur: titleDur(), kind: "title", key: "title" }];
         for (const key of sceneOrderState) {
           if (key === "photos") {
-            photos.forEach((p, i) => scenes.push({ name: "Photo " + (i + 1), dur: PHOTO_DUR, kind: "photo", index: i }));
+            photos.forEach((p, i) => scenes.push({ name: "Photo " + (i + 1), dur: p.duration, kind: "photo", key: "photo-" + i, index: i }));
           } else if (key === "photoCollage") {
-            if ($("collageEnabled").checked) scenes.push({ name: "Photo collage", dur: COLLAGE_DUR, kind: "photoCollage" });
+            if ($("collageEnabled").checked) scenes.push({ name: "Photo collage", dur: photoCollageDur(), kind: "photoCollage", key: "photoCollage" });
           } else if (key === "textCollage") {
-            if ($("textCollageEnabled").checked) scenes.push({ name: "Text collage", dur: COLLAGE_DUR, kind: "textCollage" });
+            if ($("textCollageEnabled").checked) scenes.push({ name: "Text collage", dur: textCollageDur(), kind: "textCollage", key: "textCollage" });
           } else if (key === "messages") {
-            filledMessages().forEach((m, i) => scenes.push({ name: "Message card " + (i + 1), dur: MESSAGE_DUR, kind: "message", index: i }));
+            filledMessages().forEach((m, i) => scenes.push({ name: "Message card " + (i + 1), dur: m.duration, kind: "message", key: "message-" + i, index: i }));
           }
         }
-        scenes.push({ name: "Closing card", dur: CLOSING_DUR, kind: "closing" });
+        scenes.push({ name: "Closing card", dur: closingDur(), kind: "closing", key: "closing" });
         return scenes;
       }
 
       // Per-block facts for the Scenes panel: display name, computed
       // duration, and whether the block will actually play.
       function blockInfo(key) {
-        if (key === "photos") return { name: "Photos", dur: photos.length * PHOTO_DUR, on: photos.length > 0 };
-        if (key === "photoCollage") return { name: "Photo collage", dur: COLLAGE_DUR, on: $("collageEnabled").checked };
-        if (key === "textCollage") return { name: "Text collage", dur: COLLAGE_DUR, on: $("textCollageEnabled").checked };
-        const count = filledMessages().length;
-        return { name: "Messages", dur: count * MESSAGE_DUR, on: count > 0 };
+        if (key === "photos") return { name: "Photos", dur: photos.reduce((sum, p) => sum + p.duration, 0), on: photos.length > 0 };
+        if (key === "photoCollage") return { name: "Photo collage", dur: photoCollageDur(), on: $("collageEnabled").checked };
+        if (key === "textCollage") return { name: "Text collage", dur: textCollageDur(), on: $("textCollageEnabled").checked };
+        const msgs = filledMessages();
+        return { name: "Messages", dur: msgs.reduce((sum, m) => sum + m.duration, 0), on: msgs.length > 0 };
       }
 
       function renderScenesPanel() {
@@ -467,7 +505,7 @@
           row.appendChild(lock);
           return row;
         };
-        list.appendChild(lockedRow("Title card", TITLE_DUR));
+        list.appendChild(lockedRow("Title card", titleDur()));
         sceneOrderState.forEach((key, i) => {
           const info = blockInfo(key);
           const row = document.createElement("div");
@@ -513,11 +551,12 @@
           row.appendChild(down);
           list.appendChild(row);
         });
-        list.appendChild(lockedRow("Closing card", CLOSING_DUR));
+        list.appendChild(lockedRow("Closing card", closingDur()));
         $("sceneOrder").value = sceneOrderState.join(",");
       }
 
       function refreshSummary() {
+        markPreviewDirty();
         const scenes = computeScenes();
         let t = 0;
         $("sceneList").innerHTML = scenes
@@ -539,12 +578,12 @@
         const textBad = $("textCollageEnabled").checked && cardCount < 2;
         $("collageTextWarn").style.display = textBad ? "block" : "none";
         $("generateBtn").disabled = bad || textBad || photos.length === 0;
-        renderTimeline(scenes);
+        renderTimeline(currentTiles(scenes));
         renderScenesPanel();
       }
 
       // ------------------------------------------------------------ timeline --
-      function renderTimeline(scenes) {
+      function renderTimeline(tiles) {
         const strip = $("timelineStrip");
         strip.innerHTML = "";
         const thumbIcons = {
@@ -554,35 +593,48 @@
           message: svgIcon(ICON_PATHS.messageSquareText),
           closing: svgIcon(ICON_PATHS.sparkles),
         };
-        scenes.forEach((sc, i) => {
+        tiles.forEach((tileData, i) => {
           const tile = document.createElement("button");
           tile.type = "button";
           tile.className = "tl-tile";
           tile.dataset.sceneIndex = i;
           const thumb = document.createElement("span");
           thumb.className = "tl-thumb";
-          if (sc.kind === "photo") {
+          const photoIdx = tileData.key && tileData.key.startsWith("photo-") ? Number(tileData.key.slice(6)) : -1;
+          if (photoIdx >= 0 && photos[photoIdx]) {
             const img = document.createElement("img");
-            img.src = photos[sc.index].url;
+            img.src = photos[photoIdx].url;
             img.alt = "";
             thumb.appendChild(img);
-          } else if (sc.kind === "photoCollage" || sc.kind === "textCollage") {
-            thumb.innerHTML = thumbIcons[sc.kind];
           } else {
-            thumb.innerHTML = thumbIcons[sc.kind] || thumbIcons.title;
+            const kind = tileData.key === "photoCollage" ? "photoCollage"
+              : tileData.key === "textCollage" ? "textCollage"
+              : tileData.key && tileData.key.startsWith("message-") ? "message"
+              : tileData.key;
+            thumb.innerHTML = thumbIcons[kind] || thumbIcons.title;
           }
           const name = document.createElement("span");
           name.className = "tl-name";
-          name.textContent = sc.name;
+          name.textContent = tileData.name;
           const dur = document.createElement("span");
           dur.className = "tl-dur";
-          dur.textContent = sc.dur + "s";
+          dur.textContent = tileData.dur + "s";
           tile.appendChild(thumb);
           tile.appendChild(name);
           tile.appendChild(dur);
-          tile.addEventListener("click", () => startPreviewAt(i));
+          tile.addEventListener("click", () => seekPreview(i));
           strip.appendChild(tile);
         });
+      }
+
+      // Tiles use the provisional client-side math until a preview has
+      // been built; after that they mirror the preview's scenes.json,
+      // which carries the exact seek points.
+      function currentTiles(provisional) {
+        if (previewScenes && !previewDirty) {
+          return previewScenes.map((sc) => ({ name: sc.label, dur: sc.duration, key: sc.key }));
+        }
+        return provisional;
       }
 
       function markPlayingTile(idx) {
@@ -607,14 +659,78 @@
               "<button type='button' class='mini-btn up' aria-label='Move photo up'>" + svgIcon(ICON_PATHS.chevronUp) + "Up</button>" +
               "<button type='button' class='mini-btn down' aria-label='Move photo down'>" + svgIcon(ICON_PATHS.chevronDown) + "Down</button>" +
               "<button type='button' class='mini-btn danger remove' aria-label='Remove photo'>" + svgIcon(ICON_PATHS.trash2) + "Remove</button>" +
+            "</div>" +
+            "<div class='photo-adjust'>" +
+              "<div class='adj-field'><label>Duration (sec)</label><input type='number' class='adj-duration' min='2' max='12' step='1' /></div>" +
+              "<div class='adj-field'><label>Frame</label><select class='adj-frame'>" +
+                "<option value='full'>Full bleed</option>" +
+                "<option value='thin'>Thin border</option>" +
+                "<option value='polaroid'>Polaroid</option>" +
+                "<option value='rounded'>Rounded</option>" +
+                "<option value='gold'>Gold frame</option>" +
+              "</select></div>" +
+              "<div class='adj-field'><label>Zoom <span class='adj-zoom-val'></span></label><input type='range' class='adj-zoom' min='100' max='150' step='1' /></div>" +
+              "<div class='adj-field'><label>Brightness</label><input type='range' class='adj-bright' min='80' max='120' step='1' /></div>" +
+              "<div class='adj-field'><label>Saturation</label><input type='range' class='adj-sat' min='0' max='150' step='1' /></div>" +
+              "<div class='adj-field'><label>Position: Horizontal</label><input type='range' class='adj-fx' min='0' max='100' step='1' />" +
+                "<div class='adj-quick'>" +
+                  "<button type='button' data-axis='focusX' data-val='0'>Left</button>" +
+                  "<button type='button' data-axis='focusX' data-val='50'>Center</button>" +
+                  "<button type='button' data-axis='focusX' data-val='100'>Right</button>" +
+                "</div></div>" +
+              "<div class='adj-field'><label>Position: Vertical</label><input type='range' class='adj-fy' min='0' max='100' step='1' />" +
+                "<div class='adj-quick'>" +
+                  "<button type='button' data-axis='focusY' data-val='0'>Top</button>" +
+                  "<button type='button' data-axis='focusY' data-val='50'>Center</button>" +
+                  "<button type='button' data-axis='focusY' data-val='100'>Bottom</button>" +
+                "</div></div>" +
             "</div>";
           item.querySelector("img").src = p.url;
           const caption = item.querySelector(".caption");
           caption.value = p.caption;
-          caption.addEventListener("input", () => { p.caption = caption.value; });
+          caption.addEventListener("input", () => { p.caption = caption.value; markPreviewDirty(); });
           const box = item.querySelector(".collage-box");
           box.checked = p.inCollage;
           box.addEventListener("change", () => { p.inCollage = box.checked; refreshSummary(); });
+
+          const durInput = item.querySelector(".adj-duration");
+          durInput.value = p.duration;
+          durInput.addEventListener("input", () => {
+            const v = Number.parseInt(durInput.value, 10);
+            p.duration = Number.isFinite(v) ? Math.min(12, Math.max(2, v)) : 5;
+            refreshSummary();
+          });
+          const frameSel = item.querySelector(".adj-frame");
+          frameSel.value = p.frame;
+          frameSel.addEventListener("change", () => { p.frame = frameSel.value; markPreviewDirty(); });
+          const zoomInput = item.querySelector(".adj-zoom");
+          const zoomVal = item.querySelector(".adj-zoom-val");
+          zoomInput.value = p.zoom;
+          zoomVal.textContent = p.zoom + "%";
+          zoomInput.addEventListener("input", () => {
+            p.zoom = Number(zoomInput.value);
+            zoomVal.textContent = p.zoom + "%";
+            markPreviewDirty();
+          });
+          const bindRange = (sel, key) => {
+            const input = item.querySelector(sel);
+            input.value = p[key];
+            input.addEventListener("input", () => { p[key] = Number(input.value); markPreviewDirty(); });
+            return input;
+          };
+          bindRange(".adj-bright", "brightness");
+          bindRange(".adj-sat", "saturation");
+          const fxInput = bindRange(".adj-fx", "focusX");
+          const fyInput = bindRange(".adj-fy", "focusY");
+          item.querySelectorAll(".adj-quick button").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const val = Number(btn.dataset.val);
+              p[btn.dataset.axis] = val;
+              (btn.dataset.axis === "focusX" ? fxInput : fyInput).value = val;
+              markPreviewDirty();
+            });
+          });
+
           item.querySelector(".up").disabled = i === 0;
           item.querySelector(".down").disabled = i === photos.length - 1;
           item.querySelector(".up").addEventListener("click", () => {
@@ -637,13 +753,18 @@
 
       $("photoInput").addEventListener("change", (event) => {
         for (const file of event.target.files) {
-          photos.push({ file, url: URL.createObjectURL(file), caption: "", inCollage: false });
+          photos.push({ file, url: URL.createObjectURL(file), caption: "", inCollage: false, duration: 5, zoom: 115, frame: "full", focusX: 50, focusY: 50, brightness: 100, saturation: 100 });
         }
         event.target.value = "";
         renderPhotoList();
       });
 
       for (const id of ["collageEnabled", "textCollageEnabled", "message1Text", "message2Text",
+        "celebrantName", "closingLine", "closingSignOff",
+        "titleDuration", "closingDuration", "closingPaper",
+        "message1SignedBy", "message2SignedBy", "message1Duration", "message2Duration",
+        "message1Paper", "message2Paper",
+        "collageHeading", "textCollageHeading", "photoCollageDuration", "textCollageDuration",
         "cardText1", "cardText2", "cardText3", "cardText4",
         "cardFrom1", "cardFrom2", "cardFrom3", "cardFrom4"]) {
         $(id).addEventListener("input", refreshSummary);
@@ -675,202 +796,227 @@
       });
 
       // ------------------------------------------------------------ fonts --
-      // Font stacks mirroring the generator registry in lib/generate.mjs.
-      // The pool webfonts load from Google Fonts in the page head, so the
-      // preview can show the real faces.
-      const FONT_STACKS = {
-        classic: 'Georgia, "Times New Roman", serif',
-        clean: "Arial, Helvetica, sans-serif",
-        playfair: '"Playfair Display", Georgia, serif',
-        fraunces: '"Fraunces", Georgia, serif',
-        dmserif: '"DM Serif Display", Georgia, serif',
-        greatvibes: '"Great Vibes", cursive',
-        caveat: '"Caveat", cursive',
-        bebas: '"Bebas Neue", "Arial Narrow", sans-serif',
-        geist: '"Geist", system-ui, sans-serif',
-        jakarta: '"Plus Jakarta Sans", system-ui, sans-serif',
-        outfit: '"Outfit", system-ui, sans-serif',
-        dmsans: '"DM Sans", system-ui, sans-serif',
-      };
-      function applyPreviewFonts() {
-        const stage = $("stage");
-        const nameStack = FONT_STACKS[$("fontName").value] || FONT_STACKS.classic;
-        const headStack = FONT_STACKS[$("fontHeadings").value] || FONT_STACKS.classic;
-        const capStack = FONT_STACKS[$("fontCaptions").value] || FONT_STACKS.clean;
-        const msgStack = FONT_STACKS[$("fontMessages").value] || FONT_STACKS.classic;
-        stage.querySelectorAll(".pv-name").forEach((el) => { el.style.fontFamily = nameStack; });
-        stage.querySelectorAll(".pv-eyebrow, .pv-greeting, .pv-title, .pv-gfrom").forEach((el) => { el.style.fontFamily = headStack; });
-        stage.querySelectorAll(".pv-caption, .pv-pol-cap").forEach((el) => { el.style.fontFamily = capStack; });
-        stage.querySelectorAll(".pv-msg-text, .pv-sign").forEach((el) => { el.style.fontFamily = msgStack; });
-      }
+      // Font picks are plain form values now: the exact preview and the
+      // render both read them from the payload, so there is nothing to
+      // mirror by hand. Changing one marks the preview stale.
       for (const id of ["fontName", "fontHeadings", "fontCaptions", "fontMessages"]) {
-        $(id).addEventListener("change", applyPreviewFonts);
+        $(id).addEventListener("change", markPreviewDirty);
       }
 
       // ------------------------------------------------ background presets --
-      // Mirrors the background registry in lib/generate.mjs. The preview
-      // shows the same colors statically (no orb drift); light presets flip
-      // the on-background text to dark so it stays readable.
-      const PV_BACKGROUNDS = {
-        "deep-green": { bg: "radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%)", ink: "#f7f3e8", inkSoft: "#cfd8cc", line: "#e8c56e", accent: "#e8c56e" },
-        emerald: { bg: "radial-gradient(circle at 20% 10%, #1f7a55 0%, #0d4d33 52%, #063a26 100%)", ink: "#f4fbf6", inkSoft: "#cfe8d8", line: "#ffd98a", accent: "#ffd98a" },
-        midnight: { bg: "radial-gradient(circle at 18% 12%, #2b3a6e 0%, #1a2450 55%, #0d1330 100%)", ink: "#f2f4ff", inkSoft: "#c3cbe8", line: "#a9c2ff", accent: "#a9c2ff" },
-        royal: { bg: "radial-gradient(circle at 18% 12%, #5b2a86 0%, #3a1663 55%, #22093f 100%)", ink: "#faf5ff", inkSoft: "#ddccf2", line: "#e3b8ff", accent: "#e3b8ff" },
-        sunset: { bg: "radial-gradient(circle at 18% 12%, #93395f 0%, #5e2149 52%, #33102e 100%)", ink: "#fff6ec", inkSoft: "#f2d7c4", line: "#ffb45e", accent: "#ffb45e" },
-        charcoal: { bg: "#201f1e", ink: "#f5efe4", inkSoft: "#cbc2b2", line: "#d9b96a", accent: "#d9b96a" },
-        cream: { bg: "#f6eeda", ink: "#22371f", inkSoft: "#5c6650", line: "#a07d1e", accent: "#b08a1e" },
-        sky: { bg: "linear-gradient(165deg, #eaf4fc 0%, #cfe6f7 55%, #aed2ef 100%)", ink: "#173a52", inkSoft: "#47637a", line: "#256d9e", accent: "#c98f1f" },
-      };
-      function applyPreviewBackground() {
-        const preset = PV_BACKGROUNDS[$("backgroundValue").value] || PV_BACKGROUNDS["deep-green"];
-        const stage = $("stage");
-        stage.style.background = preset.bg;
-        stage.style.color = preset.ink;
-        stage.querySelectorAll(".pv-eyebrow:not(.pv-scrap-eyebrow)").forEach((el) => { el.style.color = preset.line; });
-        stage.querySelectorAll(".pv-small").forEach((el) => { el.style.color = preset.inkSoft; });
-        stage.querySelectorAll(".pv-rule").forEach((el) => { el.style.background = preset.line; });
-        stage.querySelectorAll(".pv-accent").forEach((el) => { el.style.color = preset.accent; });
-      }
+      // The pick is a plain form value; the exact preview shows the real
+      // backdrop once it is rebuilt.
       document.querySelectorAll(".bg-card").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll(".bg-card").forEach((b) => b.classList.toggle("is-active", b === btn));
           $("backgroundValue").value = btn.dataset.bg;
-          applyPreviewBackground();
+          markPreviewDirty();
         });
       });
 
-      // ------------------------------------------------------ quick preview --
-      let previewTimer = null;
+      // ------------------------------------------------------- true preview --
+      // The stage shows the actual generated composition in an iframe:
+      // POST /api/preview stages the current form through the same code
+      // path as Generate and returns the composition URL plus its
+      // scenes.json, so what plays here is the render design itself. The
+      // composition is a fixed 1920x1080 stage, scaled by CSS transform
+      // to the stage width. Any form change marks the preview dirty; the
+      // next Play press (or Update preview) rebuilds it first.
+      let previewScenes = null; // scenes from the last successful build
+      let previewTotal = 0;
+      let previewDirty = true;
+      let previewBuilding = false;
+      let previewPlaying = false;
+      let previewRaf = null;
+      let suppressDirty = false;
+
+      function markPreviewDirty() {
+        if (!suppressDirty) previewDirty = true;
+      }
+
+      function previewTimeline() {
+        try {
+          const win = $("previewFrame").contentWindow;
+          return win && win.__timelines ? win.__timelines["main"] : null;
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function scalePreviewFrame() {
+        const w = $("stage").clientWidth;
+        if (w > 0) $("previewFrame").style.transform = "scale(" + w / 1920 + ")";
+      }
+      window.addEventListener("resize", scalePreviewFrame);
+
       function setPreviewButton(playing) {
-        $("previewBtn").querySelector(".preview-btn-label").textContent = playing ? "Stop preview" : "Play preview";
+        $("previewBtn").querySelector(".preview-btn-label").textContent = playing ? "Pause" : "Play";
         $("previewBtn").querySelector("[data-icon='play']").style.display = playing ? "none" : "";
-        $("previewBtn").querySelector("[data-icon='stop']").style.display = playing ? "" : "none";
+        $("previewBtn").querySelector("[data-icon='pause']").style.display = playing ? "" : "none";
       }
-      function stopPreview(label) {
-        if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
+
+      function stopPreview() {
+        const tl = previewTimeline();
+        if (tl) tl.pause();
+        previewPlaying = false;
         setPreviewButton(false);
-        markPlayingTile(-1);
-        if (label) $("previewLabel").textContent = label;
       }
-      function buildPreviewScenes(scenes) {
-        const stage = $("stage");
-        stage.innerHTML = "";
-        const name = $("celebrantName").value.trim() || "Celebrant";
-        const short = $("celebrantShortName").value.trim() || name.split(/\s+/)[0];
-        return scenes.map((sc) => {
-          const el = document.createElement("div");
-          if (sc.kind === "photo") {
-            el.className = "pv-scene";
-            el.innerHTML = "<img class='pv-photo' alt='' /><div class='pv-caption'></div>";
-            el.querySelector("img").src = photos[sc.index].url;
-            el.querySelector(".pv-caption").textContent = photos[sc.index].caption;
-          } else if (sc.kind === "photoCollage" || sc.kind === "textCollage") {
-            el.className = "pv-scene pv-collage";
-            const heading = document.createElement("div");
-            heading.className = "pv-eyebrow";
-            heading.textContent = sc.kind === "textCollage"
-              ? ($("textCollageHeading").value.trim() || "Kind words")
-              : ($("collageHeading").value.trim() || "Moments together");
-            heading.style.position = "absolute";
-            heading.style.top = "12px";
-            heading.style.left = "0";
-            heading.style.right = "0";
-            heading.style.textAlign = "center";
-            el.appendChild(heading);
-            if (sc.kind === "textCollage") {
-              const grid = document.createElement("div");
-              const cards = filledCards();
-              grid.className = "pv-cards cards-" + cards.length;
-              cards.forEach((card, ci) => {
-                const cell = document.createElement("div");
-                cell.className = "pv-gcard";
-                cell.style.transform = "rotate(" + [-2.5, 2, -1.5, 2.5][ci % 4] + "deg)";
-                const cardText = document.createElement("div");
-                cardText.className = "pv-gtext pv-msg-text";
-                cardText.textContent = card.text;
-                cell.appendChild(cardText);
-                if (card.from) {
-                  const cardFrom = document.createElement("div");
-                  cardFrom.className = "pv-gfrom";
-                  cardFrom.textContent = card.from;
-                  cell.appendChild(cardFrom);
-                }
-                grid.appendChild(cell);
-              });
-              el.appendChild(grid);
-            } else {
-              photos.filter((p) => p.inCollage).forEach((p, pi) => {
-                const fig = document.createElement("div");
-                fig.className = "pv-polaroid";
-                fig.style.transform = "rotate(" + [-5, 3, -3][pi % 3] + "deg)";
-                const img = document.createElement("img");
-                img.src = p.url; img.alt = "";
-                const cap = document.createElement("div");
-                cap.className = "pv-pol-cap";
-                cap.textContent = p.caption;
-                fig.appendChild(img);
-                fig.appendChild(cap);
-                el.appendChild(fig);
-              });
-            }
-            // Accents go on last so they sit above the photos and cards,
-            // matching the rendered scene's layering.
-            PV_ACCENT_SPOTS.forEach((spot) => {
-              const acc = document.createElement("span");
-              acc.className = "pv-accent";
-              acc.style.left = spot.left;
-              acc.style.top = spot.top;
-              acc.style.width = spot.size;
-              acc.innerHTML = PV_ACCENT_SVGS[spot.shape];
-              el.appendChild(acc);
+
+      // Builds (or rebuilds) the preview from the current form state.
+      // Returns true when a fresh preview is on stage.
+      async function buildPreview() {
+        if (previewBuilding) return false;
+        if (!$("celebrantName").value.trim()) {
+          $("previewLabel").textContent = "Enter the celebrant name first";
+          return false;
+        }
+        previewBuilding = true;
+        $("previewLabel").textContent = "Building the exact preview...";
+        try {
+          const resp = await fetch("/api/preview", { method: "POST", body: buildFormData(false) });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "The preview could not be built.");
+          previewScenes = data.scenes;
+          previewTotal = data.total;
+          const frame = $("previewFrame");
+          const loaded = new Promise((resolve) => { frame.onload = resolve; });
+          frame.src = data.previewUrl + "?v=" + Date.now();
+          await loaded;
+          $("previewPlaceholder").style.display = "none";
+          scalePreviewFrame();
+          const tl = previewTimeline();
+          if (tl) tl.pause(0);
+          previewPlaying = false;
+          setPreviewButton(false);
+          $("previewTime").textContent = "0:00 / " + fmt(previewTotal);
+          $("previewLabel").textContent = "Preview ready. Press Play.";
+          previewDirty = false;
+          suppressDirty = true;
+          refreshSummary();
+          suppressDirty = false;
+          startPreviewClock();
+          return true;
+        } catch (err) {
+          $("previewLabel").textContent = "Preview failed: " + err.message;
+          return false;
+        } finally {
+          previewBuilding = false;
+        }
+      }
+
+      function startPreviewClock() {
+        if (previewRaf) return;
+        const tick = () => {
+          const tl = previewTimeline();
+          if (tl && previewScenes) {
+            const time = tl.time();
+            $("previewTime").textContent = fmt(time) + " / " + fmt(previewTotal);
+            let idx = -1;
+            previewScenes.forEach((sc, i) => {
+              if (time >= sc.start && time < sc.start + sc.duration) idx = i;
             });
-          } else if (sc.kind === "message") {
-            el.className = "pv-scene";
-            const msg = filledMessages()[sc.index];
-            el.innerHTML = "<div class='pv-msg'><div class='pv-msg-text'></div><div class='pv-sign'></div></div>";
-            el.querySelector(".pv-msg-text").textContent = msg.text;
-            el.querySelector(".pv-sign").textContent = msg.signedBy;
-          } else if (sc.kind === "closing") {
-            el.className = "pv-scene";
-            el.innerHTML = "<div><div class='pv-eyebrow'></div><div class='pv-title'></div><div class='pv-small'></div></div>";
-            el.querySelector(".pv-eyebrow").textContent = "Happy Birthday, " + short;
-            el.querySelector(".pv-title").textContent = $("closingLine").value.trim();
-            el.querySelector(".pv-small").textContent = $("closingSignOff").value.trim();
-          } else {
-            el.className = "pv-scene";
-            el.innerHTML = "<div><div class='pv-eyebrow'>Happy Birthday</div><div class='pv-title'><span class='pv-greeting'>Happy Birthday,</span> <span class='pv-name'></span></div><div class='pv-small'></div></div>";
-            el.querySelector(".pv-name").textContent = short + "!";
-            el.querySelector(".pv-small").textContent =
-              name + " · " + $("role").value.trim() + "  |  " + $("fromLine").value.trim();
+            markPlayingTile(idx);
+            if (idx >= 0) $("previewLabel").textContent = previewScenes[idx].label;
+            if (previewPlaying && time >= previewTotal - 0.05) {
+              previewPlaying = false;
+              setPreviewButton(false);
+            }
           }
-          stage.appendChild(el);
-          return { el, scene: sc };
-        });
-      }
-      function startPreviewAt(fromIdx) {
-        if (photos.length === 0) { $("previewLabel").textContent = "Add photos first"; return; }
-        if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
-        const built = buildPreviewScenes(computeScenes());
-        applyPreviewFonts();
-        applyPreviewBackground();
-        let idx = Math.min(Math.max(fromIdx, 0), built.length - 1);
-        const show = () => {
-          built.forEach((b) => b.el.classList.remove("active"));
-          if (idx >= built.length) { stopPreview("Preview finished"); return; }
-          built[idx].el.classList.add("active");
-          markPlayingTile(idx);
-          $("previewLabel").textContent = built[idx].scene.name + " (" + built[idx].scene.dur + "s)";
-          previewTimer = setTimeout(() => { idx += 1; show(); }, built[idx].scene.dur * 1000);
+          previewRaf = requestAnimationFrame(tick);
         };
-        setPreviewButton(true);
-        show();
+        tick();
       }
-      $("previewBtn").addEventListener("click", () => {
-        if (previewTimer) { stopPreview("Preview stopped"); return; }
-        startPreviewAt(0);
+
+      async function togglePreview() {
+        if (!previewScenes || previewDirty) {
+          const ok = await buildPreview();
+          if (!ok) return;
+        }
+        const tl = previewTimeline();
+        if (!tl) return;
+        if (previewPlaying) {
+          tl.pause();
+          previewPlaying = false;
+        } else {
+          if (tl.time() >= previewTotal - 0.05) tl.seek(0);
+          tl.play();
+          previewPlaying = true;
+        }
+        setPreviewButton(previewPlaying);
+      }
+
+      // Filmstrip tiles seek the real timeline to the scene start and
+      // play from there, rebuilding first when the form has changed.
+      async function seekPreview(idx) {
+        if (!previewScenes || previewDirty) {
+          const ok = await buildPreview();
+          if (!ok) return;
+        }
+        const sc = previewScenes[idx];
+        const tl = previewTimeline();
+        if (!sc || !tl) return;
+        tl.seek(Math.min(sc.start + 0.01, Math.max(0, previewTotal - 0.05)));
+        tl.play();
+        previewPlaying = true;
+        setPreviewButton(true);
+      }
+
+      $("previewBtn").addEventListener("click", togglePreview);
+      $("updatePreviewBtn").addEventListener("click", async () => {
+        const ok = await buildPreview();
+        if (ok) $("previewLabel").textContent = "Preview is up to date. Press Play.";
       });
 
       // ------------------------------------------------------------ generate --
+      // The payload both /api/generate and /api/preview accept. Music is
+      // attached only for a real render; the preview ignores it.
+      function buildFormData(withMusic) {
+        const form = new FormData();
+        form.append("celebrantName", $("celebrantName").value.trim());
+        form.append("titleDuration", $("titleDuration").value);
+        form.append("closingDuration", $("closingDuration").value);
+        form.append("closingLine", $("closingLine").value.trim());
+        form.append("closingSignOff", $("closingSignOff").value.trim());
+        form.append("closingPaper", $("closingPaper").value);
+        form.append("collageHeading", $("collageHeading").value.trim());
+        form.append("collageEnabled", $("collageEnabled").checked ? "true" : "false");
+        form.append("photoCollageDuration", $("photoCollageDuration").value);
+        form.append("textCollageEnabled", $("textCollageEnabled").checked ? "true" : "false");
+        form.append("textCollageHeading", $("textCollageHeading").value.trim());
+        form.append("textCollageDuration", $("textCollageDuration").value);
+        form.append("sceneOrder", $("sceneOrder").value);
+        for (const n of [1, 2, 3, 4]) {
+          form.append("cardTexts", $("cardText" + n).value);
+          form.append("cardFroms", $("cardFrom" + n).value);
+        }
+        if (withMusic && musicFile) form.append("music", musicFile, musicFile.name);
+        form.append("musicVolume", $("musicVolume").value);
+        form.append("fontName", $("fontName").value);
+        form.append("fontHeadings", $("fontHeadings").value);
+        form.append("fontCaptions", $("fontCaptions").value);
+        form.append("fontMessages", $("fontMessages").value);
+        form.append("background", $("backgroundValue").value);
+        for (const n of [1, 2]) {
+          form.append("message" + n + "Text", $("message" + n + "Text").value);
+          form.append("message" + n + "SignedBy", $("message" + n + "SignedBy").value);
+          form.append("messageDurations", $("message" + n + "Duration").value);
+          form.append("messagePapers", $("message" + n + "Paper").value);
+        }
+        photos.forEach((p, i) => {
+          form.append("photos", p.file, p.file.name);
+          form.append("captions", p.caption || "");
+          if (p.inCollage) form.append("collageIndexes", String(i));
+          form.append("photoDurations", String(p.duration));
+          form.append("photoZooms", String(p.zoom));
+          form.append("photoFocusX", String(p.focusX));
+          form.append("photoFocusY", String(p.focusY));
+          form.append("photoBrightness", String(p.brightness));
+          form.append("photoSaturation", String(p.saturation));
+          form.append("photoFrames", p.frame);
+        });
+        return form;
+      }
+
       let pollTimer = null;
       function setStatus(html, isError) {
         const box = $("statusBox");
@@ -924,40 +1070,9 @@
           setStatus("Add at least 2 greeting cards with text for the text collage, or switch the text collage off.", true);
           return;
         }
-        stopPreview("Nothing playing");
+        stopPreview();
         $("resultBox").className = "result-box";
-        const form = new FormData();
-        form.append("celebrantName", $("celebrantName").value.trim());
-        form.append("celebrantShortName", $("celebrantShortName").value.trim());
-        form.append("role", $("role").value.trim());
-        form.append("fromLine", $("fromLine").value.trim());
-        form.append("closingLine", $("closingLine").value.trim());
-        form.append("closingSignOff", $("closingSignOff").value.trim());
-        form.append("collageHeading", $("collageHeading").value.trim());
-        form.append("collageEnabled", $("collageEnabled").checked ? "true" : "false");
-        form.append("textCollageEnabled", $("textCollageEnabled").checked ? "true" : "false");
-        form.append("textCollageHeading", $("textCollageHeading").value.trim());
-        form.append("sceneOrder", $("sceneOrder").value);
-        for (const n of [1, 2, 3, 4]) {
-          form.append("cardTexts", $("cardText" + n).value);
-          form.append("cardFroms", $("cardFrom" + n).value);
-        }
-        if (musicFile) form.append("music", musicFile, musicFile.name);
-        form.append("musicVolume", $("musicVolume").value);
-        form.append("fontName", $("fontName").value);
-        form.append("fontHeadings", $("fontHeadings").value);
-        form.append("fontCaptions", $("fontCaptions").value);
-        form.append("fontMessages", $("fontMessages").value);
-        form.append("background", $("backgroundValue").value);
-        for (const n of [1, 2]) {
-          form.append("message" + n + "Text", $("message" + n + "Text").value);
-          form.append("message" + n + "SignedBy", $("message" + n + "SignedBy").value);
-        }
-        photos.forEach((p, i) => {
-          form.append("photos", p.file, p.file.name);
-          form.append("captions", p.caption || "");
-          if (p.inCollage) form.append("collageIndexes", String(i));
-        });
+        const form = buildFormData(true);
         $("generateBtn").disabled = true;
         setStatus("<span class='spinner'></span>Sending your photos and details to the renderer.", false);
         try {

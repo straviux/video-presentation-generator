@@ -44,34 +44,51 @@ no environment variables to set, on any platform.
 ## How to use it
 
 1. **Event type.** Birthday is the only working type in this version.
-2. **Details.** Celebrant name, short name for the title, role, from line,
-   closing line, closing sign-off, and the two collage headings. All of
-   these appear in the video, so read them once before generating.
+2. **Details.** Celebrant name (it starts blank; type the full name
+   exactly as it should appear on the title card), how long the title
+   and closing cards stay, the closing line and sign-off, and the
+   closing card's paper: Classic cream, Clean white, Kraft tan, Blush
+   pink, Mint green, or Sky blue.
 3. **Photos.** Add JPG, PNG, or WebP photos.
-   - Each photo gets 5 seconds in the montage, in the order shown. Use the
-     Up and Down buttons to reorder, Remove to drop one.
+   - Photos play in the order shown. Use the Up and Down buttons to
+     reorder, Remove to drop one.
    - Type a caption for each photo if you want one on screen.
+   - Every photo has its own controls under it: how long it stays
+     (5 seconds by default), its Frame (Full bleed, Thin border,
+     Polaroid, Rounded, or Gold frame), the Ken Burns Zoom, Brightness,
+     Saturation, and Position.
+   - Position picks which part of the photo stays in frame: Vertical at
+     the bottom end keeps the bottom of the photo visible, which is the
+     fix when a subject stands low in the shot and gets cropped out.
+     The Top / Center / Bottom and Left / Center / Right buttons jump
+     the sliders to those spots, and the zoom pushes toward the same
+     point.
    - For the photo collage, tick exactly 3 photos, or untick the photo
      collage switch in the Collage tab to skip that scene entirely.
-4. **Messages.** Up to two message cards, 6 seconds each. Leave a message
-   blank to skip it. The Scenes tab decides where in the video they play.
+4. **Messages.** Up to two message cards. Each one has its own length
+   (6 seconds by default) and its own paper, picked from the same six
+   papers as the closing card. Leave a message blank to skip it. The
+   Scenes tab decides where in the video they play.
 5. **Fonts.** Use the Fonts tab to pick a font for each kind of text: the
-   celebrant name, the headings, the captions, and the message text. The
-   stage preview follows your picks. Picks beyond the two built-in stacks
+   celebrant name, the headings, the captions, and the message text.
+   Press Update preview above the stage to see your picks in the real
+   design. Picks beyond the two built-in stacks
    load from Google Fonts, so keep the machine online while rendering;
    offline, the video falls back to similar system fonts.
 6. **Background.** In the Background tab, pick one of eight backdrops
    for the title, collage, message, and closing scenes: five animated
    (Deep Green, Emerald, Midnight, Royal, Sunset), two flat colors
    (Charcoal, Cream), and one light gradient (Sky). Cream and Sky are
-   light backdrops, so the words on them turn dark automatically. Photos
-   stay full screen in every backdrop, and the paper cards keep their
-   paper.
+   light backdrops, so the words on them turn dark automatically.
+   Full-bleed photos fill the screen in every backdrop; framed photos
+   (Polaroid, Rounded, Gold frame) sit on the backdrop, and the paper
+   cards keep their paper.
 7. **Collage.** The Collage tab holds two separate scenes, and both can
    be in the same video. The photo collage shows the 3 ticked photos as
    polaroids under its own heading. The text collage shows up to 4 short
    greeting cards under its own heading instead; write at least 2 cards
-   with text. Each scene runs 6 seconds, and each has its own switch.
+   with text. Each scene runs 6 seconds by default and has its own
+   length setting and its own switch.
 8. **Scenes.** In the Scenes tab, drag the middle scenes into the order
    you want with the Up and Down buttons: Photos, Photo collage, Text
    collage, and Messages. The title card always opens the video and the
@@ -84,12 +101,18 @@ no environment variables to set, on any platform.
    fades out at the end. Leave it empty for a silent video, and only use
    music you have the right to use.
 10. **Check the summary.** The side panel lists every scene with its start
-   time and shows the total runtime. Title 5s, photos 5s each, each
-   collage 6s, messages 6s each, closing 8s. Seven photos with both
+   time and shows the total runtime. The defaults are title 5s, photos
+   5s each, each collage 6s, messages 6s each, closing 8s, and every one
+   of those lengths can be changed in its tab. Seven photos with both
    collages and two messages comes to 1:12.
-11. **Quick preview (optional).** A simple slideshow of your photos and words
-   at the real scene lengths, in the order set on the Scenes tab. The
-   finished video adds the animations.
+11. **Exact preview (optional).** The stage shows the actual generated
+   composition, the same HTML, styling, fonts, and animation the render
+   uses, so what you see is the video design itself. Play and Pause run
+   the real timeline, the time readout follows it, and clicking a scene
+   in the filmstrip jumps there. Press Update preview to rebuild it
+   after changing anything; pressing Play after a change rebuilds it
+   first on its own. Music is not part of the preview: it is mixed in
+   when you generate.
 12. **Generate Video.** The page shows progress while the scenes are built and
    the video renders. Rendering usually takes a few minutes for a one minute
    video, so keep the page open. When it finishes, the video plays right on
@@ -102,6 +125,9 @@ no environment variables to set, on any platform.
   (`render.log`), and the finished video at `renders/output.mp4`.
 - Job folders are kept, so you can re-download an earlier video from its job
   folder. Delete old job folders whenever you like.
+- The exact preview stages into `app/previews/current/`, wiped and rebuilt
+  on every preview. It is working state, not a deliverable; delete the
+  `previews` folder whenever you like.
 - Only **one video renders at a time**. If you press Generate while another
   video is rendering, the app says so and asks you to wait.
 
@@ -113,8 +139,9 @@ no environment variables to set, on any platform.
   the page shows a note that the music could not be added.
 - **One render at a time**, and the app runs on your local machine only. It
   is not a hosted website; anyone who wants to use it runs their own copy.
-- Photos are center-cropped to fill the 16:9 frame. There is no crop or
-  position control yet.
+- Photos are cropped to fill their frame. Each photo's Position controls
+  choose which part stays in frame, but there is no freehand crop or
+  rotate.
 - Output is fixed at 1920x1080, 30fps, rendered with the delivery quality
   preset. The length depends on how many photos and messages you add and
   which scenes are switched on: about a minute for a typical video, longer
@@ -122,8 +149,9 @@ no environment variables to set, on any platform.
 
 ## Passing it to another machine
 
-Use the packaged `video-presentation-generator.zip` from the project root. It
-contains this `app` folder and the `render-engine` folder without their
-installed dependencies or outputs, so on the new machine: install Node and
-FFmpeg, run `npm install` in both folders, run `npx hyperframes browser
-ensure` in `render-engine`, then `npm start` in `app`.
+Clone or pull the project repository (github.com/straviux/video-presentation-generator),
+then on the new machine: install Node and FFmpeg, run `npm install` in both
+the `app` and `render-engine` folders, run `npx hyperframes browser ensure`
+in `render-engine`, then `npm start` in `app`. Sample photos are not in the
+repository; bring your own or re-download the placeholders as described in
+the template README.
