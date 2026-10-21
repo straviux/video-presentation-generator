@@ -6,6 +6,12 @@
     <script src="assets/gsap.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --font-name: Georgia, "Times New Roman", serif;
+        --font-headings: Georgia, "Times New Roman", serif;
+        --font-captions: Arial, Helvetica, sans-serif;
+        --font-messages: Georgia, "Times New Roman", serif;
+      }
       html, body {
         margin: 0;
         width: 1920px;
@@ -37,11 +43,25 @@
       .orb-b { width: 315px; height: 315px; left: -90px; bottom: -120px; background: rgba(255, 255, 255, 0.07); }
       /* Word spans GSAP staggers in: inline-block so transforms apply. */
       .w { display: inline-block; }
+      /* Split name reveal: the two chunks form one continuous name line. */
+      .name-line { display: inline-block; white-space: nowrap; font-family: var(--font-name); }
+      .name-script { font-size: 121px; line-height: 1.3; }
+      #title-greeting { font-family: var(--font-headings); }
+      .name-chunk { display: inline-block; }
+      /* Typewriter spans: words are inline-block so wrapping stays between
+         words; the characters inside stay inline and only fade in. */
+      .tw-w { display: inline-block; }
+      .tw-c { display: inline; }
+      /* Gold accent shapes that pop in around the collage polaroids. */
+      .accent { position: absolute; pointer-events: none; }
+      .accent svg { display: block; width: 100%; height: 100%; }
       /* Soft edge darkening over photos, faded in by GSAP per scene. */
       .vignette {
         position: absolute; inset: 0; pointer-events: none; opacity: 0;
         background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 52%, rgba(4, 12, 9, 0.42) 100%);
       }
+      /* Full-canvas white layer for the fade-through-white photo transitions. */
+      .white-fade { position: absolute; inset: 0; background: #ffffff; pointer-events: none; }
       .card-inner {
         position: absolute; inset: 0;
         display: flex; flex-direction: column;
@@ -49,7 +69,7 @@
         text-align: center; padding: 96px;
       }
       .eyebrow {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: var(--font-headings);
         font-size: 28.5px; letter-spacing: 0.34em; text-transform: uppercase;
         color: #e8c56e; margin-bottom: 39px;
       }
@@ -76,13 +96,13 @@
         position: absolute; left: 0; right: 0; bottom: 0;
         padding: 96px 84px 51px;
         background: linear-gradient(to top, rgba(6, 18, 13, 0.82), rgba(6, 18, 13, 0));
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: var(--font-captions);
         font-size: 39px; color: #f7f3e8;
       }
       /* Collage */
       .collage-heading {
         position: absolute; top: 96px; left: 0; right: 0;
-        text-align: center; font-size: 66px; font-weight: 700; color: #f7f3e8;
+        text-align: center; font-family: var(--font-headings); font-size: 66px; font-weight: 700; color: #f7f3e8;
       }
       .collage-row {
         position: absolute; inset: 0;
@@ -97,7 +117,7 @@
       }
       .polaroid img { display: block; width: 483px; height: 360px; object-fit: cover; }
       .polaroid figcaption {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: var(--font-captions);
         font-size: 24px; color: #44503f; text-align: center;
         padding-top: 15px; min-height: 39px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -113,16 +133,41 @@
         text-align: center;
         box-shadow: 0 45px 90px rgba(0, 0, 0, 0.4);
       }
-      .quote-mark { font-size: 96px; line-height: 0.6; color: #ac8a21; margin-bottom: 39px; }
-      .msg-text { font-size: 46.5px; line-height: 1.5; color: #22301f; }
+      .quote-mark { font-family: var(--font-messages); font-size: 96px; line-height: 0.6; color: #ac8a21; margin-bottom: 39px; }
+      .msg-text { font-family: var(--font-messages); font-size: 46.5px; line-height: 1.5; color: #22301f; }
       .msg-sign {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: var(--font-messages);
         font-size: 28.5px; letter-spacing: 0.08em; text-transform: uppercase;
         color: #7a6a35; margin-top: 45px;
       }
-      /* Closing */
-      .closing-line { font-size: 69px; line-height: 1.3; font-weight: 700; max-width: 1350px; }
-      .closing-sign { margin-top: 9px; }
+      /* Closing: scrapbook card with torn edges and tape strips */
+      .scrap-wrap {
+        position: absolute; top: 50%; left: 50%;
+        translate: -50% -50%;
+        width: 1380px;
+        filter: drop-shadow(0 42px 54px rgba(0, 0, 0, 0.45));
+      }
+      .scrap-card {
+        background: linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%);
+        clip-path: polygon(1% 3%, 6% 1%, 12% 2.4%, 20% 0.8%, 29% 2%, 38% 1%, 47% 2.2%, 56% 0.9%, 65% 2%, 74% 1.1%, 83% 2.3%, 91% 1%, 98.6% 2.6%, 99.4% 12%, 98.7% 24%, 99.5% 38%, 98.8% 52%, 99.4% 66%, 98.7% 80%, 99.3% 92%, 97% 98.6%, 88% 99.3%, 78% 98.5%, 68% 99.4%, 58% 98.6%, 48% 99.5%, 38% 98.7%, 28% 99.3%, 18% 98.5%, 9% 99.4%, 1.6% 98.2%, 0.6% 88%, 1.3% 74%, 0.5% 60%, 1.2% 45%, 0.6% 30%, 1.3% 16%);
+        padding: 88px 100px 80px;
+        text-align: center;
+      }
+      .scrap-eyebrow { color: #a07d1e; }
+      .closing-line { font-family: var(--font-headings); font-size: 69px; line-height: 1.3; font-weight: 700; max-width: 1180px; margin: 0 auto; color: #26331f; }
+      .scrap-rule { background: #b08a1e; margin-left: auto; margin-right: auto; }
+      .closing-sign {
+        font-family: Georgia, "Times New Roman", serif;
+        font-style: italic; font-size: 37.5px; letter-spacing: 0.02em;
+        color: #6d5a22;
+      }
+      .tape {
+        position: absolute; top: -26px; width: 246px; height: 56px;
+        background: linear-gradient(100deg, rgba(238, 205, 116, 0.62), rgba(228, 190, 96, 0.5));
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
+      }
+      .tape-left { left: 46px; }
+      .tape-right { right: 46px; }
     </style>
   </head>
   <body>
@@ -139,7 +184,7 @@
       <div class="orb orb-b"></div>
       <div class="card-inner">
         <div class="eyebrow" id="title-eyebrow">Happy Birthday</div>
-        <h1 class="big-title" id="title-name"><span class="w">Happy</span> <span class="w">Birthday,</span><br /><span class="w">Nur-Aina!</span></h1>
+        <h1 class="big-title" id="title-name"><span id="title-greeting"><span class="w">Happy</span> <span class="w">Birthday,</span></span><br /><span class="name-line"><span class="name-chunk" id="title-name-left">Nur-</span><span class="name-chunk" id="title-name-right">Aina!</span></span></h1>
         <div class="rule" id="title-rule"></div>
         <p class="subtitle" id="title-role">Nur-Aina Ibrahim &middot; Program Manager</p>
         <p class="from-line" id="title-from">From your YSE Family</p>
@@ -149,36 +194,43 @@
       <img class="photo-img" id="photo-img-0" src="assets/photos/photo-1.jpg" alt="" />
       <div class="vignette" id="vignette-0"></div>
       <div class="caption-bar" id="caption-0"><span id="caption-text-0">A year of good work and good people</span></div>
+      <div class="white-fade" id="white-0" style="opacity: 0"></div>
     </section>
     <section class="clip scene scene-photo" id="scene-photo-1" style="opacity: 0" data-start="10" data-duration="5.5" data-track-index="3">
       <img class="photo-img" id="photo-img-1" src="assets/photos/photo-2.jpg" alt="" />
       <div class="vignette" id="vignette-1"></div>
       <div class="caption-bar" id="caption-1"><span id="caption-text-1">Moments worth keeping</span></div>
+      <div class="white-fade" id="white-1" style="opacity: 1"></div>
     </section>
     <section class="clip scene scene-photo" id="scene-photo-2" style="opacity: 0" data-start="15" data-duration="5.5" data-track-index="4">
       <img class="photo-img" id="photo-img-2" src="assets/photos/photo-3.jpg" alt="" />
       <div class="vignette" id="vignette-2"></div>
       <div class="caption-bar" id="caption-2"><span id="caption-text-2">Through every season of the work</span></div>
+      <div class="white-fade" id="white-2" style="opacity: 1"></div>
     </section>
     <section class="clip scene scene-photo" id="scene-photo-3" style="opacity: 0" data-start="20" data-duration="5.5" data-track-index="5">
       <img class="photo-img" id="photo-img-3" src="assets/photos/photo-4.jpg" alt="" />
       <div class="vignette" id="vignette-3"></div>
       <div class="caption-bar" id="caption-3"><span id="caption-text-3">The people who make the office feel like family</span></div>
+      <div class="white-fade" id="white-3" style="opacity: 1"></div>
     </section>
     <section class="clip scene scene-photo" id="scene-photo-4" style="opacity: 0" data-start="25" data-duration="5.5" data-track-index="6">
       <img class="photo-img" id="photo-img-4" src="assets/photos/photo-5.jpg" alt="" />
       <div class="vignette" id="vignette-4"></div>
       <div class="caption-bar" id="caption-4"><span id="caption-text-4">Small celebrations, big gratitude</span></div>
+      <div class="white-fade" id="white-4" style="opacity: 1"></div>
     </section>
     <section class="clip scene scene-photo" id="scene-photo-5" style="opacity: 0" data-start="30" data-duration="5.5" data-track-index="7">
       <img class="photo-img" id="photo-img-5" src="assets/photos/photo-6.jpg" alt="" />
       <div class="vignette" id="vignette-5"></div>
       <div class="caption-bar" id="caption-5"><span id="caption-text-5">More memories than we can count</span></div>
+      <div class="white-fade" id="white-5" style="opacity: 1"></div>
     </section>
     <section class="clip scene scene-photo" id="scene-photo-6" style="opacity: 0" data-start="35" data-duration="5.5" data-track-index="8">
       <img class="photo-img" id="photo-img-6" src="assets/photos/photo-7.jpg" alt="" />
       <div class="vignette" id="vignette-6"></div>
       <div class="caption-bar" id="caption-6"><span id="caption-text-6">And many more to come</span></div>
+      <div class="white-fade" id="white-6" style="opacity: 1"></div>
     </section>
     <section class="clip scene scene-card" id="scene-collage" style="opacity: 0" data-start="40" data-duration="6.5" data-track-index="9">
       <div class="orb orb-a"></div>
@@ -187,23 +239,23 @@
       <div class="collage-row">
         <figure class="polaroid" id="polaroid-0">
           <img src="assets/photos/photo-1.jpg" alt="" />
-          <figcaption>A year of good work and good people</figcaption>
+          <figcaption id="polaroid-cap-0">A year of good work and good people</figcaption>
         </figure>
         <figure class="polaroid" id="polaroid-1">
           <img src="assets/photos/photo-3.jpg" alt="" />
-          <figcaption>Through every season of the work</figcaption>
+          <figcaption id="polaroid-cap-1">Through every season of the work</figcaption>
         </figure>
         <figure class="polaroid" id="polaroid-2">
           <img src="assets/photos/photo-5.jpg" alt="" />
-          <figcaption>Small celebrations, big gratitude</figcaption>
+          <figcaption id="polaroid-cap-2">Small celebrations, big gratitude</figcaption>
         </figure>
-      </div>
+      </div><span class="accent" id="accent-0" style="left: 6%; top: 16%; width: 56px; height: 56px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-1" style="left: 88%; top: 13%; width: 44px; height: 44px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-2" style="left: 11%; top: 77%; width: 34px; height: 34px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span><span class="accent" id="accent-3" style="left: 85%; top: 73%; width: 58px; height: 58px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-4" style="left: 46%; top: 85%; width: 40px; height: 40px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-5" style="left: 64%; top: 9%; width: 30px; height: 30px;"><svg viewBox="0 0 24 24" fill="#e8c56e" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span>
     </section>
     <section class="clip scene scene-card" id="scene-msg-0" style="opacity: 0" data-start="46" data-duration="6.5" data-track-index="10">
       <div class="orb orb-a"></div>
       <div class="msg-card" id="msg-card-0">
         <div class="quote-mark" id="msg-quote-0">&ldquo;</div>
-        <p class="msg-text" id="msg-text-0"><span class="sent">You bring so much warmth and light to everyone around you.</span> <span class="sent">We hope this year gives back all the kindness you share so freely.</span></p>
+        <p class="msg-text" id="msg-text-0"><span class="tw-w"><span class="tw-c">Y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">b</span><span class="tw-c">r</span><span class="tw-c">i</span><span class="tw-c">n</span><span class="tw-c">g</span></span> <span class="tw-w"><span class="tw-c">s</span><span class="tw-c">o</span></span> <span class="tw-w"><span class="tw-c">m</span><span class="tw-c">u</span><span class="tw-c">c</span><span class="tw-c">h</span></span> <span class="tw-w"><span class="tw-c">w</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">m</span><span class="tw-c">t</span><span class="tw-c">h</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">l</span><span class="tw-c">i</span><span class="tw-c">g</span><span class="tw-c">h</span><span class="tw-c">t</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">o</span></span> <span class="tw-w"><span class="tw-c">e</span><span class="tw-c">v</span><span class="tw-c">e</span><span class="tw-c">r</span><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">n</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">o</span><span class="tw-c">u</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">u</span><span class="tw-c">.</span></span> <span class="tw-w"><span class="tw-c">W</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">h</span><span class="tw-c">o</span><span class="tw-c">p</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">i</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">g</span><span class="tw-c">i</span><span class="tw-c">v</span><span class="tw-c">e</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">b</span><span class="tw-c">a</span><span class="tw-c">c</span><span class="tw-c">k</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">l</span><span class="tw-c">l</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">k</span><span class="tw-c">i</span><span class="tw-c">n</span><span class="tw-c">d</span><span class="tw-c">n</span><span class="tw-c">e</span><span class="tw-c">s</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">s</span><span class="tw-c">h</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">s</span><span class="tw-c">o</span></span> <span class="tw-w"><span class="tw-c">f</span><span class="tw-c">r</span><span class="tw-c">e</span><span class="tw-c">e</span><span class="tw-c">l</span><span class="tw-c">y</span><span class="tw-c">.</span></span></p>
         <p class="msg-sign" id="msg-sign-0">Your YSE Family</p>
       </div>
     </section>
@@ -211,18 +263,22 @@
       <div class="orb orb-a"></div>
       <div class="msg-card" id="msg-card-1">
         <div class="quote-mark" id="msg-quote-1">&ldquo;</div>
-        <p class="msg-text" id="msg-text-1"><span class="sent">Thank you for leading with patience and heart.</span> <span class="sent">You make the hard days easier and the good days better for all of us.</span></p>
+        <p class="msg-text" id="msg-text-1"><span class="tw-w"><span class="tw-c">T</span><span class="tw-c">h</span><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">k</span></span> <span class="tw-w"><span class="tw-c">y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">f</span><span class="tw-c">o</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">l</span><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">d</span><span class="tw-c">i</span><span class="tw-c">n</span><span class="tw-c">g</span></span> <span class="tw-w"><span class="tw-c">w</span><span class="tw-c">i</span><span class="tw-c">t</span><span class="tw-c">h</span></span> <span class="tw-w"><span class="tw-c">p</span><span class="tw-c">a</span><span class="tw-c">t</span><span class="tw-c">i</span><span class="tw-c">e</span><span class="tw-c">n</span><span class="tw-c">c</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">h</span><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">t</span><span class="tw-c">.</span></span> <span class="tw-w"><span class="tw-c">Y</span><span class="tw-c">o</span><span class="tw-c">u</span></span> <span class="tw-w"><span class="tw-c">m</span><span class="tw-c">a</span><span class="tw-c">k</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">h</span><span class="tw-c">a</span><span class="tw-c">r</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">d</span><span class="tw-c">a</span><span class="tw-c">y</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">e</span><span class="tw-c">a</span><span class="tw-c">s</span><span class="tw-c">i</span><span class="tw-c">e</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">n</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">t</span><span class="tw-c">h</span><span class="tw-c">e</span></span> <span class="tw-w"><span class="tw-c">g</span><span class="tw-c">o</span><span class="tw-c">o</span><span class="tw-c">d</span></span> <span class="tw-w"><span class="tw-c">d</span><span class="tw-c">a</span><span class="tw-c">y</span><span class="tw-c">s</span></span> <span class="tw-w"><span class="tw-c">b</span><span class="tw-c">e</span><span class="tw-c">t</span><span class="tw-c">t</span><span class="tw-c">e</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">f</span><span class="tw-c">o</span><span class="tw-c">r</span></span> <span class="tw-w"><span class="tw-c">a</span><span class="tw-c">l</span><span class="tw-c">l</span></span> <span class="tw-w"><span class="tw-c">o</span><span class="tw-c">f</span></span> <span class="tw-w"><span class="tw-c">u</span><span class="tw-c">s</span><span class="tw-c">.</span></span></p>
         <p class="msg-sign" id="msg-sign-1">From all of us at YSE</p>
       </div>
     </section>
     <section class="clip scene scene-card" id="scene-closing" style="opacity: 0" data-start="58" data-duration="8" data-track-index="12">
       <div class="orb orb-a"></div>
       <div class="orb orb-b"></div>
-      <div class="card-inner">
-        <div class="eyebrow" id="closing-eyebrow">Happy Birthday, Nur-Aina</div>
-        <p class="closing-line" id="closing-line"><span class="w">Wishing</span> <span class="w">you</span> <span class="w">a</span> <span class="w">year</span> <span class="w">as</span> <span class="w">warm</span> <span class="w">and</span> <span class="w">generous</span> <span class="w">as</span> <span class="w">you</span> <span class="w">are.</span></p>
-        <div class="rule" id="closing-rule"></div>
-        <p class="from-line closing-sign" id="closing-sign">With love, your YSE Family</p>
+      <div class="scrap-wrap" id="closing-card">
+        <div class="scrap-card">
+          <div class="eyebrow scrap-eyebrow" id="closing-eyebrow">Happy Birthday, Nur-Aina</div>
+          <p class="closing-line" id="closing-line"><span class="w">Wishing</span> <span class="w">you</span> <span class="w">a</span> <span class="w">year</span> <span class="w">as</span> <span class="w">warm</span> <span class="w">and</span> <span class="w">generous</span> <span class="w">as</span> <span class="w">you</span> <span class="w">are.</span></p>
+          <div class="rule scrap-rule" id="closing-rule"></div>
+          <p class="closing-sign" id="closing-sign">With love, your YSE Family</p>
+        </div>
+        <div class="tape tape-left" id="tape-left"></div>
+        <div class="tape tape-right" id="tape-right"></div>
       </div>
     </section>
     </div>
@@ -233,10 +289,12 @@
       tl.fromTo("#scene-title .orb-a", { x: 0, y: 0 }, { x: -51, y: 33, duration: 5.5, ease: "sine.inOut" }, 0);
       tl.fromTo("#scene-title .orb-b", { x: 0, y: 0 }, { x: 39, y: -27, duration: 5.5, ease: "sine.inOut" }, 0);
       tl.fromTo("#title-eyebrow", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.15);
-      tl.fromTo("#title-name .w", { opacity: 0, y: 69, rotation: 4 }, { opacity: 1, y: 0, rotation: 0, duration: 0.7, ease: "power3.out", stagger: 0.12, transformOrigin: "50% 100%" }, 0.35);
-      tl.fromTo("#title-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, 1.35);
-      tl.fromTo("#title-role", { opacity: 0, y: 33 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 1.6);
-      tl.fromTo("#title-from", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.7, ease: "power1.out" }, 2.3);
+      tl.fromTo("#title-greeting .w", { opacity: 0, y: 69, rotation: 4 }, { opacity: 1, y: 0, rotation: 0, duration: 0.7, ease: "power3.out", stagger: 0.12, transformOrigin: "50% 100%" }, 0.35);
+      tl.fromTo("#title-name-left", { opacity: 0, x: -1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, 0.8);
+      tl.fromTo("#title-name-right", { opacity: 0, x: 1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, 0.87);
+      tl.fromTo("#title-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, 1.8);
+      tl.fromTo("#title-role", { opacity: 0, y: 33 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 2.05);
+      tl.fromTo("#title-from", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.7, ease: "power1.out" }, 2.6);
       tl.to("#scene-title", { opacity: 0, duration: 0.5, ease: "power1.in" }, 5);
       tl.fromTo("#scene-photo-0", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 5);
       tl.fromTo("#photo-img-0", { scale: 1.07, x: 0 }, { scale: 1.16, x: 27, duration: 5, ease: "sine.inOut" }, 5);
@@ -244,82 +302,104 @@
       tl.fromTo("#vignette-0", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, 5.3);
       tl.fromTo("#caption-0", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, 5.6);
       tl.fromTo("#caption-text-0", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 5.85);
-      tl.to("#scene-photo-0", { opacity: 0, duration: 0.5, ease: "power1.in" }, 10);
-      tl.fromTo("#scene-photo-1", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 10);
+      tl.to("#white-0", { opacity: 1, duration: 0.35, ease: "power1.in" }, 9.65);
+      tl.to("#scene-photo-0", { opacity: 0, duration: 0.01, ease: "none" }, 10);
+      tl.fromTo("#scene-photo-1", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, 10);
       tl.fromTo("#photo-img-1", { scale: 1.07, x: 0 }, { scale: 1.16, x: -27, duration: 5, ease: "sine.inOut" }, 10);
       tl.fromTo("#photo-img-1", { filter: "brightness(1.16) saturate(1.06)" }, { filter: "brightness(1) saturate(1)", duration: 1.2, ease: "power2.out" }, 10);
       tl.fromTo("#vignette-1", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, 10.3);
       tl.fromTo("#caption-1", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, 10.6);
       tl.fromTo("#caption-text-1", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 10.85);
-      tl.to("#scene-photo-1", { opacity: 0, duration: 0.5, ease: "power1.in" }, 15);
-      tl.fromTo("#scene-photo-2", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 15);
+      tl.to("#white-1", { opacity: 0, duration: 0.35, ease: "power1.out" }, 10);
+      tl.to("#white-1", { opacity: 1, duration: 0.35, ease: "power1.in" }, 14.65);
+      tl.to("#scene-photo-1", { opacity: 0, duration: 0.01, ease: "none" }, 15);
+      tl.fromTo("#scene-photo-2", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, 15);
       tl.fromTo("#photo-img-2", { scale: 1.07, x: 0 }, { scale: 1.16, x: 27, duration: 5, ease: "sine.inOut" }, 15);
       tl.fromTo("#photo-img-2", { filter: "brightness(1.16) saturate(1.06)" }, { filter: "brightness(1) saturate(1)", duration: 1.2, ease: "power2.out" }, 15);
       tl.fromTo("#vignette-2", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, 15.3);
       tl.fromTo("#caption-2", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, 15.6);
       tl.fromTo("#caption-text-2", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 15.85);
-      tl.to("#scene-photo-2", { opacity: 0, duration: 0.5, ease: "power1.in" }, 20);
-      tl.fromTo("#scene-photo-3", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 20);
+      tl.to("#white-2", { opacity: 0, duration: 0.35, ease: "power1.out" }, 15);
+      tl.to("#white-2", { opacity: 1, duration: 0.35, ease: "power1.in" }, 19.65);
+      tl.to("#scene-photo-2", { opacity: 0, duration: 0.01, ease: "none" }, 20);
+      tl.fromTo("#scene-photo-3", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, 20);
       tl.fromTo("#photo-img-3", { scale: 1.07, x: 0 }, { scale: 1.16, x: -27, duration: 5, ease: "sine.inOut" }, 20);
       tl.fromTo("#photo-img-3", { filter: "brightness(1.16) saturate(1.06)" }, { filter: "brightness(1) saturate(1)", duration: 1.2, ease: "power2.out" }, 20);
       tl.fromTo("#vignette-3", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, 20.3);
       tl.fromTo("#caption-3", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, 20.6);
       tl.fromTo("#caption-text-3", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 20.85);
-      tl.to("#scene-photo-3", { opacity: 0, duration: 0.5, ease: "power1.in" }, 25);
-      tl.fromTo("#scene-photo-4", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 25);
+      tl.to("#white-3", { opacity: 0, duration: 0.35, ease: "power1.out" }, 20);
+      tl.to("#white-3", { opacity: 1, duration: 0.35, ease: "power1.in" }, 24.65);
+      tl.to("#scene-photo-3", { opacity: 0, duration: 0.01, ease: "none" }, 25);
+      tl.fromTo("#scene-photo-4", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, 25);
       tl.fromTo("#photo-img-4", { scale: 1.07, x: 0 }, { scale: 1.16, x: 27, duration: 5, ease: "sine.inOut" }, 25);
       tl.fromTo("#photo-img-4", { filter: "brightness(1.16) saturate(1.06)" }, { filter: "brightness(1) saturate(1)", duration: 1.2, ease: "power2.out" }, 25);
       tl.fromTo("#vignette-4", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, 25.3);
       tl.fromTo("#caption-4", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, 25.6);
       tl.fromTo("#caption-text-4", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 25.85);
-      tl.to("#scene-photo-4", { opacity: 0, duration: 0.5, ease: "power1.in" }, 30);
-      tl.fromTo("#scene-photo-5", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 30);
+      tl.to("#white-4", { opacity: 0, duration: 0.35, ease: "power1.out" }, 25);
+      tl.to("#white-4", { opacity: 1, duration: 0.35, ease: "power1.in" }, 29.65);
+      tl.to("#scene-photo-4", { opacity: 0, duration: 0.01, ease: "none" }, 30);
+      tl.fromTo("#scene-photo-5", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, 30);
       tl.fromTo("#photo-img-5", { scale: 1.07, x: 0 }, { scale: 1.16, x: -27, duration: 5, ease: "sine.inOut" }, 30);
       tl.fromTo("#photo-img-5", { filter: "brightness(1.16) saturate(1.06)" }, { filter: "brightness(1) saturate(1)", duration: 1.2, ease: "power2.out" }, 30);
       tl.fromTo("#vignette-5", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, 30.3);
       tl.fromTo("#caption-5", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, 30.6);
       tl.fromTo("#caption-text-5", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 30.85);
-      tl.to("#scene-photo-5", { opacity: 0, duration: 0.5, ease: "power1.in" }, 35);
-      tl.fromTo("#scene-photo-6", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 35);
+      tl.to("#white-5", { opacity: 0, duration: 0.35, ease: "power1.out" }, 30);
+      tl.to("#white-5", { opacity: 1, duration: 0.35, ease: "power1.in" }, 34.65);
+      tl.to("#scene-photo-5", { opacity: 0, duration: 0.01, ease: "none" }, 35);
+      tl.fromTo("#scene-photo-6", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, 35);
       tl.fromTo("#photo-img-6", { scale: 1.07, x: 0 }, { scale: 1.16, x: 27, duration: 5, ease: "sine.inOut" }, 35);
       tl.fromTo("#photo-img-6", { filter: "brightness(1.16) saturate(1.06)" }, { filter: "brightness(1) saturate(1)", duration: 1.2, ease: "power2.out" }, 35);
       tl.fromTo("#vignette-6", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.out" }, 35.3);
       tl.fromTo("#caption-6", { y: 165 }, { y: 0, duration: 0.7, ease: "power3.out" }, 35.6);
       tl.fromTo("#caption-text-6", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 35.85);
+      tl.to("#white-6", { opacity: 0, duration: 0.35, ease: "power1.out" }, 35);
       tl.to("#scene-photo-6", { opacity: 0, duration: 0.5, ease: "power1.in" }, 40);
       tl.fromTo("#scene-collage", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 40);
       tl.fromTo("#scene-collage .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: 6.5, ease: "sine.inOut" }, 40);
       tl.fromTo("#scene-collage .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: 6.5, ease: "sine.inOut" }, 40);
       tl.fromTo("#collage-heading .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out", stagger: 0.09, transformOrigin: "50% 100%" }, 40.2);
-      tl.fromTo("#polaroid-0", { opacity: 0, scale: 0.45, y: 39, rotation: -19 }, { opacity: 1, scale: 1, y: 0, rotation: -5, duration: 0.6, ease: "back.out(1.7)" }, 40.55);
-      tl.fromTo("#polaroid-1", { opacity: 0, scale: 0.45, y: 39, rotation: -11 }, { opacity: 1, scale: 1, y: 0, rotation: 3, duration: 0.6, ease: "back.out(1.7)" }, 41);
-      tl.fromTo("#polaroid-2", { opacity: 0, scale: 0.45, y: 39, rotation: -17 }, { opacity: 1, scale: 1, y: 0, rotation: -3, duration: 0.6, ease: "back.out(1.7)" }, 41.449999999999996);
-      tl.to(".polaroid", { y: -10.5, duration: 1.5, ease: "sine.inOut", stagger: 0.12 }, 42.2);
-      tl.to(".polaroid", { y: 0, duration: 1.5, ease: "sine.inOut", stagger: 0.12 }, 43.7);
+      tl.fromTo("#polaroid-0", { opacity: 0, scale: 0.45, y: 39, rotation: -19 }, { opacity: 1, scale: 1, y: 0, rotation: -5, duration: 0.6, ease: "back.out(1.7)" }, 40.8);
+      tl.fromTo("#polaroid-cap-0", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, 44.6);
+      tl.fromTo("#polaroid-1", { opacity: 0, scale: 0.45, y: 39, rotation: -11 }, { opacity: 1, scale: 1, y: 0, rotation: 3, duration: 0.6, ease: "back.out(1.7)" }, 41.9);
+      tl.fromTo("#polaroid-cap-1", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, 44.72);
+      tl.fromTo("#polaroid-2", { opacity: 0, scale: 0.45, y: 39, rotation: -17 }, { opacity: 1, scale: 1, y: 0, rotation: -3, duration: 0.6, ease: "back.out(1.7)" }, 43);
+      tl.fromTo("#polaroid-cap-2", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, 44.84);
+      tl.fromTo("#accent-0", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 40.5);
+      tl.fromTo("#accent-1", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 41.45);
+      tl.fromTo("#accent-2", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 42.5);
+      tl.fromTo("#accent-3", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 43.55);
+      tl.fromTo("#accent-4", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 43.9);
+      tl.fromTo("#accent-5", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 44.25);
+      tl.to(".polaroid", { y: -10.5, duration: 0.9, ease: "sine.inOut", stagger: 0.1 }, 43.9);
+      tl.to(".polaroid", { y: 0, duration: 0.8, ease: "sine.inOut", stagger: 0.1 }, 45);
       tl.to("#scene-collage", { opacity: 0, duration: 0.5, ease: "power1.in" }, 46);
       tl.fromTo("#scene-msg-0", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 46);
       tl.fromTo("#scene-msg-0 .orb-a", { x: 0, y: 0 }, { x: -33, y: 21, duration: 6.5, ease: "sine.inOut" }, 46);
       tl.fromTo("#msg-card-0", { opacity: 0, y: 66, scale: 0.97, rotationX: 6, transformPerspective: 1350 }, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.85, ease: "power3.out" }, 46.25);
       tl.fromTo("#msg-quote-0", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)", transformOrigin: "50% 50%" }, 46.55);
-      tl.fromTo("#msg-text-0", { y: 15 }, { y: 0, duration: 0.7, ease: "power2.out" }, 46.8);
-      tl.fromTo("#msg-text-0 .sent", { opacity: 0 }, { opacity: 1, duration: 0.55, ease: "power1.out", stagger: 0.38 }, 46.8);
-      tl.fromTo("#msg-sign-0", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }, 48.1);
+      tl.fromTo("#msg-text-0 .tw-c", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05, ease: "none", stagger: 0.0411 }, 47);
+      tl.fromTo("#msg-sign-0", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 51.35);
       tl.to("#scene-msg-0", { opacity: 0, duration: 0.5, ease: "power1.in" }, 52);
       tl.fromTo("#scene-msg-1", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 52);
       tl.fromTo("#scene-msg-1 .orb-a", { x: 0, y: 0 }, { x: -33, y: 21, duration: 6.5, ease: "sine.inOut" }, 52);
       tl.fromTo("#msg-card-1", { opacity: 0, y: 66, scale: 0.97, rotationX: 6, transformPerspective: 1350 }, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.85, ease: "power3.out" }, 52.25);
       tl.fromTo("#msg-quote-1", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)", transformOrigin: "50% 50%" }, 52.55);
-      tl.fromTo("#msg-text-1", { y: 15 }, { y: 0, duration: 0.7, ease: "power2.out" }, 52.8);
-      tl.fromTo("#msg-text-1 .sent", { opacity: 0 }, { opacity: 1, duration: 0.55, ease: "power1.out", stagger: 0.38 }, 52.8);
-      tl.fromTo("#msg-sign-1", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }, 54.1);
+      tl.fromTo("#msg-text-1 .tw-c", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05, ease: "none", stagger: 0.0446 }, 53);
+      tl.fromTo("#msg-sign-1", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 57.35);
       tl.to("#scene-msg-1", { opacity: 0, duration: 0.5, ease: "power1.in" }, 58);
       tl.fromTo("#scene-closing", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 58);
       tl.fromTo("#scene-closing .orb-a", { x: 0, y: 0 }, { x: -45, y: 30, duration: 8, ease: "sine.inOut" }, 58);
       tl.fromTo("#scene-closing .orb-b", { x: 0, y: 0 }, { x: 36, y: -24, duration: 8, ease: "sine.inOut" }, 58);
-      tl.fromTo("#closing-eyebrow", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 58.25);
-      tl.fromTo("#closing-line .w", { opacity: 0, y: 51, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.65, ease: "power3.out", stagger: 0.07, transformOrigin: "50% 100%" }, 58.55);
-      tl.fromTo("#closing-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, 59.8);
-      tl.fromTo("#closing-sign", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8, ease: "power1.out" }, 60.2);
+      tl.fromTo("#closing-card", { opacity: 0, y: 72, rotation: -2.4 }, { opacity: 1, y: 0, rotation: -0.7, duration: 0.8, ease: "power3.out" }, 58.2);
+      tl.fromTo("#tape-left", { opacity: 0, y: -42, rotation: -52 }, { opacity: 1, y: 0, rotation: -38, duration: 0.5, ease: "power2.out" }, 58.6);
+      tl.fromTo("#tape-right", { opacity: 0, y: -42, rotation: 52 }, { opacity: 1, y: 0, rotation: 38, duration: 0.5, ease: "power2.out" }, 58.7);
+      tl.fromTo("#closing-eyebrow", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 58.75);
+      tl.fromTo("#closing-line .w", { opacity: 0, y: 51, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.65, ease: "power3.out", stagger: 0.07, transformOrigin: "50% 100%" }, 59.05);
+      tl.fromTo("#closing-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, 60.1);
+      tl.fromTo("#closing-sign", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8, ease: "power1.out" }, 60.55);
       tl.to("#scene-closing", { opacity: 1, duration: 5, ease: "none" }, 61);
       window.__timelines["main"] = tl;
       tl.seek(0);

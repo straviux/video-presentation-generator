@@ -1,14 +1,23 @@
-@font-face {
-  font-family: "Geist";
-  src: url("/fonts/geist-sans-variable.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Geist is loaded from the Fontsource CDN (see the <link> in index.html),
+   which declares the family as "Geist Variable". That name goes first in
+   the stack; tailwind.config.js still lists "Geist", so this rule (with
+   the body.font-sans selector to outrank the .font-sans utility) is what
+   makes the CDN family the effective UI font. Offline, it falls back to
+   system-ui / Segoe UI. The CDN CSS declares font-display: swap. */
+body,
+body.font-sans {
+  font-family: "Geist Variable", "Geist", system-ui, "Segoe UI", sans-serif;
+}
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
 
 /* ------------------------------------------------------------------ */
 /* Custom rules that Tailwind utilities cannot express. Most of these  */
@@ -281,7 +290,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Geist", system-ui, "Segoe UI", sans-serif;
+  font-family: "Geist Variable", "Geist", system-ui, "Segoe UI", sans-serif;
   font-size: 13px;
   color: rgba(247, 243, 232, 0.75);
   text-align: center;

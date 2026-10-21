@@ -237,6 +237,25 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
     }
 
     const fromLine = text(body.fromLine) || "Your YSE Family";
+
+    // Font picks for the four text slots (name, headings, captions,
+    // messages). The key list mirrors the font registry in lib/generate.mjs;
+    // unknown or missing keys fall back to the slot defaults, which are the
+    // template's original look.
+    const FONT_KEYS = [
+      "classic", "clean", "playfair", "fraunces", "dmserif", "greatvibes",
+      "caveat", "bebas", "geist", "jakarta", "outfit", "dmsans",
+    ];
+    const fontPick = (value, fallback) => {
+      const key = text(value);
+      return FONT_KEYS.includes(key) ? key : fallback;
+    };
+    const fonts = {
+      name: fontPick(body.fontName, "classic"),
+      headings: fontPick(body.fontHeadings, "classic"),
+      captions: fontPick(body.fontCaptions, "clean"),
+      messages: fontPick(body.fontMessages, "classic"),
+    };
     const shortName =
       text(body.celebrantShortName) ||
       celebrantName.split(/\s+/)[0].replace(/[^A-Za-zÀ-ÿ'-]/g, "");
@@ -280,6 +299,7 @@ app.post("/api/generate", upload.array("photos", 20), (req, res) => {
         photoIndexes: collageEnabled ? collageIndexes : [],
       },
       fromLine,
+      fonts,
       messages,
       occasion: "Birthday",
       photos,

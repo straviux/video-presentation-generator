@@ -55,13 +55,18 @@ no environment variables to set, on any platform.
      switch to skip the collage scene entirely.
 4. **Messages.** Up to two message cards, 6 seconds each, near the end of the
    video. Leave a message blank to skip it.
-5. **Check the summary.** The side panel lists every scene with its start
+5. **Fonts.** Use the Fonts tab to pick a font for each kind of text: the
+   celebrant name, the headings, the captions, and the message text. The
+   stage preview follows your picks. Picks beyond the two built-in stacks
+   load from Google Fonts, so keep the machine online while rendering;
+   offline, the video falls back to similar system fonts.
+6. **Check the summary.** The side panel lists every scene with its start
    time and shows the total runtime. Title 5s, photos 5s each, collage 6s,
    messages 6s each, closing 8s. Seven photos with the collage and two
    messages comes to 1:06.
-6. **Quick preview (optional).** A simple slideshow of your photos and words
+7. **Quick preview (optional).** A simple slideshow of your photos and words
    at the real scene lengths. The finished video adds the animations.
-7. **Generate Video.** The page shows progress while the scenes are built and
+8. **Generate Video.** The page shows progress while the scenes are built and
    the video renders. Rendering usually takes a few minutes for a one minute
    video, so keep the page open. When it finishes, the video plays right on
    the page and the Download MP4 button saves the file.

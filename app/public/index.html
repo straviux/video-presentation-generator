@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Video Presentation Generator</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@latest/index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@600;700&family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&family=Fraunces:wght@600;700&family=Geist:wght@400;600;700&family=Great+Vibes&family=Outfit:wght@400;600;700&family=Playfair+Display:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body class="m-0 h-full font-sans bg-canvas text-ink flex flex-col overflow-hidden">
@@ -45,6 +50,10 @@
         <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelCollage">
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
           Collage
+        </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelFonts">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
+          Fonts
         </button>
       </nav>
 
@@ -109,6 +118,71 @@
           <label class="field-label" for="collageHeading">Collage heading</label>
           <input type="text" class="field-input" id="collageHeading" value="Moments together" />
           <p class="warn" id="collageWarn">The collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
+        </section>
+
+        <section class="panel p-[18px]" id="panelFonts">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Fonts</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Pick a different font for each kind of text in the video. The stage preview follows your picks. The fonts load from Google Fonts, so the preview and the render need an internet connection; without one, each pick falls back to a similar system font.</p>
+          <label class="field-label" for="fontName">Name, the celebrant name on the title card</label>
+          <select class="field-input" id="fontName">
+            <option value="classic" style="font-family: Georgia, 'Times New Roman', serif" selected>Classic Serif</option>
+            <option value="clean" style="font-family: Arial, Helvetica, sans-serif">Clean Sans</option>
+            <option value="playfair" style="font-family: 'Playfair Display', Georgia, serif">Playfair Display</option>
+            <option value="fraunces" style="font-family: 'Fraunces', Georgia, serif">Fraunces</option>
+            <option value="dmserif" style="font-family: 'DM Serif Display', Georgia, serif">DM Serif Display</option>
+            <option value="greatvibes" style="font-family: 'Great Vibes', cursive">Great Vibes</option>
+            <option value="caveat" style="font-family: 'Caveat', cursive">Caveat</option>
+            <option value="bebas" style="font-family: 'Bebas Neue', 'Arial Narrow', sans-serif">Bebas Neue</option>
+            <option value="geist" style="font-family: 'Geist', system-ui, sans-serif">Geist</option>
+            <option value="jakarta" style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif">Plus Jakarta Sans</option>
+            <option value="outfit" style="font-family: 'Outfit', system-ui, sans-serif">Outfit</option>
+            <option value="dmsans" style="font-family: 'DM Sans', system-ui, sans-serif">DM Sans</option>
+          </select>
+          <label class="field-label" for="fontHeadings">Headings, greeting, collage and closing lines</label>
+          <select class="field-input" id="fontHeadings">
+            <option value="classic" style="font-family: Georgia, 'Times New Roman', serif" selected>Classic Serif</option>
+            <option value="clean" style="font-family: Arial, Helvetica, sans-serif">Clean Sans</option>
+            <option value="playfair" style="font-family: 'Playfair Display', Georgia, serif">Playfair Display</option>
+            <option value="fraunces" style="font-family: 'Fraunces', Georgia, serif">Fraunces</option>
+            <option value="dmserif" style="font-family: 'DM Serif Display', Georgia, serif">DM Serif Display</option>
+            <option value="greatvibes" style="font-family: 'Great Vibes', cursive">Great Vibes</option>
+            <option value="caveat" style="font-family: 'Caveat', cursive">Caveat</option>
+            <option value="bebas" style="font-family: 'Bebas Neue', 'Arial Narrow', sans-serif">Bebas Neue</option>
+            <option value="geist" style="font-family: 'Geist', system-ui, sans-serif">Geist</option>
+            <option value="jakarta" style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif">Plus Jakarta Sans</option>
+            <option value="outfit" style="font-family: 'Outfit', system-ui, sans-serif">Outfit</option>
+            <option value="dmsans" style="font-family: 'DM Sans', system-ui, sans-serif">DM Sans</option>
+          </select>
+          <label class="field-label" for="fontCaptions">Captions, on photos and polaroids</label>
+          <select class="field-input" id="fontCaptions">
+            <option value="classic" style="font-family: Georgia, 'Times New Roman', serif">Classic Serif</option>
+            <option value="clean" style="font-family: Arial, Helvetica, sans-serif" selected>Clean Sans</option>
+            <option value="playfair" style="font-family: 'Playfair Display', Georgia, serif">Playfair Display</option>
+            <option value="fraunces" style="font-family: 'Fraunces', Georgia, serif">Fraunces</option>
+            <option value="dmserif" style="font-family: 'DM Serif Display', Georgia, serif">DM Serif Display</option>
+            <option value="greatvibes" style="font-family: 'Great Vibes', cursive">Great Vibes</option>
+            <option value="caveat" style="font-family: 'Caveat', cursive">Caveat</option>
+            <option value="bebas" style="font-family: 'Bebas Neue', 'Arial Narrow', sans-serif">Bebas Neue</option>
+            <option value="geist" style="font-family: 'Geist', system-ui, sans-serif">Geist</option>
+            <option value="jakarta" style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif">Plus Jakarta Sans</option>
+            <option value="outfit" style="font-family: 'Outfit', system-ui, sans-serif">Outfit</option>
+            <option value="dmsans" style="font-family: 'DM Sans', system-ui, sans-serif">DM Sans</option>
+          </select>
+          <label class="field-label" for="fontMessages">Messages, the greeting card text</label>
+          <select class="field-input" id="fontMessages">
+            <option value="classic" style="font-family: Georgia, 'Times New Roman', serif" selected>Classic Serif</option>
+            <option value="clean" style="font-family: Arial, Helvetica, sans-serif">Clean Sans</option>
+            <option value="playfair" style="font-family: 'Playfair Display', Georgia, serif">Playfair Display</option>
+            <option value="fraunces" style="font-family: 'Fraunces', Georgia, serif">Fraunces</option>
+            <option value="dmserif" style="font-family: 'DM Serif Display', Georgia, serif">DM Serif Display</option>
+            <option value="greatvibes" style="font-family: 'Great Vibes', cursive">Great Vibes</option>
+            <option value="caveat" style="font-family: 'Caveat', cursive">Caveat</option>
+            <option value="bebas" style="font-family: 'Bebas Neue', 'Arial Narrow', sans-serif">Bebas Neue</option>
+            <option value="geist" style="font-family: 'Geist', system-ui, sans-serif">Geist</option>
+            <option value="jakarta" style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif">Plus Jakarta Sans</option>
+            <option value="outfit" style="font-family: 'Outfit', system-ui, sans-serif">Outfit</option>
+            <option value="dmsans" style="font-family: 'DM Sans', system-ui, sans-serif">DM Sans</option>
+          </select>
         </section>
       </div>
 
@@ -348,6 +422,39 @@
         });
       });
 
+      // ------------------------------------------------------------ fonts --
+      // Font stacks mirroring the generator registry in lib/generate.mjs.
+      // The pool webfonts load from Google Fonts in the page head, so the
+      // preview can show the real faces.
+      const FONT_STACKS = {
+        classic: 'Georgia, "Times New Roman", serif',
+        clean: "Arial, Helvetica, sans-serif",
+        playfair: '"Playfair Display", Georgia, serif',
+        fraunces: '"Fraunces", Georgia, serif',
+        dmserif: '"DM Serif Display", Georgia, serif',
+        greatvibes: '"Great Vibes", cursive',
+        caveat: '"Caveat", cursive',
+        bebas: '"Bebas Neue", "Arial Narrow", sans-serif',
+        geist: '"Geist", system-ui, sans-serif',
+        jakarta: '"Plus Jakarta Sans", system-ui, sans-serif',
+        outfit: '"Outfit", system-ui, sans-serif',
+        dmsans: '"DM Sans", system-ui, sans-serif',
+      };
+      function applyPreviewFonts() {
+        const stage = $("stage");
+        const nameStack = FONT_STACKS[$("fontName").value] || FONT_STACKS.classic;
+        const headStack = FONT_STACKS[$("fontHeadings").value] || FONT_STACKS.classic;
+        const capStack = FONT_STACKS[$("fontCaptions").value] || FONT_STACKS.clean;
+        const msgStack = FONT_STACKS[$("fontMessages").value] || FONT_STACKS.classic;
+        stage.querySelectorAll(".pv-name").forEach((el) => { el.style.fontFamily = nameStack; });
+        stage.querySelectorAll(".pv-eyebrow, .pv-greeting, .pv-title").forEach((el) => { el.style.fontFamily = headStack; });
+        stage.querySelectorAll(".pv-caption").forEach((el) => { el.style.fontFamily = capStack; });
+        stage.querySelectorAll(".pv-msg-text, .pv-sign").forEach((el) => { el.style.fontFamily = msgStack; });
+      }
+      for (const id of ["fontName", "fontHeadings", "fontCaptions", "fontMessages"]) {
+        $(id).addEventListener("change", applyPreviewFonts);
+      }
+
       // ------------------------------------------------------ quick preview --
       let previewTimer = null;
       function setPreviewButton(playing) {
@@ -392,8 +499,8 @@
           } else if (sc.kind === "message") {
             el.className = "pv-scene";
             const msg = filledMessages()[sc.index];
-            el.innerHTML = "<div class='pv-msg'><div></div><div class='pv-sign'></div></div>";
-            el.querySelector(".pv-msg div").textContent = msg.text;
+            el.innerHTML = "<div class='pv-msg'><div class='pv-msg-text'></div><div class='pv-sign'></div></div>";
+            el.querySelector(".pv-msg-text").textContent = msg.text;
             el.querySelector(".pv-sign").textContent = msg.signedBy;
           } else if (sc.kind === "closing") {
             el.className = "pv-scene";
@@ -403,8 +510,8 @@
             el.querySelector(".pv-small").textContent = $("closingSignOff").value.trim();
           } else {
             el.className = "pv-scene";
-            el.innerHTML = "<div><div class='pv-eyebrow'>Happy Birthday</div><div class='pv-title'></div><div class='pv-small'></div></div>";
-            el.querySelector(".pv-title").textContent = "Happy Birthday, " + short + "!";
+            el.innerHTML = "<div><div class='pv-eyebrow'>Happy Birthday</div><div class='pv-title'><span class='pv-greeting'>Happy Birthday,</span> <span class='pv-name'></span></div><div class='pv-small'></div></div>";
+            el.querySelector(".pv-name").textContent = short + "!";
             el.querySelector(".pv-small").textContent =
               name + " · " + $("role").value.trim() + "  |  " + $("fromLine").value.trim();
           }
@@ -416,6 +523,7 @@
         if (photos.length === 0) { $("previewLabel").textContent = "Add photos first"; return; }
         if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
         const built = buildPreviewScenes(computeScenes());
+        applyPreviewFonts();
         let idx = Math.min(Math.max(fromIdx, 0), built.length - 1);
         const show = () => {
           built.forEach((b) => b.el.classList.remove("active"));
@@ -484,6 +592,10 @@
         form.append("closingSignOff", $("closingSignOff").value.trim());
         form.append("collageHeading", $("collageHeading").value.trim());
         form.append("collageEnabled", $("collageEnabled").checked ? "true" : "false");
+        form.append("fontName", $("fontName").value);
+        form.append("fontHeadings", $("fontHeadings").value);
+        form.append("fontCaptions", $("fontCaptions").value);
+        form.append("fontMessages", $("fontMessages").value);
         for (const n of [1, 2]) {
           form.append("message" + n + "Text", $("message" + n + "Text").value);
           form.append("message" + n + "SignedBy", $("message" + n + "SignedBy").value);

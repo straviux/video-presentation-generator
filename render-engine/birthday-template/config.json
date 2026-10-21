@@ -1,1 +1,63 @@
-{"celebrantName":"Nur-Aina Ibrahim","celebrantShortName":"Nur-Aina","closingLine":"Wishing you a year as warm and generous as you are.","closingSignOff":"With love, your YSE Family","collage":{"heading":"Moments together","photoIndexes":[0,2,4]},"fromLine":"From your YSE Family","messages":[{"signedBy":"Your YSE Family","text":"You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely."},{"signedBy":"From all of us at YSE","text":"Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us."}],"occasion":"Birthday","photos":[{"caption":"A year of good work and good people","file":"assets/photos/photo-1.jpg"},{"caption":"Moments worth keeping","file":"assets/photos/photo-2.jpg"},{"caption":"Through every season of the work","file":"assets/photos/photo-3.jpg"},{"caption":"The people who make the office feel like family","file":"assets/photos/photo-4.jpg"},{"caption":"Small celebrations, big gratitude","file":"assets/photos/photo-5.jpg"},{"caption":"More memories than we can count","file":"assets/photos/photo-6.jpg"},{"caption":"And many more to come","file":"assets/photos/photo-7.jpg"}],"role":"Program Manager"}
+{
+  "celebrantName": "Nur-Aina Ibrahim",
+  "celebrantShortName": "Nur-Aina",
+  "closingLine": "Wishing you a year as warm and generous as you are.",
+  "closingSignOff": "With love, your YSE Family",
+  "collage": {
+    "heading": "Moments together",
+    "photoIndexes": [
+      0,
+      2,
+      4
+    ]
+  },
+  "fromLine": "From your YSE Family",
+  "fonts": {
+    "name": "classic",
+    "headings": "classic",
+    "captions": "clean",
+    "messages": "classic"
+  },
+  "messages": [
+    {
+      "signedBy": "Your YSE Family",
+      "text": "You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely."
+    },
+    {
+      "signedBy": "From all of us at YSE",
+      "text": "Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us."
+    }
+  ],
+  "occasion": "Birthday",
+  "photos": [
+    {
+      "caption": "A year of good work and good people",
+      "file": "assets/photos/photo-1.jpg"
+    },
+    {
+      "caption": "Moments worth keeping",
+      "file": "assets/photos/photo-2.jpg"
+    },
+    {
+      "caption": "Through every season of the work",
+      "file": "assets/photos/photo-3.jpg"
+    },
+    {
+      "caption": "The people who make the office feel like family",
+      "file": "assets/photos/photo-4.jpg"
+    },
+    {
+      "caption": "Small celebrations, big gratitude",
+      "file": "assets/photos/photo-5.jpg"
+    },
+    {
+      "caption": "More memories than we can count",
+      "file": "assets/photos/photo-6.jpg"
+    },
+    {
+      "caption": "And many more to come",
+      "file": "assets/photos/photo-7.jpg"
+    }
+  ],
+  "role": "Program Manager"
+}

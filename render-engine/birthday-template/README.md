@@ -25,16 +25,46 @@ config.json  --(node generate.mjs)-->  index.html  --(hyperframes render)-->  re
 - GSAP is loaded from a local copy at `assets/gsap.min.js`, so renders work
   offline with no CDN dependency.
 
+## Fonts
+
+Text comes in four slots, each with its own font pick in `config.json` under
+`fonts`:
+
+- `name`: the celebrant name on the title card (the split reveal chunks)
+- `headings`: the title greeting line and eyebrow, the collage heading, and
+  the closing line and eyebrow
+- `captions`: photo captions and collage polaroid captions
+- `messages`: message card text, the quote mark, and the signer lines
+
+The title subtitle, from line, and closing sign-off keep their original
+stacks and are not part of the slots.
+
+Picks come from a curated pool defined in `generate.mjs`: `classic` (Georgia
+serif), `clean` (Arial sans), `playfair` (Playfair Display), `fraunces`,
+`dmserif` (DM Serif Display), `greatvibes` (Great Vibes), `caveat`, `bebas`
+(Bebas Neue), `geist`, `jakarta` (Plus Jakarta Sans), `outfit`, and `dmsans`
+(DM Sans). The defaults (`classic`, `classic`, `clean`, `classic`) reproduce
+the template's original look. Unknown or missing keys fall back to the slot
+defaults.
+
+Picks beyond `classic` and `clean` load from Google Fonts: the generator
+writes one stylesheet link covering exactly the selected families and
+weights. That means **rendering with webfont picks needs an internet
+connection**; without one, the text renders in the fallback stack named in
+each pick (a similar serif, sans, or cursive). Script picks (`greatvibes`,
+`caveat`) used for the name get an automatic size bump, since script faces
+run small at the title size.
+
 ## Scene timing
 
 | Scene | Time | Duration | What happens |
 |---|---|---|---|
-| Title card | 0:00-0:05 | 5s | "Happy Birthday, [Name]!" Title words stagger up one by one, gold rule grows from the center, name, role, and from line follow, background orbs drift |
-| Photo montage | 0:05-0:40 | 7 x 5s = 35s | One photo per beat, slow Ken Burns zoom with a brightness settle as each photo lands, soft vignette, caption bar slides up and the caption text follows, gentle fade between photos |
-| Photo collage | 0:40-0:46 | 6s | Heading words stagger in, 3 photos in polaroid frames pop in one by one with a rotation settle, then a gentle idle float |
-| Message card 1 | 0:46-0:52 | 6s | Card rises with a slight tilt, quote mark pops in, message sentences fade in one by one, signer line slides in last |
+| Title card | 0:00-0:05 | 5s | "Happy Birthday," greeting words stagger up first, then the celebrant name arrives as a split reveal: the first chunk slides in from the left, the rest from the right, and they meet at center as one line. Gold rule grows once the name settles, role and from line follow, background orbs drift |
+| Photo montage | 0:05-0:40 | 7 x 5s = 35s | One photo per beat, slow Ken Burns zoom with a brightness settle as each photo lands, soft vignette, caption bar slides up and the caption text follows. Between photos the picture fades through white (white ramps up over the last 0.35s and lifts over the first 0.35s of the next photo); the montage edges keep a plain crossfade |
+| Photo collage | 0:40-0:46 | 6s | Heading words stagger in, then the scene builds itself: 3 polaroid photos pop in one at a time about a second apart with a rotation settle, small gold hearts, stars, and dots pop in between them, the photo captions fade in late, then a gentle idle float |
+| Message card 1 | 0:46-0:52 | 6s | Card rises with a slight tilt, quote mark pops in, then the message types on character by character (fitted to finish in about 4.2s), signer line slides in after the typing |
 | Message card 2 | 0:52-0:58 | 6s | Second greeting and signer, same choreography |
-| Closing card | 0:58-1:06 | 8s | Closing line words stagger up, rule grows, sign-off fades in, held to the end |
+| Closing card | 0:58-1:06 | 8s | A scrapbook card lands at a slight tilt on the green background: warm paper with torn edges, two translucent tape strips settling onto its top corners. Closing line words stagger up on the paper, a deeper bronze rule grows, and the sign-off fades in last in italic serif like a handwritten note, held to the end |
 | **Total** | | **66s** | |
 
 Sample content: a birthday video for Nur-Aina Ibrahim, Program Manager, with
@@ -79,6 +109,8 @@ ffprobe renders/birthday-sample.mp4
    - `collage.photoIndexes`: which photos (zero-based positions in the
      `photos` list) appear in the collage; exactly 3
    - `messages`: exactly 2 entries, `text` plus `signedBy`
+   - `fonts`: one pick per text slot (`name`, `headings`, `captions`,
+     `messages`) from the pool in the Fonts section above
    - `closingLine`, `closingSignOff`, `fromLine`
 3. Re-run `node generate.mjs`, then the render command above.
 4. The new MP4 lands wherever you point `-o`; rename it per person, for
