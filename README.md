@@ -34,16 +34,15 @@ Windows:
 winget install Gyan.FFmpeg
 ```
 
-Then, in this project folder:
+Then, in this project folder (the root has shortcuts, the two installs live in the subfolders):
 
 ```powershell
-cd render-engine
-npm install
-npx hyperframes browser ensure
-cd ..\app
-npm install
+npm run setup
+npm run setup:browser
 npm start
 ```
+
+`npm run setup` installs dependencies for both `render-engine` and `app`, `npm run setup:browser` downloads the headless Chrome HyperFrames renders with, and `npm start` starts the app.
 
 Open http://localhost:3210 in your browser.
 
