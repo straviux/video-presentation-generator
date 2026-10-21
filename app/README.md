@@ -45,16 +45,16 @@ no environment variables to set, on any platform.
 
 1. **Event type.** Birthday is the only working type in this version.
 2. **Details.** Celebrant name, short name for the title, role, from line,
-   closing line, closing sign-off, and collage heading. All of these appear in
-   the video, so read them once before generating.
+   closing line, closing sign-off, and the two collage headings. All of
+   these appear in the video, so read them once before generating.
 3. **Photos.** Add JPG, PNG, or WebP photos.
    - Each photo gets 5 seconds in the montage, in the order shown. Use the
      Up and Down buttons to reorder, Remove to drop one.
    - Type a caption for each photo if you want one on screen.
-   - For the photo collage, tick exactly 3 photos, or untick the collage
-     switch to skip the collage scene entirely.
-4. **Messages.** Up to two message cards, 6 seconds each, near the end of the
-   video. Leave a message blank to skip it.
+   - For the photo collage, tick exactly 3 photos, or untick the photo
+     collage switch in the Collage tab to skip that scene entirely.
+4. **Messages.** Up to two message cards, 6 seconds each. Leave a message
+   blank to skip it. The Scenes tab decides where in the video they play.
 5. **Fonts.** Use the Fonts tab to pick a font for each kind of text: the
    celebrant name, the headings, the captions, and the message text. The
    stage preview follows your picks. Picks beyond the two built-in stacks
@@ -67,22 +67,30 @@ no environment variables to set, on any platform.
    light backdrops, so the words on them turn dark automatically. Photos
    stay full screen in every backdrop, and the paper cards keep their
    paper.
-7. **Collage.** In the Collage tab, pick the style. Photos shows the 3
-   ticked photos as polaroids. Text cards shows up to 4 short greeting
-   cards instead; write at least 2 cards with text. Either way the scene
-   runs 6 seconds, and the switch on the same tab can skip it entirely.
-8. **Music (optional).** In the Music tab, add one MP3, M4A, WAV, or OGG
+7. **Collage.** The Collage tab holds two separate scenes, and both can
+   be in the same video. The photo collage shows the 3 ticked photos as
+   polaroids under its own heading. The text collage shows up to 4 short
+   greeting cards under its own heading instead; write at least 2 cards
+   with text. Each scene runs 6 seconds, and each has its own switch.
+8. **Scenes.** In the Scenes tab, drag the middle scenes into the order
+   you want with the Up and Down buttons: Photos, Photo collage, Text
+   collage, and Messages. The title card always opens the video and the
+   closing card always ends it. Scenes that are off or empty are marked
+   Off and are skipped, and the total runtime grows or shrinks to match,
+   so a video with everything switched on runs longer than a minute.
+9. **Music (optional).** In the Music tab, add one MP3, M4A, WAV, or OGG
    track and set its volume. The track is added after the video renders:
    it loops if it is shorter than the video, fades in at the start, and
    fades out at the end. Leave it empty for a silent video, and only use
    music you have the right to use.
-9. **Check the summary.** The side panel lists every scene with its start
-   time and shows the total runtime. Title 5s, photos 5s each, collage 6s,
-   messages 6s each, closing 8s. Seven photos with the collage and two
-   messages comes to 1:06.
-10. **Quick preview (optional).** A simple slideshow of your photos and words
-   at the real scene lengths. The finished video adds the animations.
-11. **Generate Video.** The page shows progress while the scenes are built and
+10. **Check the summary.** The side panel lists every scene with its start
+   time and shows the total runtime. Title 5s, photos 5s each, each
+   collage 6s, messages 6s each, closing 8s. Seven photos with both
+   collages and two messages comes to 1:12.
+11. **Quick preview (optional).** A simple slideshow of your photos and words
+   at the real scene lengths, in the order set on the Scenes tab. The
+   finished video adds the animations.
+12. **Generate Video.** The page shows progress while the scenes are built and
    the video renders. Rendering usually takes a few minutes for a one minute
    video, so keep the page open. When it finishes, the video plays right on
    the page and the Download MP4 button saves the file.
@@ -108,8 +116,9 @@ no environment variables to set, on any platform.
 - Photos are center-cropped to fill the 16:9 frame. There is no crop or
   position control yet.
 - Output is fixed at 1920x1080, 30fps, rendered with the delivery quality
-  preset. The video runs about one minute depending on how many photos and
-  messages you add.
+  preset. The length depends on how many photos and messages you add and
+  which scenes are switched on: about a minute for a typical video, longer
+  with everything on.
 
 ## Passing it to another machine
 

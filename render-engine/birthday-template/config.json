@@ -5,31 +5,37 @@
   "closingLine": "Wishing you a year as warm and generous as you are.",
   "closingSignOff": "With love, your YSE Family",
   "collage": {
-    "cards": [
-      {
-        "from": "The Programs Team",
-        "text": "Happiest birthday, Nur-Aina! Your kindness keeps this whole office going."
-      },
-      {
-        "from": "The Finance Team",
-        "text": "Thank you for leading with patience and heart. Enjoy your day, you have earned it."
-      },
-      {
-        "from": "The Field Team",
-        "text": "Wishing you good health, good food, and zero paperwork today."
-      },
-      {
-        "from": "Everyone at YSE",
-        "text": "We are lucky to work with you. Happy birthday!"
-      }
-    ],
-    "heading": "Moments together",
-    "mode": "photos",
-    "photoIndexes": [
-      0,
-      2,
-      4
-    ]
+    "photo": {
+      "enabled": true,
+      "heading": "Moments together",
+      "photoIndexes": [
+        0,
+        2,
+        4
+      ]
+    },
+    "text": {
+      "cards": [
+        {
+          "from": "The Programs Team",
+          "text": "Happiest birthday, Nur-Aina! Your kindness keeps this whole office going."
+        },
+        {
+          "from": "The Finance Team",
+          "text": "Thank you for leading with patience and heart. Enjoy your day, you have earned it."
+        },
+        {
+          "from": "The Field Team",
+          "text": "Wishing you good health, good food, and zero paperwork today."
+        },
+        {
+          "from": "Everyone at YSE",
+          "text": "We are lucky to work with you. Happy birthday!"
+        }
+      ],
+      "enabled": false,
+      "heading": "Kind words"
+    }
   },
   "fromLine": "From your YSE Family",
   "fonts": {
@@ -79,5 +85,11 @@
       "file": "assets/photos/photo-7.jpg"
     }
   ],
-  "role": "Program Manager"
+  "role": "Program Manager",
+  "sceneOrder": [
+    "photos",
+    "photoCollage",
+    "textCollage",
+    "messages"
+  ]
 }

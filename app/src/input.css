@@ -48,28 +48,49 @@ select {
   line-height: 1.5;
 }
 
-/* Collage style toggle (Photos / Text cards) in the Collage panel */
-.mode-opt {
+/* Scenes panel rows (built by JS): order controls for the middle blocks */
+.scene-row {
   display: flex;
   align-items: center;
-  gap: 7px;
-  flex: 1;
+  gap: 8px;
+  padding: 8px 10px;
   border: 1px solid #e3e3ea;
   border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
+  margin-bottom: 8px;
   background: #fff;
-  cursor: pointer;
 }
-.mode-opt.active {
-  border-color: #8b3dff;
-  background: #f1e8ff;
+.scene-row-name {
+  font-size: 13.5px;
   font-weight: 600;
 }
-
-/* In text collage mode the per-photo collage ticks do not apply */
-#photoList.text-mode .collage-check {
-  opacity: 0.45;
+.scene-row-dur {
+  color: #6b6b78;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.scene-row-off {
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: #ececf1;
+  color: #6b6b78;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.scene-row-spacer {
+  flex: 1;
+}
+.scene-row.locked {
+  background: #fafafc;
+  color: #6b6b78;
+}
+.scene-row-lock {
+  margin-left: auto;
+  display: inline-flex;
+}
+.scene-row-lock svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* Photo list (built by JS) */

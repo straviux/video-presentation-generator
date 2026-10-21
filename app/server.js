@@ -295,16 +295,16 @@ app.post(
     const asArray = (v) => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
     const captions = asArray(body.captions).map((c) => String(c ?? ""));
     const collageEnabled = text(body.collageEnabled) === "true";
-    const collageMode = text(body.collageMode) === "text" ? "text" : "photos";
     const collageIndexes = asArray(body.collageIndexes)
       .map((v) => Number.parseInt(v, 10))
       .filter((n) => Number.isInteger(n) && n >= 0 && n < files.length);
-    if (collageEnabled && collageMode === "photos" && collageIndexes.length !== 3) {
+    if (collageEnabled && collageIndexes.length !== 3) {
       return res.status(400).json({
         error:
-          "The collage needs exactly 3 photos. Tick 3 photos for the collage, or turn the collage off.",
+          "The photo collage needs exactly 3 photos. Tick 3 photos for the collage, or turn the photo collage off.",
       });
     }
+    const textCollageEnabled = text(body.textCollageEnabled) === "true";
 
     // Text collage cards: pair the card texts with their signers, cap at 4,
     // and drop pairs where both are empty.
@@ -316,10 +316,10 @@ app.post(
       const cardFrom = String(cardFroms[i] ?? "").trim();
       if (cardText || cardFrom) collageCards.push({ text: cardText, from: cardFrom });
     }
-    if (collageEnabled && collageMode === "text" && collageCards.filter((c) => c.text).length < 2) {
+    if (textCollageEnabled && collageCards.filter((c) => c.text).length < 2) {
       return res.status(400).json({
         error:
-          "The text collage needs at least 2 greeting cards with text. Add more cards, or turn the collage off.",
+          "The text collage needs at least 2 greeting cards with text. Add more cards, or turn the text collage off.",
       });
     }
 
@@ -373,6 +373,19 @@ app.post(
     const closingSignOff =
       text(body.closingSignOff) || `With love, ${fromLine.replace(/^From\s+/i, "")}`;
 
+    // Scene order for the four middle blocks, sanitized exactly like the
+    // generator does it: unknown keys dropped, duplicates removed, and
+    // blocks missing from the list appended in the default order.
+    const SCENE_ORDER_KEYS = ["photos", "photoCollage", "textCollage", "messages"];
+    const sceneOrder = [];
+    for (const key of text(body.sceneOrder).split(",")) {
+      const k = key.trim();
+      if (SCENE_ORDER_KEYS.includes(k) && !sceneOrder.includes(k)) sceneOrder.push(k);
+    }
+    for (const k of SCENE_ORDER_KEYS) {
+      if (!sceneOrder.includes(k)) sceneOrder.push(k);
+    }
+
     // --- create the job folder -------------------------------------------
     const jobId = `${new Date().toISOString().slice(0, 10)}-${randomUUID().slice(0, 8)}`;
     const jobDir = path.join(JOBS_DIR, jobId);
@@ -406,12 +419,18 @@ app.post(
         text(body.closingLine) || "Wishing you a year as warm and generous as you are.",
       closingSignOff,
       collage: {
-        enabled: collageEnabled,
-        heading: text(body.collageHeading) || "Moments together",
-        mode: collageMode,
-        cards: collageCards,
-        photoIndexes: collageEnabled && collageMode === "photos" ? collageIndexes : [],
+        photo: {
+          enabled: collageEnabled,
+          heading: text(body.collageHeading) || "Moments together",
+          photoIndexes: collageEnabled ? collageIndexes : [],
+        },
+        text: {
+          enabled: textCollageEnabled,
+          heading: text(body.textCollageHeading) || "Kind words",
+          cards: collageCards,
+        },
       },
+      sceneOrder,
       fromLine,
       fonts,
       messages,
@@ -464,7 +483,12 @@ app.post(
     );
 
     const totalSeconds =
-      5 + photos.length * 5 + (collageEnabled ? 6 : 0) + messages.length * 6 + 8;
+      5 +
+      photos.length * 5 +
+      (collageEnabled ? 6 : 0) +
+      (textCollageEnabled ? 6 : 0) +
+      messages.length * 6 +
+      8;
 
     const job = {
       id: jobId,

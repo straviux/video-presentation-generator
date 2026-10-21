@@ -51,6 +51,10 @@
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
           Collage
         </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelScenes">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="21" y1="6" y2="6"/><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+          Scenes
+        </button>
         <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelFonts">
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
           Fonts
@@ -105,7 +109,7 @@
 
         <section class="panel p-[18px]" id="panelMessages">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Messages</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards, shown near the end of the video. Each one gets 6 seconds. Leave a message blank to skip it.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards. Each one gets 6 seconds. Leave a message blank to skip it. Use the Scenes tab to choose where they play.</p>
           <label class="field-label" for="message1Text">Message 1</label>
           <textarea class="field-input" id="message1Text">You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.</textarea>
           <label class="field-label" for="message1SignedBy">Signed by</label>
@@ -118,24 +122,27 @@
 
         <section class="panel p-[18px]" id="panelCollage">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Collage</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">A 6 second scene after the montage. Show 3 photos together as polaroids, or show greeting cards as text instead.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Two optional scenes, each 6 seconds. The photo collage shows 3 photos together as polaroids; the text collage shows greeting cards. Both can appear in the same video. Use the Scenes tab to choose where each one plays.</p>
+          <h3 class="m-0 mb-1 text-[13.5px] font-semibold">Photo collage</h3>
           <div class="flex items-center gap-2.5 mt-1">
             <input type="checkbox" id="collageEnabled" checked class="w-[18px] h-[18px] accent-[#8b3dff]" />
-            <span class="text-[13.5px] font-semibold">Include the collage scene</span>
+            <span class="text-[13.5px] font-semibold">Include the photo collage scene</span>
           </div>
-          <label class="field-label" for="collageHeading">Collage heading</label>
+          <label class="field-label" for="collageHeading">Photo collage heading</label>
           <input type="text" class="field-input" id="collageHeading" value="Moments together" />
-          <span class="field-label">Collage style</span>
-          <div class="flex gap-2" role="radiogroup" aria-label="Collage style">
-            <label class="mode-opt active" id="collageModePhotosWrap"><input type="radio" name="collageMode" id="collageModePhotos" value="photos" checked class="accent-[#8b3dff]" /> Photos</label>
-            <label class="mode-opt" id="collageModeTextWrap"><input type="radio" name="collageMode" id="collageModeText" value="text" class="accent-[#8b3dff]" /> Text cards</label>
-          </div>
           <div id="collagePhotoArea">
             <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Tick exactly 3 photos in the Photos tab for the polaroids.</p>
-            <p class="warn" id="collageWarn">The collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
+            <p class="warn" id="collageWarn">The photo collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
           </div>
-          <div id="collageTextArea" style="display: none">
-            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the collage scene. Cards with blank text are skipped.</p>
+          <h3 class="m-0 mt-4 mb-1 text-[13.5px] font-semibold">Text collage</h3>
+          <div class="flex items-center gap-2.5 mt-1">
+            <input type="checkbox" id="textCollageEnabled" class="w-[18px] h-[18px] accent-[#8b3dff]" />
+            <span class="text-[13.5px] font-semibold">Include the text collage scene</span>
+          </div>
+          <label class="field-label" for="textCollageHeading">Text collage heading</label>
+          <input type="text" class="field-input" id="textCollageHeading" value="Kind words" />
+          <div id="collageTextArea">
+            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped.</p>
             <label class="field-label" for="cardText1">Card 1</label>
             <input type="text" class="field-input" id="cardText1" value="Happiest birthday, Nur-Aina! Your kindness keeps this whole office going." />
             <label class="field-label" for="cardFrom1">Signed by</label>
@@ -154,6 +161,13 @@
             <input type="text" class="field-input" id="cardFrom4" value="Everyone at YSE" />
             <p class="warn" id="collageTextWarn">The text collage needs at least 2 cards with text. Right now <span id="collageCardCount">0</span> cards have text.</p>
           </div>
+        </section>
+
+        <section class="panel p-[18px]" id="panelScenes">
+          <h2 class="m-0 mb-1 text-[15px] font-semibold">Scenes</h2>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">The order the scenes play in the video. The title card always opens the video and the closing card always ends it. Use the arrows to move the middle scenes; a scene marked Off is skipped when the video is made.</p>
+          <div id="sceneOrderList"></div>
+          <input type="hidden" id="sceneOrder" value="photos,photoCollage,textCollage,messages" />
         </section>
 
         <section class="panel p-[18px]" id="panelFonts">
@@ -322,7 +336,7 @@
           <ul class="output-list list-none m-0 p-0 text-[13px]">
             <li><span>Template</span><span>Birthday</span></li>
             <li><span>Size</span><span>1920 x 1080</span></li>
-            <li><span>Length</span><span>About 1 minute</span></li>
+            <li><span>Length</span><span id="outputLength">0:00</span></li>
             <li><span>Format</span><span>MP4</span></li>
           </ul>
         </section>
@@ -391,9 +405,10 @@
         return out;
       }
 
-      function collageMode() {
-        return $("collageModeText").checked ? "text" : "photos";
-      }
+      // The four middle blocks in play order. The Scenes panel reorders
+      // this list; computeScenes, the filmstrip, the preview, and the
+      // generate payload all follow it.
+      let sceneOrderState = ["photos", "photoCollage", "textCollage", "messages"];
 
       function filledCards() {
         const out = [];
@@ -406,14 +421,100 @@
 
       function computeScenes() {
         const scenes = [{ name: "Title card", dur: TITLE_DUR, kind: "title" }];
-        photos.forEach((p, i) => scenes.push({ name: "Photo " + (i + 1), dur: PHOTO_DUR, kind: "photo", index: i }));
-        if ($("collageEnabled").checked) {
-          const mode = collageMode();
-          scenes.push({ name: mode === "text" ? "Collage · Text" : "Collage · Photos", dur: COLLAGE_DUR, kind: "collage", mode });
+        for (const key of sceneOrderState) {
+          if (key === "photos") {
+            photos.forEach((p, i) => scenes.push({ name: "Photo " + (i + 1), dur: PHOTO_DUR, kind: "photo", index: i }));
+          } else if (key === "photoCollage") {
+            if ($("collageEnabled").checked) scenes.push({ name: "Photo collage", dur: COLLAGE_DUR, kind: "photoCollage" });
+          } else if (key === "textCollage") {
+            if ($("textCollageEnabled").checked) scenes.push({ name: "Text collage", dur: COLLAGE_DUR, kind: "textCollage" });
+          } else if (key === "messages") {
+            filledMessages().forEach((m, i) => scenes.push({ name: "Message card " + (i + 1), dur: MESSAGE_DUR, kind: "message", index: i }));
+          }
         }
-        filledMessages().forEach((m, i) => scenes.push({ name: "Message card " + (i + 1), dur: MESSAGE_DUR, kind: "message", index: i }));
         scenes.push({ name: "Closing card", dur: CLOSING_DUR, kind: "closing" });
         return scenes;
+      }
+
+      // Per-block facts for the Scenes panel: display name, computed
+      // duration, and whether the block will actually play.
+      function blockInfo(key) {
+        if (key === "photos") return { name: "Photos", dur: photos.length * PHOTO_DUR, on: photos.length > 0 };
+        if (key === "photoCollage") return { name: "Photo collage", dur: COLLAGE_DUR, on: $("collageEnabled").checked };
+        if (key === "textCollage") return { name: "Text collage", dur: COLLAGE_DUR, on: $("textCollageEnabled").checked };
+        const count = filledMessages().length;
+        return { name: "Messages", dur: count * MESSAGE_DUR, on: count > 0 };
+      }
+
+      function renderScenesPanel() {
+        const list = $("sceneOrderList");
+        list.innerHTML = "";
+        const lockSvg = "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>";
+        const lockedRow = (name, dur) => {
+          const row = document.createElement("div");
+          row.className = "scene-row locked";
+          const label = document.createElement("span");
+          label.className = "scene-row-name";
+          label.textContent = name;
+          const d = document.createElement("span");
+          d.className = "scene-row-dur";
+          d.textContent = fmt(dur);
+          const lock = document.createElement("span");
+          lock.className = "scene-row-lock";
+          lock.innerHTML = lockSvg;
+          row.appendChild(label);
+          row.appendChild(d);
+          row.appendChild(lock);
+          return row;
+        };
+        list.appendChild(lockedRow("Title card", TITLE_DUR));
+        sceneOrderState.forEach((key, i) => {
+          const info = blockInfo(key);
+          const row = document.createElement("div");
+          row.className = "scene-row";
+          const label = document.createElement("span");
+          label.className = "scene-row-name";
+          label.textContent = info.name;
+          row.appendChild(label);
+          const dur = document.createElement("span");
+          dur.className = "scene-row-dur";
+          dur.textContent = fmt(info.dur);
+          row.appendChild(dur);
+          if (!info.on) {
+            const off = document.createElement("span");
+            off.className = "scene-row-off";
+            off.textContent = "Off";
+            row.appendChild(off);
+          }
+          const spacer = document.createElement("span");
+          spacer.className = "scene-row-spacer";
+          row.appendChild(spacer);
+          const up = document.createElement("button");
+          up.type = "button";
+          up.className = "mini-btn";
+          up.innerHTML = svgIcon(ICON_PATHS.chevronUp) + "Up";
+          up.disabled = i === 0;
+          up.setAttribute("aria-label", "Move " + info.name + " up");
+          up.addEventListener("click", () => {
+            [sceneOrderState[i - 1], sceneOrderState[i]] = [sceneOrderState[i], sceneOrderState[i - 1]];
+            refreshSummary();
+          });
+          const down = document.createElement("button");
+          down.type = "button";
+          down.className = "mini-btn";
+          down.innerHTML = svgIcon(ICON_PATHS.chevronDown) + "Down";
+          down.disabled = i === sceneOrderState.length - 1;
+          down.setAttribute("aria-label", "Move " + info.name + " down");
+          down.addEventListener("click", () => {
+            [sceneOrderState[i + 1], sceneOrderState[i]] = [sceneOrderState[i], sceneOrderState[i + 1]];
+            refreshSummary();
+          });
+          row.appendChild(up);
+          row.appendChild(down);
+          list.appendChild(row);
+        });
+        list.appendChild(lockedRow("Closing card", CLOSING_DUR));
+        $("sceneOrder").value = sceneOrderState.join(",");
       }
 
       function refreshSummary() {
@@ -428,23 +529,18 @@
           .join("");
         $("totalRuntime").textContent = fmt(t);
         $("totalRuntimeTop").textContent = fmt(t);
-        const isText = collageMode() === "text";
+        $("outputLength").textContent = fmt(t);
         const count = photos.filter((p) => p.inCollage).length;
         $("collageCount").textContent = count;
-        const bad = $("collageEnabled").checked && !isText && count !== 3;
+        const bad = $("collageEnabled").checked && count !== 3;
         $("collageWarn").style.display = bad ? "block" : "none";
         const cardCount = filledCards().length;
         $("collageCardCount").textContent = cardCount;
-        const textBad = $("collageEnabled").checked && isText && cardCount < 2;
+        const textBad = $("textCollageEnabled").checked && cardCount < 2;
         $("collageTextWarn").style.display = textBad ? "block" : "none";
-        $("collagePhotoArea").style.display = isText ? "none" : "block";
-        $("collageTextArea").style.display = isText ? "block" : "none";
-        $("collageModePhotosWrap").classList.toggle("active", !isText);
-        $("collageModeTextWrap").classList.toggle("active", isText);
-        $("photoList").classList.toggle("text-mode", isText);
-        document.querySelectorAll(".collage-box").forEach((box) => { box.disabled = isText; });
         $("generateBtn").disabled = bad || textBad || photos.length === 0;
         renderTimeline(scenes);
+        renderScenesPanel();
       }
 
       // ------------------------------------------------------------ timeline --
@@ -453,7 +549,8 @@
         strip.innerHTML = "";
         const thumbIcons = {
           title: svgIcon(ICON_PATHS.clapperboard),
-          collage: svgIcon(ICON_PATHS.layoutGrid),
+          photoCollage: svgIcon(ICON_PATHS.layoutGrid),
+          textCollage: svgIcon(ICON_PATHS.messageSquareText),
           message: svgIcon(ICON_PATHS.messageSquareText),
           closing: svgIcon(ICON_PATHS.sparkles),
         };
@@ -469,8 +566,8 @@
             img.src = photos[sc.index].url;
             img.alt = "";
             thumb.appendChild(img);
-          } else if (sc.kind === "collage") {
-            thumb.innerHTML = sc.mode === "text" ? thumbIcons.message : thumbIcons.collage;
+          } else if (sc.kind === "photoCollage" || sc.kind === "textCollage") {
+            thumb.innerHTML = thumbIcons[sc.kind];
           } else {
             thumb.innerHTML = thumbIcons[sc.kind] || thumbIcons.title;
           }
@@ -546,8 +643,7 @@
         renderPhotoList();
       });
 
-      for (const id of ["collageEnabled", "message1Text", "message2Text",
-        "collageModePhotos", "collageModeText",
+      for (const id of ["collageEnabled", "textCollageEnabled", "message1Text", "message2Text",
         "cardText1", "cardText2", "cardText3", "cardText4",
         "cardFrom1", "cardFrom2", "cardFrom3", "cardFrom4"]) {
         $(id).addEventListener("input", refreshSummary);
@@ -668,18 +764,20 @@
             el.innerHTML = "<img class='pv-photo' alt='' /><div class='pv-caption'></div>";
             el.querySelector("img").src = photos[sc.index].url;
             el.querySelector(".pv-caption").textContent = photos[sc.index].caption;
-          } else if (sc.kind === "collage") {
+          } else if (sc.kind === "photoCollage" || sc.kind === "textCollage") {
             el.className = "pv-scene pv-collage";
             const heading = document.createElement("div");
             heading.className = "pv-eyebrow";
-            heading.textContent = $("collageHeading").value.trim() || "Moments together";
+            heading.textContent = sc.kind === "textCollage"
+              ? ($("textCollageHeading").value.trim() || "Kind words")
+              : ($("collageHeading").value.trim() || "Moments together");
             heading.style.position = "absolute";
             heading.style.top = "12px";
             heading.style.left = "0";
             heading.style.right = "0";
             heading.style.textAlign = "center";
             el.appendChild(heading);
-            if (sc.mode === "text") {
+            if (sc.kind === "textCollage") {
               const grid = document.createElement("div");
               const cards = filledCards();
               grid.className = "pv-cards cards-" + cards.length;
@@ -818,8 +916,12 @@
       $("generateBtn").addEventListener("click", async () => {
         if (photos.length === 0) { setStatus("Add at least one photo first.", true); return; }
         if (!$("celebrantName").value.trim()) { setStatus("Enter the celebrant name first.", true); return; }
-        if ($("collageEnabled").checked && collageMode() === "text" && filledCards().length < 2) {
-          setStatus("Add at least 2 greeting cards with text for the text collage, or switch the collage off.", true);
+        if ($("collageEnabled").checked && photos.filter((p) => p.inCollage).length !== 3) {
+          setStatus("Tick exactly 3 photos for the photo collage, or switch the photo collage off.", true);
+          return;
+        }
+        if ($("textCollageEnabled").checked && filledCards().length < 2) {
+          setStatus("Add at least 2 greeting cards with text for the text collage, or switch the text collage off.", true);
           return;
         }
         stopPreview("Nothing playing");
@@ -833,7 +935,9 @@
         form.append("closingSignOff", $("closingSignOff").value.trim());
         form.append("collageHeading", $("collageHeading").value.trim());
         form.append("collageEnabled", $("collageEnabled").checked ? "true" : "false");
-        form.append("collageMode", collageMode());
+        form.append("textCollageEnabled", $("textCollageEnabled").checked ? "true" : "false");
+        form.append("textCollageHeading", $("textCollageHeading").value.trim());
+        form.append("sceneOrder", $("sceneOrder").value);
         for (const n of [1, 2, 3, 4]) {
           form.append("cardTexts", $("cardText" + n).value);
           form.append("cardFroms", $("cardFrom" + n).value);

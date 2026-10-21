@@ -129,9 +129,10 @@
         padding-top: 15px; min-height: 39px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
-      /* Collage, text mode: greeting cards in place of the polaroids. The
-         container wraps, so 4 cards land in a 2x2 grid, 3 in one row, and
-         2 or 1 in a single centered row. Card widths are set by count.
+      /* Text collage scene: greeting cards on the same backdrop as the
+         photo collage. The container wraps, so 4 cards land in a 2x2
+         grid, 3 in one row, and 2 or 1 in a single centered row. Card
+         widths are set by count.
          The cards wear the same paper treatment as the message cards. */
       .collage-cards {
         position: absolute; inset: 0;
@@ -285,10 +286,10 @@
       <div class="caption-bar" id="caption-6"><span id="caption-text-6">And many more to come</span></div>
       <div class="white-fade" id="white-6" style="opacity: 1"></div>
     </section>
-    <section class="clip scene scene-card" id="scene-collage" style="opacity: 0" data-start="40" data-duration="6.5" data-track-index="9">
+    <section class="clip scene scene-card" id="scene-photo-collage" style="opacity: 0" data-start="40" data-duration="6.5" data-track-index="9">
       <div class="orb orb-a"></div>
       <div class="orb orb-b"></div>
-      <h2 class="collage-heading" id="collage-heading"><span class="w">Moments</span> <span class="w">together</span></h2>
+      <h2 class="collage-heading" id="pc-collage-heading"><span class="w">Moments</span> <span class="w">together</span></h2>
       <div class="collage-row">
         <figure class="polaroid" id="polaroid-0">
           <img src="assets/photos/photo-1.jpg" alt="" />
@@ -302,7 +303,7 @@
           <img src="assets/photos/photo-5.jpg" alt="" />
           <figcaption id="polaroid-cap-2">Small celebrations, big gratitude</figcaption>
         </figure>
-      </div><span class="accent" id="accent-0" style="left: 6%; top: 16%; width: 56px; height: 56px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-1" style="left: 88%; top: 13%; width: 44px; height: 44px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-2" style="left: 11%; top: 77%; width: 34px; height: 34px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span><span class="accent" id="accent-3" style="left: 85%; top: 73%; width: 58px; height: 58px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-4" style="left: 46%; top: 85%; width: 40px; height: 40px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-5" style="left: 64%; top: 9%; width: 30px; height: 30px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span>
+      </div><span class="accent" id="accent-pc-0" style="left: 6%; top: 16%; width: 56px; height: 56px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-pc-1" style="left: 88%; top: 13%; width: 44px; height: 44px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-pc-2" style="left: 11%; top: 77%; width: 34px; height: 34px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span><span class="accent" id="accent-pc-3" style="left: 85%; top: 73%; width: 58px; height: 58px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 5.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></span><span class="accent" id="accent-pc-4" style="left: 46%; top: 85%; width: 40px; height: 40px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/></svg></span><span class="accent" id="accent-pc-5" style="left: 64%; top: 9%; width: 30px; height: 30px;"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg></span>
     </section>
     <section class="clip scene scene-card" id="scene-msg-0" style="opacity: 0" data-start="46" data-duration="6.5" data-track-index="10">
       <div class="orb orb-a"></div>
@@ -412,25 +413,25 @@
       tl.fromTo("#caption-text-6", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 35.85);
       tl.to("#white-6", { opacity: 0, duration: 0.35, ease: "power1.out" }, 35);
       tl.to("#scene-photo-6", { opacity: 0, duration: 0.5, ease: "power1.in" }, 40);
-      tl.fromTo("#scene-collage", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 40);
-      tl.fromTo("#scene-collage .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: 6.5, ease: "sine.inOut" }, 40);
-      tl.fromTo("#scene-collage .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: 6.5, ease: "sine.inOut" }, 40);
-      tl.fromTo("#collage-heading .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out", stagger: 0.09, transformOrigin: "50% 100%" }, 40.2);
+      tl.fromTo("#scene-photo-collage", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 40);
+      tl.fromTo("#scene-photo-collage .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: 6.5, ease: "sine.inOut" }, 40);
+      tl.fromTo("#scene-photo-collage .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: 6.5, ease: "sine.inOut" }, 40);
+      tl.fromTo("#pc-collage-heading .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out", stagger: 0.09, transformOrigin: "50% 100%" }, 40.2);
       tl.fromTo("#polaroid-0", { opacity: 0, scale: 0.45, y: 39, rotation: -19 }, { opacity: 1, scale: 1, y: 0, rotation: -5, duration: 0.6, ease: "back.out(1.7)" }, 40.8);
       tl.fromTo("#polaroid-cap-0", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, 44.6);
       tl.fromTo("#polaroid-1", { opacity: 0, scale: 0.45, y: 39, rotation: -11 }, { opacity: 1, scale: 1, y: 0, rotation: 3, duration: 0.6, ease: "back.out(1.7)" }, 41.9);
       tl.fromTo("#polaroid-cap-1", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, 44.72);
       tl.fromTo("#polaroid-2", { opacity: 0, scale: 0.45, y: 39, rotation: -17 }, { opacity: 1, scale: 1, y: 0, rotation: -3, duration: 0.6, ease: "back.out(1.7)" }, 43);
       tl.fromTo("#polaroid-cap-2", { opacity: 0, y: 9 }, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, 44.84);
-      tl.fromTo("#accent-0", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 40.5);
-      tl.fromTo("#accent-1", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 41.45);
-      tl.fromTo("#accent-2", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 42.5);
-      tl.fromTo("#accent-3", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 43.55);
-      tl.fromTo("#accent-4", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 43.9);
-      tl.fromTo("#accent-5", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 44.25);
+      tl.fromTo("#accent-pc-0", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 40.5);
+      tl.fromTo("#accent-pc-1", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 41.45);
+      tl.fromTo("#accent-pc-2", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 42.5);
+      tl.fromTo("#accent-pc-3", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 43.55);
+      tl.fromTo("#accent-pc-4", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 43.9);
+      tl.fromTo("#accent-pc-5", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, 44.25);
       tl.to(".polaroid", { y: -10.5, duration: 0.9, ease: "sine.inOut", stagger: 0.1 }, 43.9);
       tl.to(".polaroid", { y: 0, duration: 0.8, ease: "sine.inOut", stagger: 0.1 }, 45);
-      tl.to("#scene-collage", { opacity: 0, duration: 0.5, ease: "power1.in" }, 46);
+      tl.to("#scene-photo-collage", { opacity: 0, duration: 0.5, ease: "power1.in" }, 46);
       tl.fromTo("#scene-msg-0", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 46);
       tl.fromTo("#scene-msg-0 .orb-a", { x: 0, y: 0 }, { x: -33, y: 21, duration: 6.5, ease: "sine.inOut" }, 46);
       tl.fromTo("#msg-card-0", { opacity: 0, y: 66, scale: 0.97, rotationX: 6, transformPerspective: 1350 }, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.85, ease: "power3.out" }, 46.25);

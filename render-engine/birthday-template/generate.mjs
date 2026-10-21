@@ -6,9 +6,13 @@
 // To make a video for someone else: edit config.json, replace the photos in
 // assets/photos/, then run `node generate.mjs` and render. Nothing else changes.
 //
-// Scene pacing matches the approved prototype:
-//   Title 5s | Photo montage 7 x 5s = 35s | Collage 6s |
-//   Message cards 2 x 6s = 12s | Closing 8s | Total 66s
+// Scene pacing:
+//   Title 5s | middle blocks 5s per photo, 6s per collage scene, 6s per
+//   message card | Closing 8s. The four middle blocks (photos,
+//   photoCollage, textCollage, messages) play in config.sceneOrder, so the
+//   total duration is computed from the config, not fixed. With the sample
+//   config (7 photos, photo collage on, text collage off, 2 messages, in
+//   the default order) the total is 66s.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
@@ -24,25 +28,79 @@ const COLLAGE_DUR = 6;
 const MESSAGE_DUR = 6;
 const CLOSING_DUR = 8;
 
-const MONTAGE_START = TITLE_DUR; // 5
-const COLLAGE_START = MONTAGE_START + config.photos.length * PHOTO_DUR; // 40
-const MESSAGES_START = COLLAGE_START + COLLAGE_DUR; // 46
-const CLOSING_START = MESSAGES_START + config.messages.length * MESSAGE_DUR; // 58
-const TOTAL = CLOSING_START + CLOSING_DUR; // 66
-
 // ------------------------------------------------------- collage content ---
-// The collage scene has two modes. "photos" (the default) builds polaroids
-// from collage.photoIndexes. "text" builds greeting cards from
-// collage.cards instead: up to 4 { text, from } entries, and cards with
-// blank text are skipped.
-const COLLAGE_MODE = config.collage && config.collage.mode === "text" ? "text" : "photos";
-const COLLAGE_CARDS = (Array.isArray(config.collage && config.collage.cards) ? config.collage.cards : [])
+// The two collages are separate scenes. collage.photo builds polaroids from
+// collage.photo.photoIndexes; collage.text builds greeting cards from
+// collage.text.cards instead: up to 4 { text, from } entries, and cards
+// with blank text are skipped. Each scene has its own heading. (The older
+// flat fields, collage.heading / collage.photoIndexes / collage.cards, are
+// still read when the nested objects are absent.)
+const rawCollage = config.collage || {};
+const photoCfg = rawCollage.photo || {};
+const textCfg = rawCollage.text || {};
+
+const PHOTO_COLLAGE_HEADING = photoCfg.heading ?? rawCollage.heading ?? "Moments together";
+const PHOTO_INDEXES = Array.isArray(photoCfg.photoIndexes)
+  ? photoCfg.photoIndexes
+  : (Array.isArray(rawCollage.photoIndexes) ? rawCollage.photoIndexes : []);
+const TEXT_COLLAGE_HEADING = textCfg.heading ?? "Kind words";
+const TEXT_CARDS = (Array.isArray(textCfg.cards)
+  ? textCfg.cards
+  : (Array.isArray(rawCollage.cards) ? rawCollage.cards : []))
   .slice(0, 4)
   .map((card) => ({
     text: String((card && card.text) ?? "").trim(),
     from: String((card && card.from) ?? "").trim(),
   }))
   .filter((card) => card.text !== "");
+
+// The photo collage is on unless its flag says no (it has always been part
+// of this template); the text collage is off unless its flag turns it on.
+// Either scene also needs content: photos ticked, cards written.
+const PHOTO_COLLAGE_ON =
+  (photoCfg.enabled ?? rawCollage.enabled) !== false && PHOTO_INDEXES.length > 0;
+const TEXT_COLLAGE_ON = textCfg.enabled === true && TEXT_CARDS.length > 0;
+
+// ---------------------------------------------------------- scene order ---
+// The four middle blocks can play in any order. config.sceneOrder lists
+// block keys; unknown keys are dropped, duplicates collapse, and any block
+// missing from the list is appended in the default order.
+const MIDDLE_BLOCKS = ["photos", "photoCollage", "textCollage", "messages"];
+function sanitizeSceneOrder(raw) {
+  const order = [];
+  if (Array.isArray(raw)) {
+    for (const key of raw) {
+      if (MIDDLE_BLOCKS.includes(key) && !order.includes(key)) order.push(key);
+    }
+  }
+  for (const key of MIDDLE_BLOCKS) {
+    if (!order.includes(key)) order.push(key);
+  }
+  return order;
+}
+const SCENE_ORDER = sanitizeSceneOrder(config.sceneOrder);
+
+// Block durations. A block that is off or empty contributes no seconds
+// and no scenes.
+const BLOCK_DUR = {
+  photos: config.photos.length * PHOTO_DUR,
+  photoCollage: PHOTO_COLLAGE_ON ? COLLAGE_DUR : 0,
+  textCollage: TEXT_COLLAGE_ON ? COLLAGE_DUR : 0,
+  messages: config.messages.length * MESSAGE_DUR,
+};
+
+// Running start offsets: title first, then the middle blocks in scene
+// order, then the closing card. The total is whatever the blocks add to.
+const STARTS = { title: 0 };
+{
+  let cursor = TITLE_DUR;
+  for (const key of SCENE_ORDER) {
+    STARTS[key] = cursor;
+    cursor += BLOCK_DUR[key];
+  }
+  STARTS.closing = cursor;
+}
+const TOTAL = STARTS.closing + CLOSING_DUR;
 
 // ------------------------------------------------------------- utilities ---
 function esc(text) {
@@ -219,8 +277,7 @@ const ORB_B = HAS_ORBS ? `<div class="orb orb-b"></div>` : "";
 
 
 // ------------------------------------------------------------ title card ---
-{
-  const s = 0;
+function buildTitle(s) {
   const titleLine1 = wordSpans(`Happy ${config.occasion},`);
   const nameParts = splitName(config.celebrantShortName || config.celebrantName);
   const titleLine2 = `<span class="name-chunk" id="title-name-left">${esc(nameParts.left)}</span>${nameParts.sep}<span class="name-chunk" id="title-name-right">${esc(nameParts.right)}!</span>`;
@@ -256,8 +313,9 @@ const ORB_B = HAS_ORBS ? `<div class="orb orb-b"></div>` : "";
 }
 
 // ---------------------------------------------------------- photo montage --
-config.photos.forEach((photo, i) => {
-  const s = MONTAGE_START + i * PHOTO_DUR;
+function buildPhotos(blockStart) {
+  config.photos.forEach((photo, i) => {
+  const s = blockStart + i * PHOTO_DUR;
   const drift = i % 2 === 0 ? 27 : -27; // alternate Ken Burns drift direction
   const isFirst = i === 0;
   const isLast = i === config.photos.length - 1;
@@ -295,16 +353,22 @@ config.photos.forEach((photo, i) => {
       `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.01, ease: "none" }, ${s + PHOTO_DUR});`,
     );
   } else {
-    // Last photo keeps the plain crossfade into the collage scene.
+    // Last photo keeps the plain crossfade into whatever scene follows.
     timeline.push(
       `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + PHOTO_DUR});`,
     );
   }
-});
+  });
+}
 
 // --------------------------------------------------------------- collage ---
-{
-  const s = COLLAGE_START;
+// One builder serves both collage scenes; they differ in heading, inner
+// content, and element ids. kind is "photo" or "text".
+function buildCollage(kind, s) {
+  const isText = kind === "text";
+  const prefix = isText ? "tc" : "pc";
+  const sceneId = isText ? "scene-text-collage" : "scene-photo-collage";
+  const headingId = `${prefix}-collage-heading`;
   const accentSpots = [
     { left: "6%", top: "16%", size: 56, shape: ACCENT_HEART },
     { left: "88%", top: "13%", size: 44, shape: ACCENT_STAR },
@@ -314,14 +378,14 @@ config.photos.forEach((photo, i) => {
     { left: "64%", top: "9%", size: 30, shape: ACCENT_DOT },
   ];
   const accents = accentSpots
-    .map((spot, k) => `<span class="accent" id="accent-${k}" style="left: ${spot.left}; top: ${spot.top}; width: ${spot.size}px; height: ${spot.size}px;">${spot.shape}</span>`)
+    .map((spot, k) => `<span class="accent" id="accent-${prefix}-${k}" style="left: ${spot.left}; top: ${spot.top}; width: ${spot.size}px; height: ${spot.size}px;">${spot.shape}</span>`)
     .join("");
 
-  // The scene body depends on the mode: a row of polaroid photos, or a
-  // grid of greeting cards in text mode.
+  // The photo scene builds a row of polaroids; the text scene builds a
+  // grid of greeting cards.
   let collageInner;
-  if (COLLAGE_MODE === "text") {
-    const cards = COLLAGE_CARDS
+  if (isText) {
+    const cards = TEXT_CARDS
       .map((card, k) => `
         <div class="greet-card" id="greet-card-${k}">
           <p class="greet-text">${esc(card.text)}</p>${card.from ? `
@@ -329,10 +393,10 @@ config.photos.forEach((photo, i) => {
         </div>`)
       .join("");
     collageInner = `
-      <div class="collage-cards cards-${COLLAGE_CARDS.length}">${cards}
+      <div class="collage-cards cards-${TEXT_CARDS.length}">${cards}
       </div>`;
   } else {
-    const polaroids = config.collage.photoIndexes
+    const polaroids = PHOTO_INDEXES
       .map((photoIndex, k) => {
         const photo = config.photos[photoIndex];
         return `
@@ -348,28 +412,28 @@ config.photos.forEach((photo, i) => {
   }
 
   scenes.push(`
-    <section class="clip scene scene-card" id="scene-collage" style="opacity: 0" data-start="${s}" data-duration="${COLLAGE_DUR + 0.5}" data-track-index="${nextTrack()}">
+    <section class="clip scene scene-card" id="${sceneId}" style="opacity: 0" data-start="${s}" data-duration="${COLLAGE_DUR + 0.5}" data-track-index="${nextTrack()}">
       ${ORB_A}
       ${ORB_B}
-      <h2 class="collage-heading" id="collage-heading">${wordSpans(config.collage.heading)}</h2>${collageInner}${accents}
+      <h2 class="collage-heading" id="${headingId}">${wordSpans(isText ? TEXT_COLLAGE_HEADING : PHOTO_COLLAGE_HEADING)}</h2>${collageInner}${accents}
     </section>`);
 
   timeline.push(
-    `tl.fromTo("#scene-collage", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
+    `tl.fromTo("#${sceneId}", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, ${s});`,
     ...(ORBS_ANIMATED ? [
-      `tl.fromTo("#scene-collage .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: ${COLLAGE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
-      `tl.fromTo("#scene-collage .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: ${COLLAGE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
+      `tl.fromTo("#${sceneId} .orb-a", { x: 0, y: 0 }, { x: -42, y: 27, duration: ${COLLAGE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
+      `tl.fromTo("#${sceneId} .orb-b", { x: 0, y: 0 }, { x: 33, y: -21, duration: ${COLLAGE_DUR + 0.5}, ease: "sine.inOut" }, ${s});`,
     ] : []),
-    `tl.fromTo("#collage-heading .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out", stagger: 0.09, transformOrigin: "50% 100%" }, ${s + 0.2});`,
+    `tl.fromTo("#${headingId} .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out", stagger: 0.09, transformOrigin: "50% 100%" }, ${s + 0.2});`,
   );
-  if (COLLAGE_MODE === "text") {
+  if (isText) {
     // The greeting cards build one by one like the polaroids do. The 1.1s
     // spacing holds for any card count, and the build is centered in the
     // scene window, so fewer cards start later instead of leaving a long
     // still tail after an early finish.
     const cardRotations = [-2.5, 2, -1.5, 2.5];
-    const buildStart = 0.8 + Math.max(0, (3.3 - 1.1 * (COLLAGE_CARDS.length - 1)) / 2);
-    COLLAGE_CARDS.forEach((card, k) => {
+    const buildStart = 0.8 + Math.max(0, (3.3 - 1.1 * (TEXT_CARDS.length - 1)) / 2);
+    TEXT_CARDS.forEach((card, k) => {
       const rot = cardRotations[k % cardRotations.length];
       const popAt = Number((s + buildStart + k * 1.1).toFixed(3));
       timeline.push(
@@ -386,7 +450,7 @@ config.photos.forEach((photo, i) => {
     // scene feels assembled rather than shown. Captions fade in late.
     const rotations = [-5, 3, -3];
     const popTimes = [0.8, 1.9, 3.0];
-    config.collage.photoIndexes.forEach((_, k) => {
+    PHOTO_INDEXES.forEach((_, k) => {
       const rot = rotations[k % rotations.length];
       const popAt = s + (popTimes[k] ?? 3.0 + (k - 2) * 1.1);
       timeline.push(
@@ -398,16 +462,16 @@ config.photos.forEach((photo, i) => {
   const accentTimes = [0.5, 1.45, 2.5, 3.55, 3.9, 4.25];
   accentTimes.forEach((t, k) => {
     timeline.push(
-      `tl.fromTo("#accent-${k}", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, ${s + t});`,
+      `tl.fromTo("#accent-${prefix}-${k}", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, ${s + t});`,
     );
   });
-  if (COLLAGE_MODE === "text") {
+  if (isText) {
     timeline.push(
       // Gentle idle float after the last card lands, kept finite so the
       // timeline stays deterministic and ends inside the scene window.
       `tl.to(".greet-card", { y: -9, duration: 0.65, ease: "sine.inOut", stagger: 0.08 }, ${s + 4.75});`,
       `tl.to(".greet-card", { y: 0, duration: 0.5, ease: "sine.inOut", stagger: 0.08 }, ${s + 5.45});`,
-      `tl.to("#scene-collage", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + COLLAGE_DUR});`,
+      `tl.to("#${sceneId}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + COLLAGE_DUR});`,
     );
   } else {
     timeline.push(
@@ -415,14 +479,15 @@ config.photos.forEach((photo, i) => {
       // timeline stays deterministic and ends inside the scene window.
       `tl.to(".polaroid", { y: -10.5, duration: 0.9, ease: "sine.inOut", stagger: 0.1 }, ${s + 3.9});`,
       `tl.to(".polaroid", { y: 0, duration: 0.8, ease: "sine.inOut", stagger: 0.1 }, ${s + 5.0});`,
-      `tl.to("#scene-collage", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + COLLAGE_DUR});`,
+      `tl.to("#${sceneId}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + COLLAGE_DUR});`,
     );
   }
 }
 
 // ----------------------------------------------------------- message cards -
-config.messages.forEach((message, i) => {
-  const s = MESSAGES_START + i * MESSAGE_DUR;
+function buildMessages(blockStart) {
+  config.messages.forEach((message, i) => {
+  const s = blockStart + i * MESSAGE_DUR;
   // Typewriter fit: characters appear one by one starting at 1s in, and the
   // full text completes about 4.2s later, whatever the message length.
   const typeCharTotal = typeCharCount(message.text);
@@ -451,11 +516,11 @@ config.messages.forEach((message, i) => {
     `tl.fromTo("#msg-sign-${i}", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, ${s + typeEnd + 0.15});`,
     `tl.to("#scene-msg-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + MESSAGE_DUR});`,
   );
-});
+  });
+}
 
 // ------------------------------------------------------------ closing card -
-{
-  const s = CLOSING_START;
+function buildClosing(s) {
   scenes.push(`
     <section class="clip scene scene-card" id="scene-closing" style="opacity: 0" data-start="${s}" data-duration="${CLOSING_DUR}" data-track-index="${nextTrack()}">
       ${ORB_A}
@@ -489,6 +554,19 @@ config.messages.forEach((message, i) => {
     `tl.to("#scene-closing", { opacity: 1, duration: ${TOTAL - (s + 3.0)}, ease: "none" }, ${s + 3.0});`,
   );
 }
+
+// ------------------------------------------------------------ build all ---
+// Title first, then the middle blocks in scene order (skipping blocks
+// that are off or empty), then the closing card.
+buildTitle(STARTS.title);
+for (const key of SCENE_ORDER) {
+  if (BLOCK_DUR[key] === 0) continue;
+  if (key === "photos") buildPhotos(STARTS.photos);
+  else if (key === "photoCollage") buildCollage("photo", STARTS.photoCollage);
+  else if (key === "textCollage") buildCollage("text", STARTS.textCollage);
+  else if (key === "messages") buildMessages(STARTS.messages);
+}
+buildClosing(STARTS.closing);
 
 // --------------------------------------------------------------- document ---
 const html = `<!doctype html>
@@ -625,9 +703,10 @@ const html = `<!doctype html>
         padding-top: 15px; min-height: 39px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
-      /* Collage, text mode: greeting cards in place of the polaroids. The
-         container wraps, so 4 cards land in a 2x2 grid, 3 in one row, and
-         2 or 1 in a single centered row. Card widths are set by count.
+      /* Text collage scene: greeting cards on the same backdrop as the
+         photo collage. The container wraps, so 4 cards land in a 2x2
+         grid, 3 in one row, and 2 or 1 in a single centered row. Card
+         widths are set by count.
          The cards wear the same paper treatment as the message cards. */
       .collage-cards {
         position: absolute; inset: 0;
@@ -742,5 +821,9 @@ ${timeline.map((line) => `      ${line}`).join("\n")}
 
 writeFileSync(`${here}/index.html`, html);
 console.log(`Wrote index.html for ${config.celebrantName}`);
-console.log(`Scenes: title 0-${TITLE_DUR}s, montage ${MONTAGE_START}-${COLLAGE_START}s, collage ${COLLAGE_START}-${MESSAGES_START}s, messages ${MESSAGES_START}-${CLOSING_START}s, closing ${CLOSING_START}-${TOTAL}s`);
+const blockSummary = SCENE_ORDER
+  .filter((key) => BLOCK_DUR[key] > 0)
+  .map((key) => `${key} ${STARTS[key]}-${STARTS[key] + BLOCK_DUR[key]}s`)
+  .join(", ");
+console.log(`Scenes: title 0-${TITLE_DUR}s, ${blockSummary}, closing ${STARTS.closing}-${TOTAL}s`);
 console.log(`Total duration: ${TOTAL}s`);

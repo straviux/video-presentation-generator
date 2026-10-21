@@ -1,8 +1,11 @@
 # Birthday Template: config-driven HyperFrames composition
 
 The first real template for the Video Presentation Generator. It renders a
-complete birthday video (1920x1080, 30fps, about 1 minute) from a single
-`config.json`. No hand-editing HTML per person.
+complete birthday video (1920x1080, 30fps) from a single
+`config.json`. No hand-editing HTML per person. The total length is
+computed from the config: 5s for the title, 5s per photo, 6s per collage
+scene, 6s per message card, and 8s for the closing card, so it lands near
+a minute for typical content and runs longer when more is switched on.
 
 The composition canvas is natively 1920x1080: the whole design (layout,
 typography, and GSAP motion offsets) is scaled 1.5x from the original 720p
@@ -57,36 +60,61 @@ run small at the title size.
 
 ## Scene timing
 
-| Scene | Time | Duration | What happens |
-|---|---|---|---|
-| Title card | 0:00-0:05 | 5s | "Happy Birthday," greeting words stagger up first, then the celebrant name arrives as a split reveal: the first chunk slides in from the left, the rest from the right, and they meet at center as one line. Gold rule grows once the name settles, role and from line follow, background orbs drift |
-| Photo montage | 0:05-0:40 | 7 x 5s = 35s | One photo per beat, slow Ken Burns zoom with a brightness settle as each photo lands, soft vignette, caption bar slides up and the caption text follows. Between photos the picture fades through white (white ramps up over the last 0.35s and lifts over the first 0.35s of the next photo); the montage edges keep a plain crossfade |
-| Photo collage | 0:40-0:46 | 6s | Heading words stagger in, then the scene builds itself: 3 polaroid photos pop in one at a time about a second apart with a rotation settle, small gold hearts, stars, and dots pop in between them, the photo captions fade in late, then a gentle idle float |
-| Text collage (alternative) | 0:40-0:46 | 6s | Same heading and window, with greeting cards instead of polaroids: up to 4 paper cards build in one by one with a rotation settle, each showing a short greeting and who it is from, gold accents pop in between, then a gentle idle float |
-| Message card 1 | 0:46-0:52 | 6s | Card rises with a slight tilt, quote mark pops in, then the message types on character by character (fitted to finish in about 4.2s), signer line slides in after the typing |
-| Message card 2 | 0:52-0:58 | 6s | Second greeting and signer, same choreography |
-| Closing card | 0:58-1:06 | 8s | A scrapbook card lands at a slight tilt on the green background: warm paper with torn edges, two translucent tape strips settling onto its top corners. Closing line words stagger up on the paper, a deeper bronze rule grows, and the sign-off fades in last in italic serif like a handwritten note, held to the end |
-| **Total** | | **66s** | |
+The video is a title card, four middle blocks, and a closing card. The
+middle blocks are the photo montage, the photo collage, the text collage,
+and the message cards; they can play in any order (see Scene order
+below). Durations are fixed per block; start times shift with the order
+and with how much is switched on.
+
+| Scene | Duration | What happens |
+|---|---|---|
+| Title card | 5s | "Happy Birthday," greeting words stagger up first, then the celebrant name arrives as a split reveal: the first chunk slides in from the left, the rest from the right, and they meet at center as one line. Gold rule grows once the name settles, role and from line follow, background orbs drift |
+| Photo montage | 5s per photo (35s with the sample 7) | One photo per beat, slow Ken Burns zoom with a brightness settle as each photo lands, soft vignette, caption bar slides up and the caption text follows. Between photos the picture fades through white (white ramps up over the last 0.35s and lifts over the first 0.35s of the next photo); the block edges keep a plain crossfade |
+| Photo collage | 6s | Heading words stagger in, then the scene builds itself: 3 polaroid photos pop in one at a time about a second apart with a rotation settle, small gold hearts, stars, and dots pop in between them, the photo captions fade in late, then a gentle idle float |
+| Text collage | 6s | Its own heading, then greeting cards: up to 4 paper cards build in one by one with a rotation settle, each showing a short greeting and who it is from, gold accents pop in between, then a gentle idle float |
+| Message cards | 6s per card (12s with the sample 2) | Card rises with a slight tilt, quote mark pops in, then the message types on character by character (fitted to finish in about 4.2s), signer line slides in after the typing |
+| Closing card | 8s | A scrapbook card lands at a slight tilt on the green background: warm paper with torn edges, two translucent tape strips settling onto its top corners. Closing line words stagger up on the paper, a deeper bronze rule grows, and the sign-off fades in last in italic serif like a handwritten note, held to the end |
+
+With the sample config (default order, photo collage on, text collage
+off) the timeline runs: title 0:00-0:05, montage 0:05-0:40, photo
+collage 0:40-0:46, messages 0:46-0:58, closing 0:58-1:06, for a 66s
+total. Turning the text collage on as well makes it 72s.
 
 Sample content: a birthday video for Nur-Aina Ibrahim, Program Manager, with
 messages from the YSE Family. Sample photos are seeded downloads from
 picsum.photos (1280x720), stored in `assets/photos/photo-1.jpg` to
 `photo-7.jpg`.
 
-## Text collage mode
+## Scene order
 
-The collage scene has two modes, set by `collage.mode` in `config.json`:
+`sceneOrder` in `config.json` lists the four middle block keys in play
+order: `"photos"`, `"photoCollage"`, `"textCollage"`, `"messages"`. The
+title card always plays first and the closing card always last. The
+generator sanitizes the list: unknown keys are dropped, duplicates
+collapse, and any block missing from the list is appended in the default
+order (`photos`, `photoCollage`, `textCollage`, `messages`). A block
+that is off or empty (no photos, no filled messages, a collage switched
+off) contributes no scenes and no time.
 
-- `"photos"` (the default): the 3 polaroids from `collage.photoIndexes`,
-  as described above.
-- `"text"`: greeting cards instead of photos. Fill `collage.cards` with
-  up to 4 entries of `{ "text": "...", "from": "..." }`. Four cards land
-  in a 2x2 grid, 3 cards sit in one row, and 2 in a single centered row,
-  building in one by one. Card text uses the `messages` font slot and the
-  signer line the `headings` slot. Cards with blank text are skipped.
+## The two collage scenes
 
-The sample config carries 4 short greetings, so flipping `mode` to
-`"text"` is all it takes to demo the mode.
+The photo collage and the text collage are separate scenes, and both can
+appear in the same video:
+
+- Photo collage (`collage.photo`): the 3 polaroids from
+  `collage.photo.photoIndexes`, under `collage.photo.heading`. It is on
+  unless `collage.photo.enabled` is set to `false`.
+- Text collage (`collage.text`): greeting cards from
+  `collage.text.cards`, up to 4 entries of `{ "text": "...", "from":
+  "..." }`, under its own heading `collage.text.heading`. Four cards
+  land in a 2x2 grid, 3 cards sit in one row, and 2 in a single centered
+  row, building in one by one. Card text uses the `messages` font slot
+  and the signer line the `headings` slot. Cards with blank text are
+  skipped. It is off unless `collage.text.enabled` is `true`.
+
+The sample config carries 4 short greetings with the text collage
+switched off, so setting `collage.text.enabled` to `true` is all it
+takes to demo it.
 
 ## Backgrounds
 
@@ -174,11 +202,16 @@ ffprobe renders/birthday-sample.mp4
 2. Edit `config.json`:
    - `celebrantName`, `celebrantShortName`, `role`, `occasion`
    - `photos`: one entry per montage photo, `file` path plus `caption`
-   - `collage.photoIndexes`: which photos (zero-based positions in the
-     `photos` list) appear in the collage; exactly 3
-   - `collage.mode` and `collage.cards`: set `mode` to `"text"` to show
-     greeting cards instead of polaroids, with up to 4 `{ text, from }`
-     entries in `cards`
+   - `collage.photo.photoIndexes`: which photos (zero-based positions in
+     the `photos` list) appear in the photo collage; exactly 3.
+     `collage.photo.enabled` can be set to `false` to skip the scene, and
+     `collage.photo.heading` sets its heading
+   - `collage.text`: set `enabled` to `true` to add the text collage
+     scene, with its own `heading` and up to 4 `{ text, from }` entries
+     in `cards`
+   - `sceneOrder`: the four middle block keys (`photos`,
+     `photoCollage`, `textCollage`, `messages`) in the order they
+     should play; the title and closing cards stay fixed at the ends
    - `messages`: exactly 2 entries, `text` plus `signedBy`
    - `fonts`: one pick per text slot (`name`, `headings`, `captions`,
      `messages`) from the pool in the Fonts section above
