@@ -537,7 +537,7 @@
               "The video could not be made. Details:<pre></pre>",
               true,
             );
-            $("statusBox pre").textContent = job.error || "Unknown error";
+            document.querySelector("#statusBox pre").textContent = job.error || "Unknown error";
           } else {
             const label = job.status === "generating" ? "Building the scenes" : "Rendering the video";
             setStatus("<span class='spinner'></span>" + label + ". This usually takes a few minutes, keep this page open.", false);
