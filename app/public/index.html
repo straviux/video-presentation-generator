@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video Presentation Generator</title>
+    <style>
+      :root {
+        --green: #17352b;
+        --green-2: #2c5c46;
+        --gold: #ac8a21;
+        --ink: #22301f;
+        --muted: #5c6659;
+        --line: #d8ddd2;
+        --bg: #f4f5f1;
+        --card: #ffffff;
+        --soft: #eef2ea;
+        --danger: #a33327;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      header {
+        background: var(--green);
+        color: #f7f3e8;
+        padding: 22px 28px;
+      }
+      header h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 26px; }
+      header p { margin: 6px 0 0; color: #cfd8cc; font-size: 14px; }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 24px 20px 60px;
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        align-items: start;
+      }
+      @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px 22px;
+        margin-bottom: 20px;
+      }
+      .card h2 {
+        margin: 0 0 4px;
+        font-size: 17px;
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      .card .hint { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+      label { display: block; font-size: 13px; font-weight: bold; margin: 12px 0 5px; }
+      label:first-of-type { margin-top: 0; }
+      input[type="text"], textarea {
+        width: 100%;
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font: inherit;
+        font-size: 14px;
+        background: #fff;
+      }
+      textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+      .event-options { display: flex; flex-wrap: wrap; gap: 10px; }
+      .event-option {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+      }
+      .event-option.selected { border-color: var(--green-2); background: var(--soft); font-weight: bold; }
+      .event-option.disabled { color: var(--muted); background: #fafafa; }
+      .badge {
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: #e8e4d2;
+        color: #6d5c14;
+        border-radius: 999px;
+        padding: 2px 8px;
+      }
+      /* Photos */
+      .photo-item {
+        display: grid;
+        grid-template-columns: 92px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background: #fff;
+      }
+      .photo-item img {
+        width: 92px; height: 60px; object-fit: cover; border-radius: 6px; display: block;
+      }
+      .photo-item .caption { margin: 0; }
+      .photo-item .collage-check {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 12px; font-weight: normal; margin: 7px 0 0; color: var(--muted);
+      }
+      .photo-actions { display: flex; flex-direction: column; gap: 6px; }
+      .mini-btn {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 7px;
+        padding: 5px 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .mini-btn:hover { background: var(--soft); }
+      .mini-btn.danger { color: var(--danger); }
+      .mini-btn:disabled { opacity: 0.4; cursor: default; }
+      .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+      .toggle-row input { width: 18px; height: 18px; }
+      .toggle-row span { font-size: 14px; font-weight: bold; }
+      .warn { color: var(--danger); font-size: 13px; margin: 8px 0 0; display: none; }
+      /* Side column */
+      .side { position: sticky; top: 20px; }
+      @media (max-width: 900px) { .side { position: static; } }
+      .scene-list { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+      .scene-list li {
+        display: flex; justify-content: space-between; gap: 10px;
+        padding: 6px 0; border-bottom: 1px solid #eceee7;
+      }
+      .scene-list li:last-child { border-bottom: none; }
+      .scene-list .dur { color: var(--muted); white-space: nowrap; }
+      .total {
+        display: flex; justify-content: space-between;
+        font-weight: bold; margin-top: 10px; font-size: 15px;
+      }
+      /* Preview */
+      .stage {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%);
+        border-radius: 10px;
+        overflow: hidden;
+        color: #f7f3e8;
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      .stage .pv-scene {
+        position: absolute; inset: 0;
+        display: none;
+        align-items: center; justify-content: center;
+        text-align: center; padding: 18px;
+      }
+      .stage .pv-scene.active { display: flex; }
+      .stage .pv-title { font-size: 21px; font-weight: bold; line-height: 1.25; }
+      .stage .pv-small { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #e9e4d4; margin-top: 7px; }
+      .stage .pv-eyebrow {
+        font-family: Arial, Helvetica, sans-serif; font-size: 9px;
+        letter-spacing: 0.3em; text-transform: uppercase; color: #e8c56e; margin-bottom: 8px;
+      }
+      .stage img.pv-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .stage .pv-caption {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        padding: 20px 14px 9px; text-align: left;
+        background: linear-gradient(to top, rgba(6,18,13,0.85), rgba(6,18,13,0));
+        font-family: Arial, Helvetica, sans-serif; font-size: 11.5px;
+      }
+      .stage .pv-collage { display: none; gap: 8px; align-items: center; justify-content: center; width: 100%; }
+      .stage .pv-collage.active { display: flex; }
+      .stage .pv-polaroid { background: #fdfcf8; padding: 5px 5px 3px; width: 31%; box-shadow: 0 8px 18px rgba(0,0,0,0.4); }
+      .stage .pv-polaroid img { width: 100%; height: 64px; object-fit: cover; display: block; }
+      .stage .pv-msg {
+        background: rgba(253,252,248,0.97); color: #22301f; border-radius: 10px;
+        padding: 16px 18px; font-size: 13px; line-height: 1.5; max-width: 88%;
+      }
+      .stage .pv-sign {
+        font-family: Arial, Helvetica, sans-serif; font-size: 9px;
+        letter-spacing: 0.08em; text-transform: uppercase; color: #7a6a35; margin-top: 8px;
+      }
+      .preview-meta {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 10px; font-size: 12.5px; color: var(--muted);
+      }
+      /* Generate + status */
+      .generate-btn {
+        width: 100%;
+        background: var(--green-2);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .generate-btn:hover { background: var(--green); }
+      .generate-btn:disabled { opacity: 0.55; cursor: default; }
+      .status-box { display: none; margin-top: 14px; font-size: 14px; line-height: 1.55; }
+      .status-box.show { display: block; }
+      .status-box .spinner {
+        display: inline-block; width: 13px; height: 13px; margin-right: 7px;
+        border: 2px solid var(--line); border-top-color: var(--green-2);
+        border-radius: 50%; animation: spin 0.9s linear infinite; vertical-align: -2px;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .status-box.error { color: var(--danger); }
+      .status-box pre {
+        background: #22281f; color: #e6e9df; border-radius: 8px;
+        padding: 10px 12px; font-size: 11.5px; overflow: auto; max-height: 180px;
+        white-space: pre-wrap; word-break: break-word;
+      }
+      .result-box { display: none; margin-top: 14px; }
+      .result-box.show { display: block; }
+      .result-box video { width: 100%; border-radius: 10px; background: #000; }
+      .download-btn {
+        display: block; text-align: center; margin-top: 10px;
+        background: var(--gold); color: #fff; text-decoration: none;
+        border-radius: 10px; padding: 12px; font-weight: bold; font-size: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Video Presentation Generator</h1>
+      <p>Make a one minute celebration video for the office. Add the details and photos, then generate a real MP4.</p>
+    </header>
+    <main>
+      <div class="builder">
+        <section class="card" id="step-event">
+          <h2>1. Event type</h2>
+          <p class="hint">Birthday is ready to use. The other event types are on the way.</p>
+          <div class="event-options">
+            <label class="event-option selected"><input type="radio" name="eventType" value="Birthday" checked /> Birthday</label>
+            <label class="event-option disabled"><input type="radio" name="eventType" value="Appreciation" disabled /> Appreciation <span class="badge">Coming soon</span></label>
+            <label class="event-option disabled"><input type="radio" name="eventType" value="Awards" disabled /> Awards <span class="badge">Coming soon</span></label>
+            <label class="event-option disabled"><input type="radio" name="eventType" value="Retirement" disabled /> Retirement <span class="badge">Coming soon</span></label>
+          </div>
+        </section>
+
+        <section class="card" id="step-details">
+          <h2>2. Details</h2>
+          <p class="hint">These words appear on the title card and the closing card of the video.</p>
+          <label for="celebrantName">Celebrant name</label>
+          <input type="text" id="celebrantName" value="Nur-Aina Ibrahim" />
+          <div class="row">
+            <div>
+              <label for="celebrantShortName">Short name, used in the title</label>
+              <input type="text" id="celebrantShortName" value="Nur-Aina" />
+            </div>
+            <div>
+              <label for="role">Role</label>
+              <input type="text" id="role" value="Program Manager" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="fromLine">From line, on the title card</label>
+              <input type="text" id="fromLine" value="From your YSE Family" />
+            </div>
+            <div>
+              <label for="closingSignOff">Closing sign-off</label>
+              <input type="text" id="closingSignOff" value="With love, your YSE Family" />
+            </div>
+          </div>
+          <label for="closingLine">Closing line</label>
+          <input type="text" id="closingLine" value="Wishing you a year as warm and generous as you are." />
+          <label for="collageHeading">Collage heading</label>
+          <input type="text" id="collageHeading" value="Moments together" />
+        </section>
+
+        <section class="card" id="step-photos">
+          <h2>3. Photos</h2>
+          <p class="hint">Add JPG, PNG, or WebP photos. Each photo gets 5 seconds in the montage. Use the arrows to change the order, and tick exactly 3 photos if you want the photo collage.</p>
+          <input type="file" id="photoInput" accept=".jpg,.jpeg,.png,.webp" multiple />
+          <div id="photoList" style="margin-top: 14px"></div>
+          <div class="toggle-row">
+            <input type="checkbox" id="collageEnabled" checked />
+            <span>Include the photo collage scene</span>
+          </div>
+          <p class="warn" id="collageWarn">The collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
+        </section>
+
+        <section class="card" id="step-messages">
+          <h2>4. Messages</h2>
+          <p class="hint">Up to two message cards, shown near the end of the video. Each one gets 6 seconds. Leave a message blank to skip it.</p>
+          <label for="message1Text">Message 1</label>
+          <textarea id="message1Text">You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.</textarea>
+          <label for="message1SignedBy">Signed by</label>
+          <input type="text" id="message1SignedBy" value="Your YSE Family" />
+          <label for="message2Text">Message 2</label>
+          <textarea id="message2Text">Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.</textarea>
+          <label for="message2SignedBy">Signed by</label>
+          <input type="text" id="message2SignedBy" value="From all of us at YSE" />
+        </section>
+      </div>
+
+      <div class="side">
+        <section class="card" id="summary-card">
+          <h2>Video summary</h2>
+          <p class="hint">Scenes update as you add photos and change options.</p>
+          <ul class="scene-list" id="sceneList"></ul>
+          <div class="total"><span>Total runtime</span><span id="totalRuntime">0:00</span></div>
+        </section>
+
+        <section class="card" id="preview-card">
+          <h2>Quick preview</h2>
+          <p class="hint">A simple slideshow of your content at real scene lengths. The finished video adds the animations.</p>
+          <div class="stage" id="stage"></div>
+          <div class="preview-meta">
+            <button type="button" class="mini-btn" id="previewBtn">Play preview</button>
+            <span id="previewLabel">Nothing playing</span>
+          </div>
+        </section>
+
+        <section class="card" id="generate-card">
+          <h2>5. Generate</h2>
+          <p class="hint">Rendering happens on this machine and usually takes a few minutes for a one minute video.</p>
+          <button type="button" class="generate-btn" id="generateBtn">Generate Video</button>
+          <div class="status-box" id="statusBox"></div>
+          <div class="result-box" id="resultBox">
+            <video id="resultVideo" controls playsinline></video>
+            <a class="download-btn" id="downloadBtn" href="#" download>Download MP4</a>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const photos = []; // { file, url, caption, inCollage }
+
+      const TITLE_DUR = 5, PHOTO_DUR = 5, COLLAGE_DUR = 6, MESSAGE_DUR = 6, CLOSING_DUR = 8;
+
+      function fmt(totalSeconds) {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return m + ":" + String(s).padStart(2, "0");
+      }
+
+      function filledMessages() {
+        const out = [];
+        for (const n of [1, 2]) {
+          const text = $("message" + n + "Text").value.trim();
+          if (text) out.push({ text, signedBy: $("message" + n + "SignedBy").value.trim() });
+        }
+        return out;
+      }
+
+      function computeScenes() {
+        const scenes = [{ name: "Title card", dur: TITLE_DUR, kind: "title" }];
+        photos.forEach((p, i) => scenes.push({ name: "Photo " + (i + 1), dur: PHOTO_DUR, kind: "photo", index: i }));
+        if ($("collageEnabled").checked) {
+          scenes.push({ name: "Photo collage", dur: COLLAGE_DUR, kind: "collage" });
+        }
+        filledMessages().forEach((m, i) => scenes.push({ name: "Message card " + (i + 1), dur: MESSAGE_DUR, kind: "message", index: i }));
+        scenes.push({ name: "Closing card", dur: CLOSING_DUR, kind: "closing" });
+        return scenes;
+      }
+
+      function refreshSummary() {
+        const scenes = computeScenes();
+        let t = 0;
+        $("sceneList").innerHTML = scenes
+          .map((sc) => {
+            const label = fmt(t) + "  " + sc.name;
+            t += sc.dur;
+            return "<li><span>" + label + "</span><span class='dur'>" + sc.dur + "s</span></li>";
+          })
+          .join("");
+        $("totalRuntime").textContent = fmt(t);
+        const count = photos.filter((p) => p.inCollage).length;
+        $("collageCount").textContent = count;
+        const bad = $("collageEnabled").checked && count !== 3;
+        $("collageWarn").style.display = bad ? "block" : "none";
+        $("generateBtn").disabled = bad || photos.length === 0;
+      }
+
+      function renderPhotoList() {
+        const list = $("photoList");
+        list.innerHTML = "";
+        photos.forEach((p, i) => {
+          const item = document.createElement("div");
+          item.className = "photo-item";
+          item.innerHTML =
+            "<img alt='' />" +
+            "<div>" +
+              "<input type='text' class='caption' placeholder='Caption for this photo' />" +
+              "<label class='collage-check'><input type='checkbox' class='collage-box' /> Include in the collage</label>" +
+            "</div>" +
+            "<div class='photo-actions'>" +
+              "<button type='button' class='mini-btn up'>Up</button>" +
+              "<button type='button' class='mini-btn down'>Down</button>" +
+              "<button type='button' class='mini-btn danger remove'>Remove</button>" +
+            "</div>";
+          item.querySelector("img").src = p.url;
+          const caption = item.querySelector(".caption");
+          caption.value = p.caption;
+          caption.addEventListener("input", () => { p.caption = caption.value; });
+          const box = item.querySelector(".collage-box");
+          box.checked = p.inCollage;
+          box.addEventListener("change", () => { p.inCollage = box.checked; refreshSummary(); });
+          item.querySelector(".up").disabled = i === 0;
+          item.querySelector(".down").disabled = i === photos.length - 1;
+          item.querySelector(".up").addEventListener("click", () => {
+            [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]];
+            renderPhotoList(); refreshSummary();
+          });
+          item.querySelector(".down").addEventListener("click", () => {
+            [photos[i + 1], photos[i]] = [photos[i], photos[i + 1]];
+            renderPhotoList(); refreshSummary();
+          });
+          item.querySelector(".remove").addEventListener("click", () => {
+            URL.revokeObjectURL(p.url);
+            photos.splice(i, 1);
+            renderPhotoList(); refreshSummary();
+          });
+          list.appendChild(item);
+        });
+        refreshSummary();
+      }
+
+      $("photoInput").addEventListener("change", (event) => {
+        for (const file of event.target.files) {
+          photos.push({ file, url: URL.createObjectURL(file), caption: "", inCollage: false });
+        }
+        event.target.value = "";
+        renderPhotoList();
+      });
+
+      for (const id of ["collageEnabled", "message1Text", "message2Text"]) {
+        $(id).addEventListener("input", refreshSummary);
+        $(id).addEventListener("change", refreshSummary);
+      }
+
+      // ------------------------------------------------------ quick preview --
+      let previewTimer = null;
+      function stopPreview(label) {
+        if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
+        $("previewBtn").textContent = "Play preview";
+        if (label) $("previewLabel").textContent = label;
+      }
+      function buildPreviewScenes(scenes) {
+        const stage = $("stage");
+        stage.innerHTML = "";
+        const name = $("celebrantName").value.trim() || "Celebrant";
+        const short = $("celebrantShortName").value.trim() || name.split(/\s+/)[0];
+        return scenes.map((sc) => {
+          const el = document.createElement("div");
+          if (sc.kind === "photo") {
+            el.className = "pv-scene";
+            el.innerHTML = "<img class='pv-photo' alt='' /><div class='pv-caption'></div>";
+            el.querySelector("img").src = photos[sc.index].url;
+            el.querySelector(".pv-caption").textContent = photos[sc.index].caption;
+          } else if (sc.kind === "collage") {
+            el.className = "pv-scene pv-collage";
+            const heading = document.createElement("div");
+            heading.className = "pv-eyebrow";
+            heading.textContent = $("collageHeading").value.trim() || "Moments together";
+            heading.style.position = "absolute";
+            heading.style.top = "12px";
+            el.appendChild(heading);
+            photos.filter((p) => p.inCollage).forEach((p) => {
+              const fig = document.createElement("div");
+              fig.className = "pv-polaroid";
+              const img = document.createElement("img");
+              img.src = p.url; img.alt = "";
+              fig.appendChild(img);
+              el.appendChild(fig);
+            });
+          } else if (sc.kind === "message") {
+            el.className = "pv-scene";
+            const msg = filledMessages()[sc.index];
+            el.innerHTML = "<div class='pv-msg'><div></div><div class='pv-sign'></div></div>";
+            el.querySelector(".pv-msg div").textContent = msg.text;
+            el.querySelector(".pv-sign").textContent = msg.signedBy;
+          } else if (sc.kind === "closing") {
+            el.className = "pv-scene";
+            el.innerHTML = "<div><div class='pv-eyebrow'></div><div class='pv-title'></div><div class='pv-small'></div></div>";
+            el.querySelector(".pv-eyebrow").textContent = "Happy Birthday, " + short;
+            el.querySelector(".pv-title").textContent = $("closingLine").value.trim();
+            el.querySelector(".pv-small").textContent = $("closingSignOff").value.trim();
+          } else {
+            el.className = "pv-scene";
+            el.innerHTML = "<div><div class='pv-eyebrow'>Happy Birthday</div><div class='pv-title'></div><div class='pv-small'></div></div>";
+            el.querySelector(".pv-title").textContent = "Happy Birthday, " + short + "!";
+            el.querySelector(".pv-small").textContent =
+              name + " · " + $("role").value.trim() + "  |  " + $("fromLine").value.trim();
+          }
+          stage.appendChild(el);
+          return { el, scene: sc };
+        });
+      }
+      $("previewBtn").addEventListener("click", () => {
+        if (previewTimer) { stopPreview("Preview stopped"); return; }
+        if (photos.length === 0) { $("previewLabel").textContent = "Add photos first"; return; }
+        const built = buildPreviewScenes(computeScenes());
+        let idx = 0;
+        const show = () => {
+          built.forEach((b) => b.el.classList.remove("active"));
+          if (idx >= built.length) { stopPreview("Preview finished"); return; }
+          built[idx].el.classList.add("active");
+          $("previewLabel").textContent = built[idx].scene.name + " (" + built[idx].scene.dur + "s)";
+          previewTimer = setTimeout(() => { idx += 1; show(); }, built[idx].scene.dur * 1000);
+        };
+        $("previewBtn").textContent = "Stop preview";
+        show();
+      });
+
+      // ------------------------------------------------------------ generate --
+      let pollTimer = null;
+      function setStatus(html, isError) {
+        const box = $("statusBox");
+        box.className = "status-box show" + (isError ? " error" : "");
+        box.innerHTML = html;
+      }
+      async function pollJob(jobId) {
+        try {
+          const resp = await fetch("/api/jobs/" + jobId);
+          const job = await resp.json();
+          if (!resp.ok) throw new Error(job.error || "Could not read the job status.");
+          if (job.status === "done") {
+            clearInterval(pollTimer);
+            setStatus("Done. Your video is ready below.", false);
+            $("generateBtn").disabled = false;
+            $("resultVideo").src = job.videoUrl;
+            $("downloadBtn").href = job.downloadUrl;
+            $("resultBox").className = "result-box show";
+          } else if (job.status === "error") {
+            clearInterval(pollTimer);
+            $("generateBtn").disabled = false;
+            setStatus(
+              "The video could not be made. Details:<pre></pre>",
+              true,
+            );
+            $("statusBox pre").textContent = job.error || "Unknown error";
+          } else {
+            const label = job.status === "generating" ? "Building the scenes" : "Rendering the video";
+            setStatus("<span class='spinner'></span>" + label + ". This usually takes a few minutes, keep this page open.", false);
+          }
+        } catch (err) {
+          clearInterval(pollTimer);
+          $("generateBtn").disabled = false;
+          setStatus("Lost contact with the server while checking the job. " + err.message, true);
+        }
+      }
+      $("generateBtn").addEventListener("click", async () => {
+        if (photos.length === 0) { setStatus("Add at least one photo first.", true); return; }
+        if (!$("celebrantName").value.trim()) { setStatus("Enter the celebrant name first.", true); return; }
+        stopPreview("Nothing playing");
+        $("resultBox").className = "result-box";
+        const form = new FormData();
+        form.append("celebrantName", $("celebrantName").value.trim());
+        form.append("celebrantShortName", $("celebrantShortName").value.trim());
+        form.append("role", $("role").value.trim());
+        form.append("fromLine", $("fromLine").value.trim());
+        form.append("closingLine", $("closingLine").value.trim());
+        form.append("closingSignOff", $("closingSignOff").value.trim());
+        form.append("collageHeading", $("collageHeading").value.trim());
+        form.append("collageEnabled", $("collageEnabled").checked ? "true" : "false");
+        for (const n of [1, 2]) {
+          form.append("message" + n + "Text", $("message" + n + "Text").value);
+          form.append("message" + n + "SignedBy", $("message" + n + "SignedBy").value);
+        }
+        photos.forEach((p, i) => {
+          form.append("photos", p.file, p.file.name);
+          form.append("captions", p.caption || "");
+          if (p.inCollage) form.append("collageIndexes", String(i));
+        });
+        $("generateBtn").disabled = true;
+        setStatus("<span class='spinner'></span>Sending your photos and details to the renderer.", false);
+        try {
+          const resp = await fetch("/api/generate", { method: "POST", body: form });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "The server refused the request.");
+          pollTimer = setInterval(() => pollJob(data.id), 2500);
+          pollJob(data.id);
+        } catch (err) {
+          $("generateBtn").disabled = false;
+          setStatus("Could not start the job. " + err.message, true);
+        }
+      });
+
+      renderPhotoList();
+    </script>
+  </body>
+</html>

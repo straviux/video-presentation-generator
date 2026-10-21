@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build artifacts and distributables
+*.zip
+*.mp4
+
+# Render outputs (regenerable): videos, extracted frame JPEGs, caches
+renders/
+**/frames/
+**/.frames-cache/
+**/.tmp/
+**/.hyperframes/
+
+# Per-job working directories (uploads, logs, job state)
+app/jobs/
+
+# Logs
+*.log

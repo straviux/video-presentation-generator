@@ -1,0 +1,1 @@
+{"name":"birthday-template","private":true,"scripts":{"check":"npx --yes hyperframes@0.8.181 check","dev":"npx --yes hyperframes@0.8.181 preview","generate":"node generate.mjs","publish":"npx --yes hyperframes@0.8.181 publish","render":"npx --yes hyperframes@0.8.181 render"},"type":"module"}
