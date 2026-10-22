@@ -17,7 +17,7 @@
 import express from "express";
 import multer from "multer";
 import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
 import {
   copyFileSync,
@@ -190,7 +190,53 @@ const HF_BIN = path.join(
 const RENDER_TIMEOUT_MS = 15 * 60 * 1000;
 
 const app = express();
-app.use(express.static(path.join(APP_DIR, "public")));
+
+// ------------------------------------------------------------- build id --
+// A short stamp of the exact code on disk, computed once at startup from
+// the files that define the app's behavior. It changes whenever any of
+// them changes, so the header of the running page (and /api/health) can
+// always be matched against the code that was pulled. No manual bumping.
+const BUILD_ID = (() => {
+  try {
+    const hash = createHash("sha256");
+    for (const rel of ["public/index.html", "server.js", "lib/generate.mjs"]) {
+      hash.update(readFileSync(path.join(APP_DIR, rel)));
+    }
+    return hash.digest("hex").slice(0, 8);
+  } catch {
+    return "unknown";
+  }
+})();
+
+// The app page is served through this route (not the static middleware)
+// so the build stamp can be filled in and the page is never cached: a
+// reopened app always runs the page that matches the server's code.
+let stampedPage = null;
+try {
+  stampedPage = readFileSync(path.join(APP_DIR, "public", "index.html"), "utf8").replaceAll(
+    "__BUILD_ID__",
+    BUILD_ID,
+  );
+} catch {
+  stampedPage = null;
+}
+const servePage = (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (stampedPage !== null) res.type("html").send(stampedPage);
+  else res.sendFile(path.join(APP_DIR, "public", "index.html"));
+};
+app.get("/", servePage);
+app.get("/index.html", servePage);
+
+app.use(
+  express.static(path.join(APP_DIR, "public"), {
+    setHeaders: (res, filePath) => {
+      // The stylesheet shapes the page; like the page itself it must
+      // never come from a stale cache after an update.
+      if (filePath.endsWith("styles.css")) res.set("Cache-Control", "no-store");
+    },
+  }),
+);
 app.use(express.json());
 app.use("/previews", express.static(path.join(APP_DIR, "previews")));
 app.use("/project-assets", express.static(PROJECTS_DIR));
@@ -398,6 +444,7 @@ async function runJob(job) {
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
+    buildId: BUILD_ID,
     hyperframesInstalled: existsSync(HF_BIN),
     rendering: activeJobId !== null,
   });
