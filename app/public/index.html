@@ -153,7 +153,7 @@
 
         <section class="panel p-[18px]" id="panelMessages">
           <h2 class="m-0 mb-1 text-[15px] font-semibold">Messages</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Up to two message cards. Set how long each card stays, which paper it is written on, and an optional animated effect. Leave a message blank to skip it. Use the Scenes tab to choose where they play.</p>
+          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add up to six message cards. Set how long each card stays, which paper it is written on, and an optional animated effect. Leave a message blank to skip it. The buttons under a card move it, copy it, or remove it. Use the Scenes tab to choose where the messages play.</p>
           <div class="border border-line rounded-[10px] p-3 mb-1 bg-[#fafafc]">
             <label class="field-label" for="smartTone" style="margin-top: 0">Smart generate</label>
             <div class="flex gap-2">
@@ -168,65 +168,14 @@
                 Smart generate
               </button>
             </div>
-            <p class="m-0 mt-2 text-muted text-[12px] leading-normal">Fills both messages below with ready-made lines in the chosen tone, greeting the celebrant by first name when one is entered. The Signed by lines are left as they are. The same tone also drives the Generate buttons on the greeting cards and the closing line.</p>
+            <p class="m-0 mt-2 text-muted text-[12px] leading-normal">Fills every message below with ready-made lines in the chosen tone, greeting the celebrant by first name when one is entered. The Signed by lines are left as they are. The same tone also drives the Generate buttons on the greeting cards and the closing line.</p>
             <p class="warn" id="smartLibraryNote">The message library could not be loaded, so Smart generate is off. Restart the app and try again.</p>
           </div>
-          <label class="field-label" for="message1Text">Message 1</label>
-          <textarea class="field-input" id="message1Text">You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.</textarea>
-          <label class="field-label" for="message1SignedBy">Signed by</label>
-          <input type="text" class="field-input" id="message1SignedBy" value="Your YSE Family" />
-          <label class="field-label" for="message1Duration">Message 1 seconds</label>
-          <input type="number" class="field-input" id="message1Duration" value="6" min="4" max="15" step="1" />
-          <label class="field-label" for="message1Paper">Message 1 paper</label>
-          <select class="field-input" id="message1Paper">
-            <option value="classic" selected>Classic cream</option>
-            <option value="white">Clean white</option>
-            <option value="kraft">Kraft tan</option>
-            <option value="blush">Blush pink</option>
-            <option value="mint">Mint green</option>
-            <option value="sky">Sky blue</option>
-            <option value="crumpled">Crumpled</option>
-            <option value="folder">Folder</option>
-            <option value="asymmetrical">Asymmetrical</option>
-            <option value="felt">Felt</option>
-            <option value="specialty">Specialty</option>
-          </select>
-          <label class="field-label" for="message1Effect">Message 1 effect</label>
-          <select class="field-input" id="message1Effect">
-            <option value="none" selected>None</option>
-            <option value="confetti">Confetti</option>
-            <option value="sparkles">Sparkles</option>
-            <option value="hearts">Hearts</option>
-            <option value="petals">Petals</option>
-          </select>
-          <label class="field-label" for="message2Text">Message 2</label>
-          <textarea class="field-input" id="message2Text">Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.</textarea>
-          <label class="field-label" for="message2SignedBy">Signed by</label>
-          <input type="text" class="field-input" id="message2SignedBy" value="From all of us at YSE" />
-          <label class="field-label" for="message2Duration">Message 2 seconds</label>
-          <input type="number" class="field-input" id="message2Duration" value="6" min="4" max="15" step="1" />
-          <label class="field-label" for="message2Paper">Message 2 paper</label>
-          <select class="field-input" id="message2Paper">
-            <option value="classic" selected>Classic cream</option>
-            <option value="white">Clean white</option>
-            <option value="kraft">Kraft tan</option>
-            <option value="blush">Blush pink</option>
-            <option value="mint">Mint green</option>
-            <option value="sky">Sky blue</option>
-            <option value="crumpled">Crumpled</option>
-            <option value="folder">Folder</option>
-            <option value="asymmetrical">Asymmetrical</option>
-            <option value="felt">Felt</option>
-            <option value="specialty">Specialty</option>
-          </select>
-          <label class="field-label" for="message2Effect">Message 2 effect</label>
-          <select class="field-input" id="message2Effect">
-            <option value="none" selected>None</option>
-            <option value="confetti">Confetti</option>
-            <option value="sparkles">Sparkles</option>
-            <option value="hearts">Hearts</option>
-            <option value="petals">Petals</option>
-          </select>
+          <div id="messageList"></div>
+          <button type="button" id="addMessageBtn" class="w-full flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff] disabled:opacity-50 disabled:cursor-default">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Add a message card
+          </button>
         </section>
 
         <section class="panel p-[18px]" id="panelCollage">
@@ -271,83 +220,12 @@
             <option value="petals">Petals</option>
           </select>
           <div id="collageTextArea">
-            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped. Each card can wear its own paper, picked under the card. The Generate button under each card writes a short line for you, in the tone picked in the Messages tab; signers are left as they are.</p>
-            <label class="field-label" for="cardText1">Card 1</label>
-            <input type="text" class="field-input" id="cardText1" value="Happiest birthday! Your kindness keeps this whole office going." />
-            <label class="field-label" for="cardFrom1">Signed by</label>
-            <input type="text" class="field-input" id="cardFrom1" value="The Programs Team" />
-            <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="1">Generate</button></div>
-            <label class="field-label" for="cardPaper1">Card 1 paper</label>
-            <select class="field-input" id="cardPaper1">
-              <option value="classic" selected>Classic cream</option>
-              <option value="white">Clean white</option>
-              <option value="kraft">Kraft tan</option>
-              <option value="blush">Blush pink</option>
-              <option value="mint">Mint green</option>
-              <option value="sky">Sky blue</option>
-              <option value="crumpled">Crumpled</option>
-              <option value="folder">Folder</option>
-              <option value="asymmetrical">Asymmetrical</option>
-              <option value="felt">Felt</option>
-              <option value="specialty">Specialty</option>
-            </select>
-            <label class="field-label" for="cardText2">Card 2</label>
-            <input type="text" class="field-input" id="cardText2" value="Thank you for leading with patience and heart. Enjoy your day, you have earned it." />
-            <label class="field-label" for="cardFrom2">Signed by</label>
-            <input type="text" class="field-input" id="cardFrom2" value="The Finance Team" />
-            <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="2">Generate</button></div>
-            <label class="field-label" for="cardPaper2">Card 2 paper</label>
-            <select class="field-input" id="cardPaper2">
-              <option value="classic" selected>Classic cream</option>
-              <option value="white">Clean white</option>
-              <option value="kraft">Kraft tan</option>
-              <option value="blush">Blush pink</option>
-              <option value="mint">Mint green</option>
-              <option value="sky">Sky blue</option>
-              <option value="crumpled">Crumpled</option>
-              <option value="folder">Folder</option>
-              <option value="asymmetrical">Asymmetrical</option>
-              <option value="felt">Felt</option>
-              <option value="specialty">Specialty</option>
-            </select>
-            <label class="field-label" for="cardText3">Card 3</label>
-            <input type="text" class="field-input" id="cardText3" value="Wishing you good health, good food, and zero paperwork today." />
-            <label class="field-label" for="cardFrom3">Signed by</label>
-            <input type="text" class="field-input" id="cardFrom3" value="The Field Team" />
-            <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="3">Generate</button></div>
-            <label class="field-label" for="cardPaper3">Card 3 paper</label>
-            <select class="field-input" id="cardPaper3">
-              <option value="classic" selected>Classic cream</option>
-              <option value="white">Clean white</option>
-              <option value="kraft">Kraft tan</option>
-              <option value="blush">Blush pink</option>
-              <option value="mint">Mint green</option>
-              <option value="sky">Sky blue</option>
-              <option value="crumpled">Crumpled</option>
-              <option value="folder">Folder</option>
-              <option value="asymmetrical">Asymmetrical</option>
-              <option value="felt">Felt</option>
-              <option value="specialty">Specialty</option>
-            </select>
-            <label class="field-label" for="cardText4">Card 4</label>
-            <input type="text" class="field-input" id="cardText4" value="We are lucky to work with you. Happy birthday!" />
-            <label class="field-label" for="cardFrom4">Signed by</label>
-            <input type="text" class="field-input" id="cardFrom4" value="Everyone at YSE" />
-            <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="4">Generate</button></div>
-            <label class="field-label" for="cardPaper4">Card 4 paper</label>
-            <select class="field-input" id="cardPaper4">
-              <option value="classic" selected>Classic cream</option>
-              <option value="white">Clean white</option>
-              <option value="kraft">Kraft tan</option>
-              <option value="blush">Blush pink</option>
-              <option value="mint">Mint green</option>
-              <option value="sky">Sky blue</option>
-              <option value="crumpled">Crumpled</option>
-              <option value="folder">Folder</option>
-              <option value="asymmetrical">Asymmetrical</option>
-              <option value="felt">Felt</option>
-              <option value="specialty">Specialty</option>
-            </select>
+            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Add up to six greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped. Each card can wear its own paper, picked under the card. The buttons under a card move it, copy it, or remove it. The Generate button under each card writes a short line for you, in the tone picked in the Messages tab; signers are left as they are.</p>
+            <div id="textCardList"></div>
+            <button type="button" id="addTextCardBtn" class="w-full flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff] disabled:opacity-50 disabled:cursor-default">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              Add a greeting card
+            </button>
             <p class="warn" id="collageTextWarn">The text collage needs at least 2 cards with text. Right now <span id="collageCardCount">0</span> cards have text.</p>
           </div>
         </section>
@@ -646,6 +524,51 @@
       const $ = (id) => document.getElementById(id);
       const photos = []; // { file, url, caption, inCollage, inClosingTop, inClosingBottom, duration, zoom, frame, focusX, focusY, brightness, saturation }
 
+      // Flexible card editors: the Messages panel and the text collage
+      // render their editors from these state arrays, the same pattern
+      // the photo list uses. The server and the generator accept up to
+      // 6 of each. First load carries today's sample content, so the
+      // out-of-box video is unchanged.
+      const MAX_MESSAGES = 6;
+      const MAX_TEXT_CARDS = 6;
+      const PAPER_OPTIONS = [
+        ["classic", "Classic cream"], ["white", "Clean white"], ["kraft", "Kraft tan"],
+        ["blush", "Blush pink"], ["mint", "Mint green"], ["sky", "Sky blue"],
+        ["crumpled", "Crumpled"], ["folder", "Folder"], ["asymmetrical", "Asymmetrical"],
+        ["felt", "Felt"], ["specialty", "Specialty"],
+      ];
+      const EFFECT_OPTIONS = [
+        ["none", "None"], ["confetti", "Confetti"], ["sparkles", "Sparkles"],
+        ["hearts", "Hearts"], ["petals", "Petals"],
+      ];
+      let messagesState = [
+        { text: "You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.", signedBy: "Your YSE Family", duration: 6, paper: "classic", effect: "none" },
+        { text: "Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.", signedBy: "From all of us at YSE", duration: 6, paper: "classic", effect: "none" },
+      ];
+      let textCardsState = [
+        { text: "Happiest birthday! Your kindness keeps this whole office going.", from: "The Programs Team", paper: "classic" },
+        { text: "Thank you for leading with patience and heart. Enjoy your day, you have earned it.", from: "The Finance Team", paper: "classic" },
+        { text: "Wishing you good health, good food, and zero paperwork today.", from: "The Field Team", paper: "classic" },
+        { text: "We are lucky to work with you. Happy birthday!", from: "Everyone at YSE", paper: "classic" },
+      ];
+      let smartAvailable = false;
+
+      // Mirrors the server and generator clamp for message durations.
+      function clampMessageDuration(v) {
+        const n = Number.parseInt(v, 10);
+        return Number.isFinite(n) ? Math.min(15, Math.max(4, n)) : 6;
+      }
+      const paperOrClassic = (v) => (PAPER_OPTIONS.some(([k]) => k === v) ? v : "classic");
+      const effectOrNone = (v) => (EFFECT_OPTIONS.some(([k]) => k === v) ? v : "none");
+      function paperOptionsHtml(selected) {
+        return PAPER_OPTIONS.map(([key, label]) =>
+          "<option value='" + key + "'" + (key === selected ? " selected" : "") + ">" + label + "</option>").join("");
+      }
+      function effectOptionsHtml(selected) {
+        return EFFECT_OPTIONS.map(([key, label]) =>
+          "<option value='" + key + "'" + (key === selected ? " selected" : "") + ">" + label + "</option>").join("");
+      }
+
       // Genuine Lucide icon paths (lucide v1.61.0, ISC), inlined as SVG.
       const ICON_PATHS = {
         clapperboard: '<path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/>',
@@ -655,6 +578,7 @@
         chevronUp: '<path d="m18 15-6-6-6 6"/>',
         chevronDown: '<path d="m6 9 6 6 6-6"/>',
         trash2: '<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+        copy: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
       };
       const svgIcon = (paths) =>
         "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>" + paths + "</svg>";
@@ -671,7 +595,6 @@
       const closingDur = () => numVal("closingDuration", 8, 4, 15);
       const photoCollageDur = () => numVal("photoCollageDuration", 6, 4, 12);
       const textCollageDur = () => numVal("textCollageDuration", 6, 4, 12);
-      const messageDur = (n) => numVal("message" + n + "Duration", 6, 4, 15);
 
       function fmt(totalSeconds) {
         const m = Math.floor(totalSeconds / 60);
@@ -681,9 +604,9 @@
 
       function filledMessages() {
         const out = [];
-        for (const n of [1, 2]) {
-          const text = $("message" + n + "Text").value.trim();
-          if (text) out.push({ text, signedBy: $("message" + n + "SignedBy").value.trim(), duration: messageDur(n) });
+        for (const m of messagesState) {
+          const text = m.text.trim();
+          if (text) out.push({ text, signedBy: m.signedBy.trim(), duration: clampMessageDuration(m.duration) });
         }
         return out;
       }
@@ -695,9 +618,9 @@
 
       function filledCards() {
         const out = [];
-        for (const n of [1, 2, 3, 4]) {
-          const text = $("cardText" + n).value.trim();
-          if (text) out.push({ text, from: $("cardFrom" + n).value.trim() });
+        for (const c of textCardsState) {
+          const text = c.text.trim();
+          if (text) out.push({ text, from: c.from.trim() });
         }
         return out;
       }
@@ -1140,16 +1063,149 @@
         renderPhotoList();
       });
 
-      for (const id of ["collageEnabled", "textCollageEnabled", "message1Text", "message2Text",
+      // ------------------------------------------- flexible card editors --
+      // The Up / Down / Copy / Remove row under each message editor and
+      // text collage card editor, mirroring the photo rows' buttons.
+      function cardActions(opts) {
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-1.5 mt-3";
+        const mk = (icon, label, handler, extra) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "mini-btn" + (extra && extra.cls ? " " + extra.cls : "");
+          btn.innerHTML = svgIcon(icon) + label;
+          btn.disabled = Boolean(extra && extra.disabled);
+          btn.setAttribute("aria-label", label);
+          btn.addEventListener("click", handler);
+          return btn;
+        };
+        row.appendChild(mk(ICON_PATHS.chevronUp, "Up", opts.onUp, { disabled: opts.upDisabled }));
+        row.appendChild(mk(ICON_PATHS.chevronDown, "Down", opts.onDown, { disabled: opts.downDisabled }));
+        row.appendChild(mk(ICON_PATHS.copy, "Copy", opts.onDuplicate, { disabled: opts.dupDisabled }));
+        const spacer = document.createElement("span");
+        spacer.className = "flex-1";
+        row.appendChild(spacer);
+        row.appendChild(mk(ICON_PATHS.trash2, "Remove", opts.onRemove, { cls: "danger", disabled: opts.removeDisabled }));
+        return row;
+      }
+
+      // Message editors, rendered from messagesState. Typing updates
+      // state only; the structural buttons re-render the list.
+      function renderMessageList() {
+        const list = $("messageList");
+        list.innerHTML = "";
+        messagesState.forEach((m, i) => {
+          const item = document.createElement("div");
+          item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
+          item.innerHTML =
+            "<div class='text-[13.5px] font-semibold mb-1'>Message " + (i + 1) + "</div>" +
+            "<label class='field-label'>Message text</label>" +
+            "<textarea class='field-input msg-text'></textarea>" +
+            "<label class='field-label'>Signed by</label>" +
+            "<input type='text' class='field-input msg-signed' />" +
+            "<label class='field-label'>Seconds on screen</label>" +
+            "<input type='number' class='field-input msg-duration' min='4' max='15' step='1' />" +
+            "<label class='field-label'>Paper</label>" +
+            "<select class='field-input msg-paper'>" + paperOptionsHtml(m.paper) + "</select>" +
+            "<label class='field-label'>Effect</label>" +
+            "<select class='field-input msg-effect'>" + effectOptionsHtml(m.effect) + "</select>";
+          const text = item.querySelector(".msg-text");
+          text.value = m.text;
+          text.addEventListener("input", () => { m.text = text.value; refreshSummary(); });
+          const signed = item.querySelector(".msg-signed");
+          signed.value = m.signedBy;
+          signed.addEventListener("input", () => { m.signedBy = signed.value; refreshSummary(); });
+          const dur = item.querySelector(".msg-duration");
+          dur.value = m.duration;
+          dur.addEventListener("input", () => { m.duration = clampMessageDuration(dur.value); refreshSummary(); });
+          const paper = item.querySelector(".msg-paper");
+          paper.addEventListener("change", () => { m.paper = paper.value; refreshSummary(); });
+          const effect = item.querySelector(".msg-effect");
+          effect.addEventListener("change", () => { m.effect = effect.value; refreshSummary(); });
+          item.appendChild(cardActions({
+            upDisabled: i === 0,
+            downDisabled: i === messagesState.length - 1,
+            dupDisabled: messagesState.length >= MAX_MESSAGES,
+            removeDisabled: messagesState.length <= 1,
+            onUp: () => { [messagesState[i - 1], messagesState[i]] = [messagesState[i], messagesState[i - 1]]; renderMessageList(); },
+            onDown: () => { [messagesState[i + 1], messagesState[i]] = [messagesState[i], messagesState[i + 1]]; renderMessageList(); },
+            onDuplicate: () => { messagesState.splice(i + 1, 0, { ...m }); renderMessageList(); },
+            onRemove: () => { messagesState.splice(i, 1); renderMessageList(); },
+          }));
+          list.appendChild(item);
+        });
+        $("addMessageBtn").disabled = messagesState.length >= MAX_MESSAGES;
+        refreshSummary();
+      }
+
+      $("addMessageBtn").addEventListener("click", () => {
+        if (messagesState.length >= MAX_MESSAGES) return;
+        messagesState.push({ text: "", signedBy: "", duration: 6, paper: "classic", effect: "none" });
+        renderMessageList();
+      });
+
+      // Text collage card editors, rendered from textCardsState. Each
+      // card keeps its own Smart generate button; the click fills that
+      // card's text from the library's short lines, signers untouched.
+      function renderTextCardList() {
+        const list = $("textCardList");
+        list.innerHTML = "";
+        textCardsState.forEach((c, i) => {
+          const item = document.createElement("div");
+          item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
+          item.innerHTML =
+            "<div class='text-[13.5px] font-semibold mb-1'>Card " + (i + 1) + "</div>" +
+            "<label class='field-label'>Card text</label>" +
+            "<input type='text' class='field-input card-text' />" +
+            "<label class='field-label'>Signed by</label>" +
+            "<input type='text' class='field-input card-from' />" +
+            "<div class='mt-1.5'><button type='button' class='mini-btn' data-smart-card='" + (i + 1) + "'>Generate</button></div>" +
+            "<label class='field-label'>Paper</label>" +
+            "<select class='field-input card-paper'>" + paperOptionsHtml(c.paper) + "</select>";
+          const text = item.querySelector(".card-text");
+          text.value = c.text;
+          text.addEventListener("input", () => { c.text = text.value; refreshSummary(); });
+          const from = item.querySelector(".card-from");
+          from.value = c.from;
+          from.addEventListener("input", () => { c.from = from.value; refreshSummary(); });
+          const paper = item.querySelector(".card-paper");
+          paper.addEventListener("change", () => { c.paper = paper.value; refreshSummary(); });
+          const genBtn = item.querySelector("[data-smart-card]");
+          genBtn.disabled = !smartAvailable;
+          genBtn.addEventListener("click", () => {
+            const tone = smartTone();
+            if (!tone) return;
+            const entry = pickSmart(tone.shorts, "card" + (i + 1));
+            if (entry) { c.text = entry.text; text.value = entry.text; }
+            refreshSummary();
+          });
+          item.appendChild(cardActions({
+            upDisabled: i === 0,
+            downDisabled: i === textCardsState.length - 1,
+            dupDisabled: textCardsState.length >= MAX_TEXT_CARDS,
+            removeDisabled: textCardsState.length <= 1,
+            onUp: () => { [textCardsState[i - 1], textCardsState[i]] = [textCardsState[i], textCardsState[i - 1]]; renderTextCardList(); },
+            onDown: () => { [textCardsState[i + 1], textCardsState[i]] = [textCardsState[i], textCardsState[i + 1]]; renderTextCardList(); },
+            onDuplicate: () => { textCardsState.splice(i + 1, 0, { ...c }); renderTextCardList(); },
+            onRemove: () => { textCardsState.splice(i, 1); renderTextCardList(); },
+          }));
+          list.appendChild(item);
+        });
+        $("addTextCardBtn").disabled = textCardsState.length >= MAX_TEXT_CARDS;
+        refreshSummary();
+      }
+
+      $("addTextCardBtn").addEventListener("click", () => {
+        if (textCardsState.length >= MAX_TEXT_CARDS) return;
+        textCardsState.push({ text: "", from: "", paper: "classic" });
+        renderTextCardList();
+      });
+
+      for (const id of ["collageEnabled", "textCollageEnabled",
         "celebrantName", "titleDate", "closingLine", "closingSignOff",
         "titleDuration", "titleEffect", "closingDuration", "closingPaper", "closingEffect",
-        "message1SignedBy", "message2SignedBy", "message1Duration", "message2Duration",
-        "message1Paper", "message2Paper", "message1Effect", "message2Effect",
         "collageHeading", "textCollageHeading", "photoCollageDuration", "textCollageDuration",
-        "photoCollageEffect", "textCollageEffect",
-        "cardText1", "cardText2", "cardText3", "cardText4",
-        "cardFrom1", "cardFrom2", "cardFrom3", "cardFrom4",
-        "cardPaper1", "cardPaper2", "cardPaper3", "cardPaper4"]) {
+        "photoCollageEffect", "textCollageEffect"]) {
         $(id).addEventListener("input", refreshSummary);
         $(id).addEventListener("change", refreshSummary);
       }
@@ -1393,9 +1449,9 @@
           textCollageDuration: $("textCollageDuration").value,
           textCollageEffect: $("textCollageEffect").value,
           sceneOrder: sceneOrderState.join(","),
-          cardTexts: [1, 2, 3, 4].map((n) => $("cardText" + n).value),
-          cardFroms: [1, 2, 3, 4].map((n) => $("cardFrom" + n).value),
-          cardPapers: [1, 2, 3, 4].map((n) => $("cardPaper" + n).value),
+          cardTexts: textCardsState.map((c) => c.text),
+          cardFroms: textCardsState.map((c) => c.from),
+          cardPapers: textCardsState.map((c) => c.paper),
           musicVolume: $("musicVolume").value,
           fontName: $("fontName").value,
           fontHeadings: $("fontHeadings").value,
@@ -1409,13 +1465,11 @@
           textFxOutlineOn: $("textFxOutlineOn").checked,
           textFxOutlineWidth: $("textFxOutlineWidth").value,
           background: $("backgroundValue").value,
-          message1Text: $("message1Text").value,
-          message1SignedBy: $("message1SignedBy").value,
-          message2Text: $("message2Text").value,
-          message2SignedBy: $("message2SignedBy").value,
-          messageDurations: [$("message1Duration").value, $("message2Duration").value],
-          messagePapers: [$("message1Paper").value, $("message2Paper").value],
-          messageEffects: [$("message1Effect").value, $("message2Effect").value],
+          messageTexts: messagesState.map((m) => m.text),
+          messageSigners: messagesState.map((m) => m.signedBy),
+          messageDurations: messagesState.map((m) => String(m.duration)),
+          messagePapers: messagesState.map((m) => m.paper),
+          messageEffects: messagesState.map((m) => m.effect),
           photos: photos.map((p) => ({
             name: p.file ? p.file.name : "",
             caption: p.caption || "",
@@ -1458,10 +1512,10 @@
         form.append("textCollageDuration", s.textCollageDuration);
         form.append("textCollageEffect", s.textCollageEffect);
         form.append("sceneOrder", s.sceneOrder);
-        for (const n of [1, 2, 3, 4]) {
-          form.append("cardTexts", s.cardTexts[n - 1]);
-          form.append("cardFroms", s.cardFroms[n - 1]);
-          form.append("cardPapers", s.cardPapers[n - 1]);
+        for (let i = 0; i < s.cardTexts.length; i++) {
+          form.append("cardTexts", s.cardTexts[i]);
+          form.append("cardFroms", s.cardFroms[i]);
+          form.append("cardPapers", s.cardPapers[i]);
         }
         if (withMusic && musicFile) form.append("music", musicFile, musicFile.name);
         form.append("musicVolume", s.musicVolume);
@@ -1477,12 +1531,12 @@
         form.append("textFxOutlineOn", s.textFxOutlineOn ? "true" : "false");
         form.append("textFxOutlineWidth", s.textFxOutlineWidth);
         form.append("background", s.background);
-        for (const n of [1, 2]) {
-          form.append("message" + n + "Text", s["message" + n + "Text"]);
-          form.append("message" + n + "SignedBy", s["message" + n + "SignedBy"]);
-          form.append("messageDurations", s.messageDurations[n - 1]);
-          form.append("messagePapers", s.messagePapers[n - 1]);
-          form.append("messageEffects", s.messageEffects[n - 1]);
+        for (let i = 0; i < s.messageTexts.length; i++) {
+          form.append("messageTexts", s.messageTexts[i]);
+          form.append("messageSigners", s.messageSigners[i]);
+          form.append("messageDurations", s.messageDurations[i]);
+          form.append("messagePapers", s.messagePapers[i]);
+          form.append("messageEffects", s.messageEffects[i]);
         }
         photos.forEach((p, i) => {
           form.append("photos", p.file, p.file.name);
@@ -1547,6 +1601,7 @@
       }
 
       function setSmartEnabled(on) {
+        smartAvailable = on;
         for (const el of [$("smartTone"), $("smartGenerateBtn"), $("smartClosingBtn")]) {
           el.disabled = !on;
         }
@@ -1588,18 +1643,10 @@
       $("smartGenerateBtn").addEventListener("click", () => {
         const tone = smartTone();
         if (!tone) return;
-        $("message1Text").value = composeSmartMessage(tone, "m1");
-        $("message2Text").value = composeSmartMessage(tone, "m2");
-        refreshSummary();
-      });
-      document.querySelectorAll("[data-smart-card]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const tone = smartTone();
-          if (!tone) return;
-          const entry = pickSmart(tone.shorts, "card" + btn.dataset.smartCard);
-          if (entry) $("cardText" + btn.dataset.smartCard).value = entry.text;
-          refreshSummary();
+        messagesState.forEach((m, i) => {
+          m.text = composeSmartMessage(tone, "m" + (i + 1));
         });
+        renderMessageList();
       });
       $("smartClosingBtn").addEventListener("click", () => {
         const tone = smartTone();
@@ -1759,6 +1806,53 @@
         }
       }
 
+      // Saved projects store the message and greeting-card editors as
+      // aligned arrays. Projects saved before the flexible editors
+      // stored the two messages as flat message1Text / message2Text
+      // fields (the greeting cards were always arrays), so the mapping
+      // accepts both shapes and always yields at least one editor.
+      function messagesFromFields(f) {
+        const texts = Array.isArray(f.messageTexts) ? f.messageTexts.map((v) => String(v ?? "")) : [];
+        const signers = Array.isArray(f.messageSigners) ? f.messageSigners.map((v) => String(v ?? "")) : [];
+        if (!texts.length && !signers.length && (f.message1Text !== undefined || f.message2Text !== undefined)) {
+          texts.push(String(f.message1Text ?? ""), String(f.message2Text ?? ""));
+          signers.push(String(f.message1SignedBy ?? ""), String(f.message2SignedBy ?? ""));
+        }
+        const durations = Array.isArray(f.messageDurations) ? f.messageDurations : [];
+        const papers = Array.isArray(f.messagePapers) ? f.messagePapers : [];
+        const effects = Array.isArray(f.messageEffects) ? f.messageEffects : [];
+        const count = Math.min(MAX_MESSAGES, Math.max(texts.length, signers.length, durations.length));
+        const out = [];
+        for (let i = 0; i < count; i++) {
+          out.push({
+            text: texts[i] ?? "",
+            signedBy: signers[i] ?? "",
+            duration: clampMessageDuration(durations[i]),
+            paper: paperOrClassic(String(papers[i] ?? "")),
+            effect: effectOrNone(String(effects[i] ?? "")),
+          });
+        }
+        if (!out.length) out.push({ text: "", signedBy: "", duration: 6, paper: "classic", effect: "none" });
+        return out;
+      }
+
+      function textCardsFromFields(f) {
+        const texts = Array.isArray(f.cardTexts) ? f.cardTexts.map((v) => String(v ?? "")) : [];
+        const froms = Array.isArray(f.cardFroms) ? f.cardFroms.map((v) => String(v ?? "")) : [];
+        const papers = Array.isArray(f.cardPapers) ? f.cardPapers.map((v) => String(v ?? "")) : [];
+        const count = Math.min(MAX_TEXT_CARDS, Math.max(texts.length, froms.length, papers.length));
+        const out = [];
+        for (let i = 0; i < count; i++) {
+          out.push({
+            text: texts[i] ?? "",
+            from: froms[i] ?? "",
+            paper: paperOrClassic(String(papers[i] ?? "")),
+          });
+        }
+        if (!out.length) out.push({ text: "", from: "", paper: "classic" });
+        return out;
+      }
+
       // The inverse of collectFormState: restores every control from a
       // saved project, then rebuilds the photo and music lists from the
       // project's stored files, in the saved order and with every
@@ -1798,27 +1892,10 @@
         $("textFxOutlineOn").checked = Boolean(f.textFxOutlineOn);
         setVal("textFxOutlineWidth", f.textFxOutlineWidth);
         syncFxReadouts();
-        setVal("message1Text", f.message1Text);
-        setVal("message1SignedBy", f.message1SignedBy);
-        setVal("message2Text", f.message2Text);
-        setVal("message2SignedBy", f.message2SignedBy);
-        const md = f.messageDurations || [];
-        const mp = f.messagePapers || [];
-        const me = f.messageEffects || [];
-        setVal("message1Duration", md[0]);
-        setVal("message2Duration", md[1]);
-        setVal("message1Paper", mp[0]);
-        setVal("message2Paper", mp[1]);
-        setVal("message1Effect", me[0]);
-        setVal("message2Effect", me[1]);
-        const ct = f.cardTexts || [];
-        const cf = f.cardFroms || [];
-        const cp = f.cardPapers || [];
-        for (const n of [1, 2, 3, 4]) {
-          setVal("cardText" + n, ct[n - 1]);
-          setVal("cardFrom" + n, cf[n - 1]);
-          setVal("cardPaper" + n, cp[n - 1]);
-        }
+        messagesState = messagesFromFields(f);
+        textCardsState = textCardsFromFields(f);
+        renderMessageList();
+        renderTextCardList();
         if (f.background) {
           $("backgroundValue").value = f.background;
           document.querySelectorAll(".bg-card").forEach((b) =>
@@ -2056,6 +2133,8 @@
         }
       });
 
+      renderMessageList();
+      renderTextCardList();
       renderPhotoList();
       refreshProjectList();
       refreshLibrary();

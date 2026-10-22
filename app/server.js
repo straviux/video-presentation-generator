@@ -459,12 +459,12 @@ function parseForm(body, photoCount, { requirePhotos }) {
   const textCollageEnabled = text(body.textCollageEnabled) === "true";
 
   // Text collage cards: pair the card texts with their signers and
-  // papers, cap at 4, and drop pairs where both are empty.
+  // papers, cap at 6, and drop pairs where both are empty.
   const cardTexts = asArray(body.cardTexts);
   const cardFroms = asArray(body.cardFroms);
   const cardPapers = asArray(body.cardPapers);
   const collageCards = [];
-  for (let i = 0; i < Math.min(4, Math.max(cardTexts.length, cardFroms.length)); i++) {
+  for (let i = 0; i < Math.min(6, Math.max(cardTexts.length, cardFroms.length)); i++) {
     const cardText = String(cardTexts[i] ?? "").trim();
     const cardFrom = String(cardFroms[i] ?? "").trim();
     if (cardText || cardFrom) {
@@ -494,25 +494,43 @@ function parseForm(body, photoCount, { requirePhotos }) {
     ? text(body.background)
     : "deep-green";
 
-  // Per-message duration, paper, and effect, aligned with message 1 and
-  // 2 by the same index the fields were appended in.
+  // Messages: aligned arrays (texts, signers, durations, papers,
+  // effects), capped at 6 cards. The legacy message1Text /
+  // message2Text scalar fields are still accepted when no arrays were
+  // sent, so an older payload keeps working. Blank texts are skipped;
+  // the filled cards play in order.
   const messageDurations = asArray(body.messageDurations);
   const messagePapers = asArray(body.messagePapers);
   const messageEffects = asArray(body.messageEffects);
+  let messageTexts = asArray(body.messageTexts).map((v) => String(v ?? ""));
+  let messageSigners = asArray(body.messageSigners).map((v) => String(v ?? ""));
+  if (
+    messageTexts.length === 0 &&
+    (body.message1Text !== undefined || body.message2Text !== undefined)
+  ) {
+    messageTexts = [String(body.message1Text ?? ""), String(body.message2Text ?? "")];
+    messageSigners = [
+      String(body.message1SignedBy ?? ""),
+      String(body.message2SignedBy ?? ""),
+    ];
+  }
+  const messageSlots = Math.min(
+    6,
+    Math.max(messageTexts.length, messageSigners.length, messageDurations.length),
+  );
   const messages = [];
-  for (const n of [1, 2]) {
-    const msgText = text(body[`message${n}Text`]);
-    const signedBy = text(body[`message${n}SignedBy`]);
+  for (let i = 0; i < messageSlots; i++) {
+    const msgText = text(messageTexts[i]);
     if (msgText) {
       messages.push({
         text: msgText,
-        signedBy,
-        duration: Math.round(clampNumber(messageDurations[n - 1], 6, 4, 15)),
-        paper: PAPER_KEYS.includes(text(messagePapers[n - 1]))
-          ? text(messagePapers[n - 1])
+        signedBy: text(messageSigners[i]),
+        duration: Math.round(clampNumber(messageDurations[i], 6, 4, 15)),
+        paper: PAPER_KEYS.includes(text(messagePapers[i]))
+          ? text(messagePapers[i])
           : "classic",
-        effect: EFFECT_KEYS.includes(text(messageEffects[n - 1]))
-          ? text(messageEffects[n - 1])
+        effect: EFFECT_KEYS.includes(text(messageEffects[i]))
+          ? text(messageEffects[i])
           : "none",
       });
     }
@@ -1118,6 +1136,26 @@ app.post(
         };
       }
 
+      // Message and greeting-card editors are flexible in count (up
+      // to 6 each); the saved arrays keep the count the editor sent,
+      // so a project reopens with the same number of cards.
+      const savedMessageCount = Math.min(
+        6,
+        Math.max(
+          projectArray(body.messageTexts).length,
+          projectArray(body.messageSigners).length,
+          projectArray(body.messageDurations).length,
+        ),
+      );
+      const savedCardCount = Math.min(
+        6,
+        Math.max(
+          projectArray(body.cardTexts).length,
+          projectArray(body.cardFroms).length,
+          projectArray(body.cardPapers).length,
+        ),
+      );
+
       const state = {
         name,
         savedAt: new Date().toISOString(),
@@ -1140,9 +1178,9 @@ app.post(
           textCollageDuration: projectField(body.textCollageDuration),
           textCollageEffect: projectField(body.textCollageEffect),
           sceneOrder: projectField(body.sceneOrder),
-          cardTexts: projectArrayOf(body.cardTexts, 4),
-          cardFroms: projectArrayOf(body.cardFroms, 4),
-          cardPapers: projectArrayOf(body.cardPapers, 4),
+          cardTexts: projectArrayOf(body.cardTexts, savedCardCount),
+          cardFroms: projectArrayOf(body.cardFroms, savedCardCount),
+          cardPapers: projectArrayOf(body.cardPapers, savedCardCount),
           musicVolume: projectField(body.musicVolume),
           fontName: projectField(body.fontName),
           fontHeadings: projectField(body.fontHeadings),
@@ -1156,13 +1194,11 @@ app.post(
           textFxOutlineOn: projectField(body.textFxOutlineOn) === "true",
           textFxOutlineWidth: projectField(body.textFxOutlineWidth),
           background: projectField(body.background),
-          message1Text: projectField(body.message1Text),
-          message1SignedBy: projectField(body.message1SignedBy),
-          message2Text: projectField(body.message2Text),
-          message2SignedBy: projectField(body.message2SignedBy),
-          messageDurations: projectArrayOf(body.messageDurations, 2),
-          messagePapers: projectArrayOf(body.messagePapers, 2),
-          messageEffects: projectArrayOf(body.messageEffects, 2),
+          messageTexts: projectArrayOf(body.messageTexts, savedMessageCount),
+          messageSigners: projectArrayOf(body.messageSigners, savedMessageCount),
+          messageDurations: projectArrayOf(body.messageDurations, savedMessageCount),
+          messagePapers: projectArrayOf(body.messagePapers, savedMessageCount),
+          messageEffects: projectArrayOf(body.messageEffects, savedMessageCount),
         },
         photos: photos.map((p) => p.stored),
         music: music ? music.stored : null,
