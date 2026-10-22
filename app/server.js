@@ -70,6 +70,8 @@ mkdirSync(PROJECTS_DIR, { recursive: true });
 const DATA_DIR = path.join(APP_DIR, "data");
 const MESSAGE_DB_FILE = path.join(DATA_DIR, "messages.db");
 const MESSAGE_SEED_FILE = path.join(APP_DIR, "lib", "message-banks.json");
+const CAPTION_SEED_FILE = path.join(APP_DIR, "lib", "caption-banks.json");
+const CAPTION_CATEGORIES = ["portrait", "group", "candid", "celebration"];
 const MESSAGE_TONES = ["warm", "grateful", "playful", "formal"];
 const MESSAGE_KINDS = ["opener", "middle", "closer", "short", "closing"];
 const MESSAGE_GROUPS = [
@@ -93,6 +95,9 @@ try {
       ");" +
       "CREATE TABLE IF NOT EXISTS meta (" +
       "key TEXT PRIMARY KEY, value TEXT" +
+      ");" +
+      "CREATE TABLE IF NOT EXISTS caption_lines (" +
+      "id INTEGER PRIMARY KEY, category TEXT, text TEXT" +
       ");",
   );
   const countRow = messageDb
@@ -131,6 +136,43 @@ try {
           "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
       )
       .run(String(seedVersion));
+  }
+  // The photo caption library lives in the same database, in its own
+  // table, seeded from app/lib/caption-banks.json with the same
+  // discipline: a fresh table gets every seed caption, and a seed
+  // version bump only tops up the (category, text) pairs that are not
+  // already there. Its version is tracked under its own meta key.
+  const captionSeed = JSON.parse(readFileSync(CAPTION_SEED_FILE, "utf8"));
+  const captionSeedVersion = Number(captionSeed.version) || 1;
+  const captionCountRow = messageDb
+    .prepare("SELECT COUNT(*) AS n FROM caption_lines")
+    .get();
+  const captionVersionRow = messageDb
+    .prepare("SELECT value FROM meta WHERE key = 'captions_seeded_version'")
+    .get();
+  const storedCaptionVersion = captionVersionRow
+    ? Number(captionVersionRow.value) || 0
+    : 0;
+  if (Number(captionCountRow.n) === 0 || storedCaptionVersion < captionSeedVersion) {
+    const captionExistsStmt = messageDb.prepare(
+      "SELECT id FROM caption_lines WHERE category = ? AND text = ?",
+    );
+    const captionInsertStmt = messageDb.prepare(
+      "INSERT INTO caption_lines (category, text) VALUES (?, ?)",
+    );
+    for (const category of CAPTION_CATEGORIES) {
+      for (const text of (captionSeed.categories || {})[category] || []) {
+        if (typeof text !== "string" || !text) continue;
+        if (captionExistsStmt.get(category, text)) continue;
+        captionInsertStmt.run(category, text);
+      }
+    }
+    messageDb
+      .prepare(
+        "INSERT INTO meta (key, value) VALUES ('captions_seeded_version', ?) " +
+          "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+      )
+      .run(String(captionSeedVersion));
   }
 } catch (err) {
   messageDb = null;
@@ -417,12 +459,12 @@ function parseForm(body, photoCount, { requirePhotos }) {
   const textCollageEnabled = text(body.textCollageEnabled) === "true";
 
   // Text collage cards: pair the card texts with their signers and
-  // papers, cap at 4, and drop pairs where both are empty.
+  // papers, cap at 6, and drop pairs where both are empty.
   const cardTexts = asArray(body.cardTexts);
   const cardFroms = asArray(body.cardFroms);
   const cardPapers = asArray(body.cardPapers);
   const collageCards = [];
-  for (let i = 0; i < Math.min(4, Math.max(cardTexts.length, cardFroms.length)); i++) {
+  for (let i = 0; i < Math.min(6, Math.max(cardTexts.length, cardFroms.length)); i++) {
     const cardText = String(cardTexts[i] ?? "").trim();
     const cardFrom = String(cardFroms[i] ?? "").trim();
     if (cardText || cardFrom) {
@@ -452,25 +494,43 @@ function parseForm(body, photoCount, { requirePhotos }) {
     ? text(body.background)
     : "deep-green";
 
-  // Per-message duration, paper, and effect, aligned with message 1 and
-  // 2 by the same index the fields were appended in.
+  // Messages: aligned arrays (texts, signers, durations, papers,
+  // effects), capped at 6 cards. The legacy message1Text /
+  // message2Text scalar fields are still accepted when no arrays were
+  // sent, so an older payload keeps working. Blank texts are skipped;
+  // the filled cards play in order.
   const messageDurations = asArray(body.messageDurations);
   const messagePapers = asArray(body.messagePapers);
   const messageEffects = asArray(body.messageEffects);
+  let messageTexts = asArray(body.messageTexts).map((v) => String(v ?? ""));
+  let messageSigners = asArray(body.messageSigners).map((v) => String(v ?? ""));
+  if (
+    messageTexts.length === 0 &&
+    (body.message1Text !== undefined || body.message2Text !== undefined)
+  ) {
+    messageTexts = [String(body.message1Text ?? ""), String(body.message2Text ?? "")];
+    messageSigners = [
+      String(body.message1SignedBy ?? ""),
+      String(body.message2SignedBy ?? ""),
+    ];
+  }
+  const messageSlots = Math.min(
+    6,
+    Math.max(messageTexts.length, messageSigners.length, messageDurations.length),
+  );
   const messages = [];
-  for (const n of [1, 2]) {
-    const msgText = text(body[`message${n}Text`]);
-    const signedBy = text(body[`message${n}SignedBy`]);
+  for (let i = 0; i < messageSlots; i++) {
+    const msgText = text(messageTexts[i]);
     if (msgText) {
       messages.push({
         text: msgText,
-        signedBy,
-        duration: Math.round(clampNumber(messageDurations[n - 1], 6, 4, 15)),
-        paper: PAPER_KEYS.includes(text(messagePapers[n - 1]))
-          ? text(messagePapers[n - 1])
+        signedBy: text(messageSigners[i]),
+        duration: Math.round(clampNumber(messageDurations[i], 6, 4, 15)),
+        paper: PAPER_KEYS.includes(text(messagePapers[i]))
+          ? text(messagePapers[i])
           : "classic",
-        effect: EFFECT_KEYS.includes(text(messageEffects[n - 1]))
-          ? text(messageEffects[n - 1])
+        effect: EFFECT_KEYS.includes(text(messageEffects[i]))
+          ? text(messageEffects[i])
           : "none",
       });
     }
@@ -923,6 +983,29 @@ app.delete("/api/message-bank/lines/:id", (req, res) => {
   }
 });
 
+// --------------------------------------------------------- captions ------
+// The photo caption library, grouped by category for the caption
+// picker in the Photos panel. Same database as the message library.
+app.get("/api/captions", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "The caption library is not available." });
+  }
+  try {
+    const rows = messageDb
+      .prepare("SELECT id, category, text FROM caption_lines ORDER BY id")
+      .all();
+    const categories = {};
+    for (const category of CAPTION_CATEGORIES) categories[category] = [];
+    for (const row of rows) {
+      if (!categories[row.category]) continue;
+      categories[row.category].push({ id: row.id, text: row.text });
+    }
+    res.json({ categories });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
 // -------------------------------------------------------------- projects ---
 // Save / load for whole editor states. A project is a folder under
 // app/projects/<slug>/ holding state.json (every form field, including
@@ -1053,6 +1136,26 @@ app.post(
         };
       }
 
+      // Message and greeting-card editors are flexible in count (up
+      // to 6 each); the saved arrays keep the count the editor sent,
+      // so a project reopens with the same number of cards.
+      const savedMessageCount = Math.min(
+        6,
+        Math.max(
+          projectArray(body.messageTexts).length,
+          projectArray(body.messageSigners).length,
+          projectArray(body.messageDurations).length,
+        ),
+      );
+      const savedCardCount = Math.min(
+        6,
+        Math.max(
+          projectArray(body.cardTexts).length,
+          projectArray(body.cardFroms).length,
+          projectArray(body.cardPapers).length,
+        ),
+      );
+
       const state = {
         name,
         savedAt: new Date().toISOString(),
@@ -1075,9 +1178,9 @@ app.post(
           textCollageDuration: projectField(body.textCollageDuration),
           textCollageEffect: projectField(body.textCollageEffect),
           sceneOrder: projectField(body.sceneOrder),
-          cardTexts: projectArrayOf(body.cardTexts, 4),
-          cardFroms: projectArrayOf(body.cardFroms, 4),
-          cardPapers: projectArrayOf(body.cardPapers, 4),
+          cardTexts: projectArrayOf(body.cardTexts, savedCardCount),
+          cardFroms: projectArrayOf(body.cardFroms, savedCardCount),
+          cardPapers: projectArrayOf(body.cardPapers, savedCardCount),
           musicVolume: projectField(body.musicVolume),
           fontName: projectField(body.fontName),
           fontHeadings: projectField(body.fontHeadings),
@@ -1091,13 +1194,11 @@ app.post(
           textFxOutlineOn: projectField(body.textFxOutlineOn) === "true",
           textFxOutlineWidth: projectField(body.textFxOutlineWidth),
           background: projectField(body.background),
-          message1Text: projectField(body.message1Text),
-          message1SignedBy: projectField(body.message1SignedBy),
-          message2Text: projectField(body.message2Text),
-          message2SignedBy: projectField(body.message2SignedBy),
-          messageDurations: projectArrayOf(body.messageDurations, 2),
-          messagePapers: projectArrayOf(body.messagePapers, 2),
-          messageEffects: projectArrayOf(body.messageEffects, 2),
+          messageTexts: projectArrayOf(body.messageTexts, savedMessageCount),
+          messageSigners: projectArrayOf(body.messageSigners, savedMessageCount),
+          messageDurations: projectArrayOf(body.messageDurations, savedMessageCount),
+          messagePapers: projectArrayOf(body.messagePapers, savedMessageCount),
+          messageEffects: projectArrayOf(body.messageEffects, savedMessageCount),
         },
         photos: photos.map((p) => p.stored),
         music: music ? music.stored : null,

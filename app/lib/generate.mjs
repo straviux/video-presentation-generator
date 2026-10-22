@@ -88,7 +88,7 @@ const TEXT_COLLAGE_HEADING = textCfg.heading ?? "Kind words";
 const TEXT_CARDS = (Array.isArray(textCfg.cards)
   ? textCfg.cards
   : (Array.isArray(rawCollage.cards) ? rawCollage.cards : []))
-  .slice(0, 4)
+  .slice(0, 6)
   .map((card) => ({
     text: String((card && card.text) ?? "").trim(),
     from: String((card && card.from) ?? "").trim(),
@@ -819,15 +819,17 @@ function buildCollage(kind, s) {
     `tl.fromTo("#${headingId} .w", { opacity: 0, y: 39, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: ${cd(0.55)}, ease: "power3.out", stagger: ${cd(0.09)}, transformOrigin: "50% 100%" }, ${ct(0.2)});`,
   );
   if (isText) {
-    // The greeting cards build one by one like the polaroids do. The 1.1s
-    // spacing holds for any card count, and the build is centered in the
-    // scene window, so fewer cards start later instead of leaving a long
-    // still tail after an early finish.
+    // The greeting cards build one by one like the polaroids do. The
+    // spacing is 1.1s when there is room; with five or six cards it
+    // compresses so the last card still lands by 4.1s. The build is
+    // centered in the scene window, so fewer cards start later instead
+    // of leaving a long still tail after an early finish.
     const cardRotations = [-2.5, 2, -1.5, 2.5];
-    const buildStart = 0.8 + Math.max(0, (3.3 - 1.1 * (TEXT_CARDS.length - 1)) / 2);
+    const cardSpacing = TEXT_CARDS.length > 1 ? Math.min(1.1, 3.3 / (TEXT_CARDS.length - 1)) : 1.1;
+    const buildStart = 0.8 + Math.max(0, (3.3 - cardSpacing * (TEXT_CARDS.length - 1)) / 2);
     TEXT_CARDS.forEach((card, k) => {
       const rot = cardRotations[k % cardRotations.length];
-      const popAt = ct(buildStart + k * 1.1);
+      const popAt = ct(buildStart + k * cardSpacing);
       timeline.push(
         `tl.fromTo("#greet-card-${k}", { opacity: 0, scale: 0.5, y: 39, rotation: ${rot - 12} }, { opacity: 1, scale: 1, y: 0, rotation: ${rot}, duration: ${cd(0.6)}, ease: "back.out(1.7)" }, ${popAt});`,
       );
@@ -1224,7 +1226,8 @@ ${TEXT_FX_CSS}
       }
       /* Text collage scene: greeting cards on the same backdrop as the
          photo collage. The container wraps, so 4 cards land in a 2x2
-         grid, 3 in one row, and 2 or 1 in a single centered row. Card
+         grid, 5 or 6 in two rows of three, 3 in one row, and 2 or 1 in
+         a single centered row. Card
          widths are set by count.
          The cards wear the same paper treatment as the message cards. */
       .collage-cards {
@@ -1247,8 +1250,12 @@ ${TEXT_FX_CSS}
       .cards-2 .greet-card { width: 640px; }
       .cards-3 .greet-card { width: 528px; }
       .cards-4 .greet-card { width: 620px; }
+      .cards-5 .greet-card { width: 528px; }
+      .cards-6 .greet-card { width: 528px; }
       .greet-text { font-family: var(--font-messages); font-size: 42px; line-height: 1.4; color: var(--paper-ink, #22301f); }
       .cards-3 .greet-text { font-size: 38px; }
+      .cards-5 .greet-text { font-size: 38px; }
+      .cards-6 .greet-text { font-size: 38px; }
       .greet-from {
         font-family: var(--font-headings);
         font-size: 25.5px; letter-spacing: 0.07em; text-transform: uppercase;

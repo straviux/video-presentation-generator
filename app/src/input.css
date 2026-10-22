@@ -147,6 +147,63 @@ select {
 .photo-item .collage-check input {
   accent-color: #8b3dff;
 }
+/* Caption field row + the library picker menu (built by JS). The menu
+   is an expanding block inside the photo row, so the scrolling panel
+   never clips it, and its entries wrap within the panel width. */
+.caption-row {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+.caption-row .caption {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+.caption-pick-btn {
+  flex: none;
+  padding: 5px 8px;
+}
+.caption-menu {
+  margin-top: 6px;
+  border: 1px solid #e3e3ea;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fafafc;
+  max-height: 230px;
+  overflow-y: auto;
+}
+.caption-menu[hidden] {
+  display: none;
+}
+.caption-cat {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b6b78;
+  margin: 7px 2px 3px;
+}
+.caption-cat:first-child {
+  margin-top: 0;
+}
+.caption-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12.5px;
+  color: inherit;
+  cursor: pointer;
+  white-space: normal;
+}
+.caption-option:hover {
+  background: #f1e8ff;
+}
 .photo-actions {
   grid-column: 1 / -1;
   display: flex;

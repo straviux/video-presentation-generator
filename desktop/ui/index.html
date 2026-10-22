@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Presentation Generator</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        font-family: system-ui, "Segoe UI", sans-serif;
+        background: #17141f;
+        color: #ece9f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .card { text-align: center; max-width: 520px; padding: 32px; }
+      .logo {
+        width: 84px; height: 84px; margin: 0 auto 22px;
+        border-radius: 20px;
+        background: linear-gradient(145deg, #9d5cff, #8b3dff 55%, #6d28d9);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 12px 32px rgba(139, 61, 255, 0.35);
+      }
+      .logo svg { width: 40px; height: 40px; }
+      h1 { font-size: 24px; font-weight: 650; letter-spacing: 0.2px; }
+      .sub { color: #a79fc0; font-size: 13px; margin-top: 6px; }
+      .spinner {
+        width: 30px; height: 30px; margin: 30px auto 0;
+        border-radius: 50%;
+        border: 3px solid rgba(139, 61, 255, 0.25);
+        border-top-color: #8b3dff;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .spinner.hidden, .hidden { display: none; }
+      #status { margin-top: 18px; font-size: 14px; line-height: 1.55; color: #cfc9e3; }
+      #engine { margin-top: 8px; font-size: 12px; color: #7d7598; word-break: break-all; }
+      .actions { margin-top: 24px; display: flex; gap: 12px; justify-content: center; align-items: center; }
+      button {
+        background: #8b3dff; color: #fff; border: 0; border-radius: 10px;
+        padding: 11px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      }
+      button:hover { background: #7c2ef0; }
+      a.link {
+        color: #b79bff; font-size: 13px; cursor: pointer; text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="#fff"/></svg>
+      </div>
+      <h1>Video Presentation Generator</h1>
+      <p class="sub">Desktop launcher</p>
+      <div class="spinner" id="spinner"></div>
+      <p id="status">Preparing...</p>
+      <p id="engine" class="hidden"></p>
+      <div class="actions">
+        <button id="pickBtn" class="hidden">Choose engine folder</button>
+        <a class="link hidden" id="retryLink">Retry</a>
+        <a class="link hidden" id="changeLink">Change engine folder</a>
+      </div>
+    </div>
+    <script>
+      const invoke = window.__TAURI__.core.invoke;
+      const statusEl = document.getElementById("status");
+      const engineEl = document.getElementById("engine");
+      const spinnerEl = document.getElementById("spinner");
+      const pickBtn = document.getElementById("pickBtn");
+      const retryLink = document.getElementById("retryLink");
+      const changeLink = document.getElementById("changeLink");
+
+      function render(state) {
+        statusEl.textContent = state.message;
+        const busy = state.status === "booting" || state.status === "starting" || state.status === "ready";
+        spinnerEl.classList.toggle("hidden", !busy);
+        pickBtn.classList.toggle("hidden", !state.canPick);
+        pickBtn.textContent = state.status === "needs_engine" ? "Choose engine folder" : "Change engine folder";
+        changeLink.classList.add("hidden");
+        retryLink.classList.toggle("hidden", state.status !== "error");
+        if (state.engineDir) {
+          engineEl.textContent = state.engineDir;
+          engineEl.classList.remove("hidden");
+        } else {
+          engineEl.classList.add("hidden");
+        }
+      }
+
+      async function poll() {
+        try {
+          render(await invoke("get_boot_state"));
+        } catch (e) {
+          statusEl.textContent = "Waiting for the app backend...";
+        }
+      }
+
+      pickBtn.addEventListener("click", async () => {
+        pickBtn.disabled = true;
+        try { render(await invoke("pick_engine_folder")); }
+        finally { pickBtn.disabled = false; }
+      });
+      retryLink.addEventListener("click", async () => {
+        try { render(await invoke("retry_boot")); } catch (e) { /* next poll shows it */ }
+      });
+
+      poll();
+      setInterval(poll, 500);
+    </script>
+  </body>
+</html>
