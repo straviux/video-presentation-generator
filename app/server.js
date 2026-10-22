@@ -568,6 +568,7 @@ function parseForm(body, photoCount, { requirePhotos }) {
       closingPaper: PAPER_KEYS.includes(text(body.closingPaper))
         ? text(body.closingPaper)
         : "classic",
+      titleDate: text(body.titleDate),
       titleEffect: effectPick(body.titleEffect),
       closingEffect: effectPick(body.closingEffect),
       photoCollageEffect: effectPick(body.photoCollageEffect),
@@ -582,6 +583,7 @@ function buildConfig(values) {
     background: values.background,
     celebrantName: values.celebrantName,
     titleDuration: values.titleDuration,
+    titleDate: values.titleDate,
     titleEffect: values.titleEffect,
     closingDuration: values.closingDuration,
     closingEffect: values.closingEffect,
@@ -1017,6 +1019,7 @@ app.post(
         fields: {
           celebrantName: projectField(body.celebrantName),
           titleDuration: projectField(body.titleDuration),
+          titleDate: projectField(body.titleDate),
           titleEffect: projectField(body.titleEffect),
           closingDuration: projectField(body.closingDuration),
           closingEffect: projectField(body.closingEffect),

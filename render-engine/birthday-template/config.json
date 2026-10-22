@@ -103,5 +103,6 @@
     "glow": { "on": false, "strength": 50 },
     "outline": { "on": false, "width": 40 }
   },
+  "titleDate": "",
   "titleEffect": "none"
 }

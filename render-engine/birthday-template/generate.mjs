@@ -53,6 +53,8 @@ function pickPaper(value) {
   return PAPER_KEYS.includes(value) ? value : "classic";
 }
 const CLOSING_PAPER = pickPaper(config.closingPaper ?? config.closing?.paper);
+// Optional date line under the title card's gold rule ("" = no line).
+const TITLE_DATE = String(config.titleDate ?? "").trim();
 // The closing eyebrow greets the celebrant by first name only.
 const FIRST_NAME = String(config.celebrantName ?? "").trim().split(/\s+/)[0] || "";
 
@@ -608,7 +610,8 @@ function buildTitle(s) {
       <div class="card-inner">
         <div class="eyebrow" id="title-eyebrow">Happy ${esc(config.occasion)}</div>
         <h1 class="big-title" id="title-name"><span id="title-greeting">${titleLine1}</span><br /><span class="${nameLineClass}">${titleLine2}</span></h1>
-        <div class="rule" id="title-rule"></div>
+        <div class="rule" id="title-rule"></div>${TITLE_DATE ? `
+        <div class="title-date" id="title-date">${esc(TITLE_DATE)}</div>` : ""}
       </div>
     </section>`);
   sceneMeta.push({ key: "title", label: "Title card", start: s, duration: TITLE_DUR });
@@ -625,6 +628,9 @@ function buildTitle(s) {
     `tl.fromTo("#title-name-left", { opacity: 0, x: -1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.8});`,
     `tl.fromTo("#title-name-right", { opacity: 0, x: 1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.87});`,
     `tl.fromTo("#title-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, ${s + 1.8});`,
+    ...(TITLE_DATE ? [
+      `tl.fromTo("#title-date", { opacity: 0, y: 18 }, { opacity: 0.85, y: 0, duration: 0.45, ease: "power2.out" }, ${s + 2.5});`,
+    ] : []),
     `tl.to("#scene-title", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + TITLE_DUR});`,
   );
 }
@@ -1046,6 +1052,14 @@ ${TEXT_FX_CSS}
         width: 270px; height: 6px; border-radius: 3px;
         background: var(--line); margin: 45px 0 39px; transform-origin: center;
       }
+      /* Optional date line under the title rule, in the headings slot
+         with the eyebrow's letterspaced small-caps treatment. Only
+         emitted when the config sets titleDate. */
+      .title-date {
+        font-family: var(--font-headings);
+        font-size: 31.5px; letter-spacing: 0.3em; text-transform: uppercase;
+        color: var(--line);
+      }
       /* Photo montage. Every photo sits in a brightness wrapper (the
          settle tween animates the wrapper) around the img itself, which
          carries the static saturation and the Position crop
@@ -1162,25 +1176,28 @@ ${TEXT_FX_CSS}
       .paper-mint { background: var(--paper-grain), linear-gradient(165deg, #f0f8ed 0%, #dff0da 58%, #cbe5c6 100%); }
       .paper-sky { background: var(--paper-grain), linear-gradient(165deg, #eef5fc 0%, #dcedf8 58%, #c6dff2 100%); }
       /* Crumpled: a warm white sheet smoothed back out. The grain rides
-         twice for a heavier tooth, and three soft diagonal crease bands
-         (a dark line with a light shoulder) cross the surface. */
-      .paper-crumpled { background: var(--paper-grain), var(--paper-grain), linear-gradient(37deg, rgba(0, 0, 0, 0) 45%, rgba(122, 100, 58, 0.10) 48.5%, rgba(255, 255, 255, 0.22) 51%, rgba(0, 0, 0, 0) 55%), linear-gradient(143deg, rgba(0, 0, 0, 0) 57%, rgba(122, 100, 58, 0.08) 60.5%, rgba(255, 255, 255, 0.17) 63%, rgba(0, 0, 0, 0) 67%), linear-gradient(96deg, rgba(0, 0, 0, 0) 29%, rgba(122, 100, 58, 0.07) 32.5%, rgba(255, 255, 255, 0.14) 35%, rgba(0, 0, 0, 0) 39%), radial-gradient(ellipse at 28% 18%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%), radial-gradient(ellipse at 76% 86%, rgba(110, 90, 50, 0.13), rgba(110, 90, 50, 0) 60%), linear-gradient(165deg, #faf6ec 0%, #f3edda 58%, #e9e0c6 100%); }
+         twice for a heavier tooth, and five crease bands cross the
+         surface: each is a narrow dark line with a bright shoulder,
+         kept sharp and fairly strong so the creases still read when
+         the design is scaled down to preview size. Soft facet patches
+         and a gentle edge darkening finish the sheet. */
+      .paper-crumpled { background: var(--paper-grain), var(--paper-grain), linear-gradient(37deg, rgba(0, 0, 0, 0) 43.5%, rgba(110, 88, 44, 0.21) 46%, rgba(255, 255, 255, 0.36) 47.4%, rgba(0, 0, 0, 0) 50.5%), linear-gradient(143deg, rgba(0, 0, 0, 0) 55.5%, rgba(110, 88, 44, 0.17) 58.2%, rgba(255, 255, 255, 0.28) 59.6%, rgba(0, 0, 0, 0) 62.5%), linear-gradient(96deg, rgba(0, 0, 0, 0) 27.5%, rgba(110, 88, 44, 0.16) 30.1%, rgba(255, 255, 255, 0.26) 31.4%, rgba(0, 0, 0, 0) 34.5%), linear-gradient(178deg, rgba(0, 0, 0, 0) 65.5%, rgba(110, 88, 44, 0.14) 68%, rgba(255, 255, 255, 0.22) 69.2%, rgba(0, 0, 0, 0) 72%), linear-gradient(63deg, rgba(0, 0, 0, 0) 73.5%, rgba(110, 88, 44, 0.13) 75.8%, rgba(255, 255, 255, 0.20) 77%, rgba(0, 0, 0, 0) 79.5%), radial-gradient(ellipse at 26% 16%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 55%), radial-gradient(ellipse at 77% 85%, rgba(110, 90, 50, 0.17), rgba(110, 90, 50, 0) 60%), radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 60%, rgba(101, 82, 44, 0.17) 100%), linear-gradient(165deg, #faf6ec 0%, #f3edda 58%, #e9e0c6 100%); }
       /* Folder: manila folder stock. The raised tab along the top edge is
          drawn by the extras block after the card styles; here the paper
          carries its own deep brown ink through the --paper-ink vars. */
-      .paper-folder { --paper-ink: #3d2a10; --paper-ink-soft: #68491a; --paper-accent: #8a5a1e; background: var(--paper-grain), linear-gradient(180deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0) 16%), linear-gradient(165deg, #e2b26a 0%, #d9a860 55%, #cd9947 100%); }
+      .paper-folder { --paper-ink: #3d2a10; --paper-ink-soft: #68491a; --paper-accent: #8a5a1e; background: var(--paper-grain), linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 16%), linear-gradient(165deg, #e2b26a 0%, #d9a860 55%, #cd9947 100%); }
       /* Asymmetrical: the classic warm paper under the closing card's
          torn, irregular clip-path (applied in the extras block). */
       .paper-asymmetrical { background: var(--paper-grain), linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%); }
-      /* Felt: muted sage-grey-green fibres. A second, coarser and softer
-         noise layer (lower frequency, gentler alpha) is mixed with the
-         shared grain for a dense, matte tooth. */
-      .paper-felt { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.30 0 0 0 0 0.33 0 0 0 0 0.24 0 0 0 0.06 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>"), var(--paper-grain), linear-gradient(165deg, #edf0e8 0%, #dde3d3 58%, #c8d1ba 100%); }
-      /* Specialty: formal ivory stationery with a fine gold speckle. The
-         double gold border inset is drawn with box-shadow in the extras
-         block; background sizes/offsets keep the two speckle tiles from
-         lining up into a pattern. */
-      .paper-specialty { background: var(--paper-grain), radial-gradient(circle, rgba(160, 118, 26, 0.20) 1.6px, rgba(160, 118, 26, 0) 2.4px), radial-gradient(circle, rgba(160, 118, 26, 0.13) 1.2px, rgba(160, 118, 26, 0) 2px), linear-gradient(165deg, #fdfaf1 0%, #f8f2e0 58%, #f0e6cb 100%); background-size: auto, 92px 92px, 148px 148px, auto; background-position: 0 0, 12px 18px, 48px 70px, 0 0; }
+      /* Felt: muted sage-grey-green fibres. Two noise layers ride over
+         the shared grain: a coarse fibre layer at a strength that
+         actually shows, then a finer tooth, for a dense, matte nap. */
+      .paper-felt { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.24 0 0 0 0 0.27 0 0 0 0 0.19 0 0 0 0.26 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>"), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.30 0 0 0 0 0.32 0 0 0 0 0.24 0 0 0 0.12 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"), var(--paper-grain), linear-gradient(165deg, #edf0e8 0%, #dde3d3 58%, #c8d1ba 100%); }
+      /* Specialty: formal ivory stationery with a fine gold speckle.
+         The double gold border inset is drawn with box-shadow in the
+         extras block; background sizes/offsets keep the two speckle
+         tiles from lining up into a pattern. */
+      .paper-specialty { background: var(--paper-grain), radial-gradient(circle, rgba(160, 118, 26, 0.34) 2px, rgba(160, 118, 26, 0) 3.2px), radial-gradient(circle, rgba(160, 118, 26, 0.24) 1.5px, rgba(160, 118, 26, 0) 2.6px), linear-gradient(165deg, #fdfaf1 0%, #f8f2e0 58%, #f0e6cb 100%); background-size: auto, 84px 84px, 132px 132px, auto; background-position: 0 0, 12px 18px, 48px 70px, 0 0; }
       /* Message cards */
       /* Message cards wear the same paper as the closing scrapbook card:
          warm gradient plus a faint SVG-noise grain, so the text sits on
@@ -1239,32 +1256,39 @@ ${TEXT_FX_CSS}
       .tape-left { left: 46px; }
       .tape-right { right: 46px; }
       /* Paper extras that need the card rules above to be in place.
-         Folder: a raised tab along the top edge, riding behind the card
-         face. The message card draws its own tab; the closing card is
+         Folder: a raised tab standing proud of the top edge, riding
+         behind the card face. The tab is deliberately lighter than the
+         card stock, with a firmer edge line and a soft shadow above it,
+         so it still reads when the design is scaled down to preview
+         size. The message card draws its own tab; the closing card is
          clipped by its torn outline, so its tab hangs on the wrap
-         instead (the wrap paints it behind the card). Both get the
+         instead (the wrap paints it behind the card), set further
+         right to clear the wrap's left tape strip. Both cards get the
          darker manila edge line. */
       .msg-card.paper-folder, .scrap-card.paper-folder { border: 1px solid rgba(96, 64, 18, 0.45); }
       .msg-card.paper-folder::before,
       .scrap-wrap:has(> .scrap-card.paper-folder)::before {
         content: ""; position: absolute; z-index: -1;
-        top: -25px; left: 72px; width: 320px; height: 32px;
-        border-radius: 12px 16px 0 0;
-        background: linear-gradient(180deg, #ecc47c 0%, #e0b26a 100%);
-        border: 1px solid rgba(96, 64, 18, 0.35); border-bottom: none;
+        top: -36px; left: 84px; width: 360px; height: 46px;
+        border-radius: 14px 18px 0 0;
+        background: linear-gradient(180deg, #f6d78f 0%, #ecbe6e 100%);
+        border: 1px solid rgba(96, 64, 18, 0.55); border-bottom: none;
+        box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.55), 0 -4px 10px rgba(24, 14, 2, 0.25);
       }
-      /* Specialty: the double gold border inset. The message card needs
-         its outer shadow restated alongside the insets; the closing
-         card takes the insets alone. */
-      .paper-specialty { box-shadow: inset 0 0 0 2px rgba(160, 118, 26, 0.5), inset 0 0 0 11px rgba(253, 250, 241, 0.85), inset 0 0 0 13px rgba(160, 118, 26, 0.35); }
-      .msg-card.paper-specialty { box-shadow: 0 45px 90px rgba(0, 0, 0, 0.4), inset 0 0 0 2px rgba(160, 118, 26, 0.5), inset 0 0 0 11px rgba(253, 250, 241, 0.85), inset 0 0 0 13px rgba(160, 118, 26, 0.35); }
+      .scrap-wrap:has(> .scrap-card.paper-folder)::before { left: 330px; }
+      /* Specialty: the double gold border inset, two visible gold rules
+         with an ivory gap between them (about 3.5px and 13.5px in from
+         the edge). The message card needs its outer shadow restated
+         alongside the insets; the closing card takes the insets alone. */
+      .paper-specialty { box-shadow: inset 0 0 0 3.5px rgba(160, 118, 26, 0.8), inset 0 0 0 10px rgba(253, 250, 241, 0.9), inset 0 0 0 13.5px rgba(160, 118, 26, 0.6); }
+      .msg-card.paper-specialty { box-shadow: 0 45px 90px rgba(0, 0, 0, 0.4), inset 0 0 0 3.5px rgba(160, 118, 26, 0.8), inset 0 0 0 10px rgba(253, 250, 241, 0.9), inset 0 0 0 13.5px rgba(160, 118, 26, 0.6); }
       /* Asymmetrical: message cards take the closing card's torn
          outline. A clip-path would also clip the card's own shadow, so
          the lift comes back as a drop-shadow filter on the silhouette,
          and the tape strip moves inside the safe area so the torn edge
          cannot cut it off. (The closing card already wears this
          outline, so its asymmetrical paper only changes the surface.) */
-      .msg-card.paper-asymmetrical { clip-path: polygon(1% 3%, 6% 1%, 12% 2.4%, 20% 0.8%, 29% 2%, 38% 1%, 47% 2.2%, 56% 0.9%, 65% 2%, 74% 1.1%, 83% 2.3%, 91% 1%, 98.6% 2.6%, 99.4% 12%, 98.7% 24%, 99.5% 38%, 98.8% 52%, 99.4% 66%, 98.7% 80%, 99.3% 92%, 97% 98.6%, 88% 99.3%, 78% 98.5%, 68% 99.4%, 58% 98.6%, 48% 99.5%, 38% 98.7%, 28% 99.3%, 18% 98.5%, 9% 99.4%, 1.6% 98.2%, 0.6% 88%, 1.3% 74%, 0.5% 60%, 1.2% 45%, 0.6% 30%, 1.3% 16%); filter: drop-shadow(0 34px 34px rgba(0, 0, 0, 0.35)); }
+      .msg-card.paper-asymmetrical { clip-path: polygon(1% 3%, 6% 1%, 12% 2.4%, 20% 0.8%, 29% 2%, 38% 1%, 47% 2.2%, 56% 0.9%, 65% 2%, 74% 1.1%, 83% 2.3%, 91% 1%, 98.6% 2.6%, 99.4% 12%, 98.7% 24%, 99.5% 38%, 98.8% 52%, 99.4% 66%, 98.7% 80%, 99.3% 92%, 97% 98.6%, 88% 99.3%, 78% 98.5%, 68% 99.4%, 58% 98.6%, 48% 99.5%, 38% 98.7%, 28% 99.3%, 18% 98.5%, 9% 99.4%, 1.6% 98.2%, 0.6% 88%, 1.3% 74%, 0.5% 60%, 1.2% 45%, 0.6% 30%, 1.3% 16%); filter: drop-shadow(0 36px 38px rgba(0, 0, 0, 0.42)); }
       .msg-card.paper-asymmetrical .msg-tape { top: 14px; }
     </style>
   </head>

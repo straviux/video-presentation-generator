@@ -19,10 +19,15 @@
       <h1 class="m-0 text-base font-semibold whitespace-nowrap">Video Presentation Generator</h1>
       <span class="text-xs text-muted border border-line rounded-full px-2.5 py-1 whitespace-nowrap bg-[#fafafc]">1920 x 1080 · MP4</span>
       <div class="flex-1"></div>
-      <span class="flex items-center gap-1.5 text-[13px] text-muted whitespace-nowrap">
+      <span class="flex items-center gap-1.5 text-[13px] text-muted whitespace-nowrap max-[860px]:hidden">
         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6h4"/></svg>
         Total runtime <strong class="text-ink font-semibold" id="totalRuntimeTop">0:00</strong>
       </span>
+      <button type="button" id="navSaveBtn" class="flex items-center gap-1.5 border border-line bg-white text-ink rounded-lg px-3 py-1.5 text-[13px] font-medium cursor-pointer hover:bg-[#f5f5f8] whitespace-nowrap" title="Save the current project">
+        <svg id="navSaveIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+        <svg id="navSavedIcon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        <span id="navSaveLabel">Save</span>
+      </button>
     </header>
 
     <div class="flex-1 flex min-h-0">
@@ -88,6 +93,8 @@
           <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">These words appear on the title card and the closing card of the video. Each of those cards can also carry an optional animated effect: confetti, sparkles, hearts, or petals.</p>
           <label class="field-label" for="celebrantName">Celebrant name</label>
           <input type="text" class="field-input" id="celebrantName" value="" placeholder="e.g. Maria Clara Santos" />
+          <label class="field-label" for="titleDate">Date (title card)</label>
+          <input type="text" class="field-input" id="titleDate" value="" placeholder="e.g. October 22, 2026" />
           <label class="field-label" for="titleDuration">Title card seconds</label>
           <input type="number" class="field-input" id="titleDuration" value="5" min="3" max="10" step="1" />
           <label class="field-label" for="titleEffect">Title card effect</label>
@@ -938,7 +945,7 @@
       });
 
       for (const id of ["collageEnabled", "textCollageEnabled", "message1Text", "message2Text",
-        "celebrantName", "closingLine", "closingSignOff",
+        "celebrantName", "titleDate", "closingLine", "closingSignOff",
         "titleDuration", "titleEffect", "closingDuration", "closingPaper", "closingEffect",
         "message1SignedBy", "message2SignedBy", "message1Duration", "message2Duration",
         "message1Paper", "message2Paper", "message1Effect", "message2Effect",
@@ -1172,6 +1179,7 @@
       function collectFormState() {
         return {
           celebrantName: $("celebrantName").value,
+          titleDate: $("titleDate").value,
           titleDuration: $("titleDuration").value,
           titleEffect: $("titleEffect").value,
           closingDuration: $("closingDuration").value,
@@ -1233,6 +1241,7 @@
         const s = collectFormState();
         const form = new FormData();
         form.append("celebrantName", s.celebrantName.trim());
+        form.append("titleDate", s.titleDate.trim());
         form.append("titleDuration", s.titleDuration);
         form.append("titleEffect", s.titleEffect);
         form.append("closingDuration", s.closingDuration);
@@ -1464,14 +1473,16 @@
         }
       }
 
-      $("saveProjectBtn").addEventListener("click", async () => {
+      // The one save flow, shared by the Projects panel button and the
+      // top bar Save button. Returns true when a project was saved.
+      async function saveProject() {
         const name = $("projectName").value.trim();
         if (!name) {
           setProjectStatus("Enter a project name first.");
-          return;
+          return false;
         }
         if (knownProjects.some((p) => p.slug === projectSlug(name))) {
-          if (!window.confirm("A project named \"" + name + "\" already exists. Overwrite it?")) return;
+          if (!window.confirm("A project named \"" + name + "\" already exists. Overwrite it?")) return false;
         }
         setProjectStatus("Saving...");
         try {
@@ -1482,9 +1493,40 @@
           if (!resp.ok) throw new Error(data.error || "The project could not be saved.");
           setProjectStatus("Saved " + data.name + ".");
           refreshProjectList();
+          return true;
         } catch (err) {
           setProjectStatus("Save failed: " + err.message);
+          return false;
         }
+      }
+
+      $("saveProjectBtn").addEventListener("click", saveProject);
+
+      // Top bar Save: the same save flow, without leaving the current
+      // panel. With no project name yet it routes to the Projects panel
+      // first; on success the button itself flashes "Saved".
+      let navSaveFlashTimer = null;
+      function flashNavSaved() {
+        $("navSaveLabel").textContent = "Saved";
+        $("navSaveIcon").classList.add("hidden");
+        $("navSavedIcon").classList.remove("hidden");
+        if (navSaveFlashTimer) clearTimeout(navSaveFlashTimer);
+        navSaveFlashTimer = setTimeout(() => {
+          $("navSaveLabel").textContent = "Save";
+          $("navSaveIcon").classList.remove("hidden");
+          $("navSavedIcon").classList.add("hidden");
+          navSaveFlashTimer = null;
+        }, 2000);
+      }
+
+      $("navSaveBtn").addEventListener("click", async () => {
+        if (!$("projectName").value.trim()) {
+          document.querySelector('.rail-btn[data-tab="panelProjects"]').click();
+          setProjectStatus("Name your project, then Save.");
+          $("projectName").focus();
+          return;
+        }
+        if (await saveProject()) flashNavSaved();
       });
 
       async function loadProject(slug) {
@@ -1524,6 +1566,7 @@
           if (v !== undefined && v !== null) $(id).value = String(v);
         };
         setVal("celebrantName", f.celebrantName);
+        setVal("titleDate", f.titleDate);
         setVal("titleDuration", f.titleDuration);
         setVal("titleEffect", f.titleEffect);
         setVal("closingDuration", f.closingDuration);

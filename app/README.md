@@ -45,7 +45,9 @@ no environment variables to set, on any platform.
 
 1. **Event type.** Birthday is the only working type in this version.
 2. **Details.** Celebrant name (it starts blank; type the full name
-   exactly as it should appear on the title card), how long the title
+   exactly as it should appear on the title card), an optional date
+   line for the title card (free text; leave it blank for no date),
+   how long the title
    and closing cards stay, the closing line and sign-off, and the
    closing card's paper: Classic cream, Clean white, Kraft tan, Blush
    pink, Mint green, Sky blue, Crumpled, Folder, Asymmetrical, Felt,

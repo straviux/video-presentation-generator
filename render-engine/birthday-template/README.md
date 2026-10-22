@@ -317,6 +317,9 @@ ffprobe renders/birthday-sample.mp4
    crops to fill and photos simply gain no extra detail).
 2. Edit `config.json`:
    - `celebrantName`, `occasion`
+   - `titleDate`: an optional date line printed under the title card's
+     gold rule (free text, e.g. "October 22, 2026"); empty or missing
+     means no date line
    - `titleDuration`, `closingDuration`: how long the title and closing
      cards stay (optional, defaults 5 and 8)
    - `photos`: one entry per montage photo, `file` path plus `caption`;
