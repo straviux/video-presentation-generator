@@ -750,3 +750,104 @@ textarea.field-input {
   flex: none;
   display: block;
 }
+
+/* ------------------------------------------------ consolidation -- */
+/* The New Card menu: one shared popup for the Card panel button and
+   the filmstrip's + tile. Positioned in JS from the anchor. */
+.new-card-menu {
+  position: fixed;
+  z-index: 60;
+  width: 240px;
+  background: #fff;
+  border: 1px solid #e3e3ea;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(30, 16, 64, 0.18);
+  padding: 6px;
+}
+.new-card-menu[hidden] {
+  display: none;
+}
+.new-card-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: inherit;
+  cursor: pointer;
+}
+.new-card-item:hover:not(:disabled) {
+  background: #f1e8ff;
+}
+.new-card-item:disabled {
+  color: #9a9aa5;
+  cursor: default;
+}
+.new-card-foot {
+  border-top: 1px solid #eeeef3;
+  margin-top: 4px;
+  padding: 7px 10px 4px;
+  font-size: 11.5px;
+  color: #6b6b78;
+}
+/* The filmstrip's + tile, matching the scene tiles' footprint. */
+.tl-tile.tl-add {
+  border-style: dashed;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 86px;
+  color: #7329d6;
+}
+.tl-tile.tl-add:hover {
+  border-color: #8b3dff;
+  background: #faf7ff;
+}
+.tl-add-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #f1e8ff;
+}
+.tl-add-plus svg {
+  width: 18px;
+  height: 18px;
+}
+/* The photo inspector's navigation strip. */
+.insp-photo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.insp-strip-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+}
+.insp-strip-thumb img {
+  width: 52px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+.insp-strip-thumb.selected {
+  border-color: #7329d6;
+  box-shadow: 0 0 0 2px rgba(139, 61, 255, 0.55);
+}

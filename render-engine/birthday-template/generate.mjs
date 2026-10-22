@@ -10,11 +10,12 @@
 //   (titleDuration, photos[].duration, collage.photo.duration /
 //   collage.text.duration, messages[].duration, closingDuration), each
 //   defaulting to the original pacing: title 5s, photos 5s each, collages
-//   6s, messages 6s each, closing 8s. The four middle blocks (photos,
-//   photoCollage, textCollage, messages) play in config.sceneOrder, so the
-//   total duration is computed from the config, not fixed. With the sample
-//   config (7 photos, photo collage on, text collage off, 2 messages, in
-//   the default order) the total is 66s. The generator also writes
+//   6s, messages 6s each, closing 8s. The middle scenes play in
+//   config.sceneOrder, a sequence of individual cards ("photo:<i>" for
+//   each photo, "message:<i>" for each message, plus the two collages
+//   as units), so the total duration is computed from the config, not
+//   fixed. With the sample config (7 photos, photo collage on, text
+//   collage off, 2 messages, in the default order) the total is 66s. The generator also writes
 //   scenes.json (per-scene start and duration) next to index.html, which
 //   the app's exact preview uses for its transport and filmstrip.
 
@@ -118,23 +119,8 @@ const PHOTO_COLLAGE_EFFECT = pickEffect(photoCfg.effect);
 const TEXT_COLLAGE_EFFECT = pickEffect(textCfg.effect);
 
 // ---------------------------------------------------------- scene order ---
-// The four middle blocks can play in any order. config.sceneOrder lists
-// block keys; unknown keys are dropped, duplicates collapse, and any block
-// missing from the list is appended in the default order.
-const MIDDLE_BLOCKS = ["photos", "photoCollage", "textCollage", "messages"];
-function sanitizeSceneOrder(raw) {
-  const order = [];
-  if (Array.isArray(raw)) {
-    for (const key of raw) {
-      if (MIDDLE_BLOCKS.includes(key) && !order.includes(key)) order.push(key);
-    }
-  }
-  for (const key of MIDDLE_BLOCKS) {
-    if (!order.includes(key)) order.push(key);
-  }
-  return order;
-}
-const SCENE_ORDER = sanitizeSceneOrder(config.sceneOrder);
+// The scene sequence is sanitized further down, once the photos and
+// messages it names have been read (see "played sequence").
 
 // ----------------------------------------------------- per-photo setup ---
 // Each photo carries its own display settings; missing fields fall back
@@ -155,14 +141,6 @@ const PHOTOS = config.photos.map((photo) => ({
   saturation: clampNum(photo.saturation, 100, 0, 150),
   frame: PHOTO_FRAMES.includes(photo.frame) ? photo.frame : "full",
 }));
-const PHOTO_OFFSETS = [];
-{
-  let acc = 0;
-  for (const photo of PHOTOS) {
-    PHOTO_OFFSETS.push(acc);
-    acc += photo.duration;
-  }
-}
 
 // ------------------------------------------------- closing photo strips --
 // Optional small framed photos in a strip above the closing card and/or
@@ -193,35 +171,76 @@ const MESSAGES = config.messages.map((message) => ({
   paper: pickPaper(message.paper),
   effect: pickEffect(message.effect),
 }));
-const MSG_OFFSETS = [];
-{
-  let acc = 0;
-  for (const message of MESSAGES) {
-    MSG_OFFSETS.push(acc);
-    acc += message.duration;
-  }
+// ------------------------------------------------------- played sequence --
+// The middle of the video is a sequence of individual cards:
+// "photo:<i>" for each photo, "message:<i>" for each message, plus the
+// two collage scenes as units ("photoCollage", "textCollage"). The
+// title card always opens and the closing card always ends; neither
+// is part of the stored sequence. Sanitization keeps known keys with
+// in-range indexes, drops duplicates and stale keys, and appends any
+// current item the list forgot at the end in natural order (photos,
+// then the collages, then messages). The pre-sequence block keys
+// ("photos", "messages") expand to their items in place, so older
+// configs keep their order.
+function naturalItemKeys() {
+  const keys = [];
+  PHOTOS.forEach((_, i) => keys.push(`photo:${i}`));
+  keys.push("photoCollage", "textCollage");
+  MESSAGES.forEach((_, i) => keys.push(`message:${i}`));
+  return keys;
 }
+function sanitizeSceneOrder(raw) {
+  const known = new Set(naturalItemKeys());
+  const order = [];
+  const push = (key) => {
+    if (known.has(key) && !order.includes(key)) order.push(key);
+  };
+  if (Array.isArray(raw)) {
+    for (const key of raw) {
+      if (key === "photos") PHOTOS.forEach((_, i) => push(`photo:${i}`));
+      else if (key === "messages") MESSAGES.forEach((_, i) => push(`message:${i}`));
+      else if (typeof key === "string") push(key);
+    }
+  }
+  for (const key of naturalItemKeys()) push(key);
+  return order;
+}
+const SCENE_ORDER = sanitizeSceneOrder(config.sceneOrder);
 
-// Block durations. A block that is off or empty contributes no seconds
-// and no scenes. Photos and messages sum their per-card durations.
-const BLOCK_DUR = {
-  photos: PHOTOS.reduce((sum, photo) => sum + photo.duration, 0),
-  photoCollage: PHOTO_COLLAGE_ON ? PHOTO_COLLAGE_DUR : 0,
-  textCollage: TEXT_COLLAGE_ON ? TEXT_COLLAGE_DUR : 0,
-  messages: MESSAGES.reduce((sum, message) => sum + message.duration, 0),
-};
-
-// Running start offsets: title first, then the middle blocks in scene
-// order, then the closing card. The total is whatever the blocks add to.
-const STARTS = { title: 0 };
+// The walk over the sequence: an item that will not play (a disabled
+// collage, a message with no text) takes no time and emits no scene,
+// so its stored position is all that decides where it lands if it
+// comes back. Played items get their start at the running cursor.
+function itemPlays(key) {
+  if (key === "photoCollage") return PHOTO_COLLAGE_ON;
+  if (key === "textCollage") return TEXT_COLLAGE_ON;
+  if (key.startsWith("message:")) {
+    const message = MESSAGES[Number(key.slice(8))];
+    return Boolean(message) && String(message.text ?? "").trim() !== "";
+  }
+  return true;
+}
+function itemDuration(key) {
+  if (key === "photoCollage") return PHOTO_COLLAGE_DUR;
+  if (key === "textCollage") return TEXT_COLLAGE_DUR;
+  const idx = Number(key.slice(key.indexOf(":") + 1));
+  return key.startsWith("photo:") ? PHOTOS[idx].duration : MESSAGES[idx].duration;
+}
+const PLAYED = SCENE_ORDER.filter(itemPlays);
+const ITEM_STARTS = {};
+let TOTAL_MIDDLE = 0;
 {
   let cursor = TITLE_DUR;
-  for (const key of SCENE_ORDER) {
-    STARTS[key] = cursor;
-    cursor += BLOCK_DUR[key];
+  for (const key of PLAYED) {
+    ITEM_STARTS[key] = cursor;
+    cursor += itemDuration(key);
   }
-  STARTS.closing = cursor;
+  TOTAL_MIDDLE = cursor - TITLE_DUR;
 }
+
+// Running start offsets: the title first, the played sequence, then
+// the closing card. The total is whatever the scenes add to.
+const STARTS = { title: 0, closing: TITLE_DUR + TOTAL_MIDDLE };
 const TOTAL = STARTS.closing + CLOSING_DUR;
 
 // ------------------------------------------------------------- utilities ---
@@ -665,14 +684,18 @@ function buildTitle(s) {
   );
 }
 
-function buildPhotos(blockStart) {
-  PHOTOS.forEach((photo, i) => {
-  const s = blockStart + PHOTO_OFFSETS[i];
+function buildPhoto(i, s, chainPrev, chainNext) {
+  const photo = PHOTOS[i];
   const dur = photo.duration;
   const framed = photo.frame === "polaroid" || photo.frame === "rounded" || photo.frame === "gold";
   const drift = (i % 2 === 0 ? 1 : -1) * (framed ? 12 : 27); // alternate Ken Burns drift direction
-  const isFirst = i === 0;
-  const isLast = i === PHOTOS.length - 1;
+  // The fade through white links two photos that sit next to each
+  // other in the played sequence. A photo at the edge of a run (or
+  // alone) crossfades the way the other scene types do instead:
+  // chainPrev and chainNext say whether the played neighbors are
+  // photos.
+  const isFirst = !chainPrev;
+  const isLast = !chainNext;
   const brightStart = Number(((photo.brightness / 100) * 1.16).toFixed(3));
   const brightEnd = photo.brightness / 100;
   const imgTag = `<img class="photo-img" id="photo-img-${i}" src="${esc(photo.file)}" alt="" style="object-position: ${photo.focusX}% ${photo.focusY}%; filter: saturate(${photo.saturation / 100})" />`;
@@ -718,8 +741,9 @@ function buildPhotos(blockStart) {
   sceneMeta.push({ key: `photo-${i}`, label: `Photo ${i + 1}`, start: s, duration: dur });
 
   timeline.push(
-    // First photo crossfades in from the title card as before; later photos
-    // start instantly under their white layer, which is what fades instead.
+    // The first photo of a run crossfades in from the scene before
+    // it; chained photos start instantly under their white layer,
+    // which is what fades instead.
     isFirst
       ? `tl.fromTo("#scene-photo-${i}", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, ${s});`
       : `tl.fromTo("#scene-photo-${i}", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, ${s});`,
@@ -755,12 +779,12 @@ function buildPhotos(blockStart) {
       `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.01, ease: "none" }, ${s + dur});`,
     );
   } else {
-    // Last photo keeps the plain crossfade into whatever scene follows.
+    // Last photo of a run keeps the plain crossfade into whatever
+    // scene follows.
     timeline.push(
       `tl.to("#scene-photo-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + dur});`,
     );
   }
-  });
 }
 
 function buildCollage(kind, s) {
@@ -896,9 +920,12 @@ function buildCollage(kind, s) {
   }
 }
 
-function buildMessages(blockStart) {
-  MESSAGES.forEach((message, i) => {
-  const s = blockStart + MSG_OFFSETS[i];
+// One message card. i is the card's FILLED order (its position among
+// the messages that play), which is what the scene ids and the
+// scenes.json vocabulary have always used; the server drops blank
+// messages before the config is written, so it matches the config
+// index in every config the app produces.
+function buildMessage(message, i, s) {
   const dur = message.duration;
   // Typewriter fit: characters appear one by one starting at 1s in. The
   // typing window is the card duration minus 1.6s, so the full text lands
@@ -939,7 +966,6 @@ function buildMessages(blockStart) {
     `tl.fromTo("#msg-sign-${i}", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, ${s + typeEnd + 0.15});`,
     `tl.to("#scene-msg-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + dur});`,
   );
-  });
 }
 
 // One closing photo strip ("top" or "bottom"): a centered row of small
@@ -1055,15 +1081,25 @@ function buildClosing(s) {
 }
 
 // ------------------------------------------------------------ build all ---
-// Title first, then the middle blocks in scene order (skipping blocks
-// that are off or empty), then the closing card.
+// Title first, then the played sequence card by card, then the
+// closing card.
 buildTitle(STARTS.title);
-for (const key of SCENE_ORDER) {
-  if (BLOCK_DUR[key] === 0) continue;
-  if (key === "photos") buildPhotos(STARTS.photos);
-  else if (key === "photoCollage") buildCollage("photo", STARTS.photoCollage);
-  else if (key === "textCollage") buildCollage("text", STARTS.textCollage);
-  else if (key === "messages") buildMessages(STARTS.messages);
+{
+  let filledMessages = 0;
+  PLAYED.forEach((key, pos) => {
+    const s = ITEM_STARTS[key];
+    if (key === "photoCollage") { buildCollage("photo", s); return; }
+    if (key === "textCollage") { buildCollage("text", s); return; }
+    const idx = Number(key.slice(key.indexOf(":") + 1));
+    if (key.startsWith("photo:")) {
+      const chainPrev = pos > 0 && PLAYED[pos - 1].startsWith("photo:");
+      const chainNext = pos < PLAYED.length - 1 && PLAYED[pos + 1].startsWith("photo:");
+      buildPhoto(idx, s, chainPrev, chainNext);
+      return;
+    }
+    buildMessage(MESSAGES[idx], filledMessages, s);
+    filledMessages += 1;
+  });
 }
 buildClosing(STARTS.closing);
 
@@ -1495,9 +1531,8 @@ writeFileSync(
   JSON.stringify({ total: TOTAL, scenes: sceneMeta }, null, 2),
 );
 console.log(`Wrote index.html for ${config.celebrantName}`);
-const blockSummary = SCENE_ORDER
-  .filter((key) => BLOCK_DUR[key] > 0)
-  .map((key) => `${key} ${STARTS[key]}-${STARTS[key] + BLOCK_DUR[key]}s`)
+const seqSummary = PLAYED
+  .map((key) => `${key} ${ITEM_STARTS[key]}-${ITEM_STARTS[key] + itemDuration(key)}s`)
   .join(", ");
-console.log(`Scenes: title 0-${TITLE_DUR}s, ${blockSummary}, closing ${STARTS.closing}-${TOTAL}s`);
+console.log(`Scenes: title 0-${TITLE_DUR}s, ${seqSummary}, closing ${STARTS.closing}-${TOTAL}s`);
 console.log(`Total duration: ${TOTAL}s`);
