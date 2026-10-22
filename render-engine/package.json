@@ -12,5 +12,8 @@
   "dependencies": {
     "gsap": "^3.15.0",
     "hyperframes": "^0.8.181"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
   }
 }
