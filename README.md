@@ -48,6 +48,10 @@ Open http://localhost:3210 in your browser.
 
 Full details: `render-engine/SETUP.md` for the stack, `app/README.md` for using the app, `render-engine/birthday-template/README.md` for the template.
 
+## Desktop app
+
+A Tauri 2 desktop launcher lives in `desktop/`: it starts this engine and shows it in a native window, so daily use needs no terminal or browser tab. The engine is not bundled, so `git pull` updates keep working as usual. See `desktop/README.md` for setup and first-launch details.
+
 ## Notes on this repository
 
 - `node_modules/`, render jobs, rendered MP4s, and cache folders are not committed (see `.gitignore`); run `npm install` after cloning.

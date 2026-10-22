@@ -1,0 +1,1 @@
+{"description":"Tauri 2 desktop launcher for the Video Presentation Generator (wraps the existing engine clone, no bundled engine).","devDependencies":{"@tauri-apps/cli":"^2"},"name":"video-presentation-generator-desktop","private":true,"scripts":{"tauri":"tauri"},"version":"1.0.0"}

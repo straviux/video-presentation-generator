@@ -1,0 +1,4 @@
+node_modules/
+src-tauri/target/
+# Icons under src-tauri/icons/ are generated locally with `npx tauri icon icon.svg`
+# on the build machine; the source of truth is icon.svg in this folder.
