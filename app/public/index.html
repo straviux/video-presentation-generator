@@ -80,8 +80,13 @@
 
       <div class="flex-none w-[360px] bg-white border-r border-line overflow-y-auto min-w-0">
         <section class="panel active p-[18px]" id="panelTemplates">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Templates</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Birthday is ready to use. The other event types are on the way.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Templates</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpTemplates" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpTemplates" hidden>
+            <p>Birthday is ready to use. The other event types are on the way.</p>
+          </div>
           <label class="flex items-center gap-2.5 border-2 border-brand rounded-[10px] p-3.5 mb-2.5 bg-brand-soft text-sm font-semibold cursor-pointer"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#2c5c46,#17352b)]"></span><input type="radio" name="eventType" value="Birthday" checked class="accent-[#8b3dff] flex-none" /> <span class="min-w-0">Birthday</span></label>
           <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Appreciation" disabled class="accent-[#8b3dff] flex-none" /> <span class="min-w-0">Appreciation</span> <span class="ml-auto flex-none text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
           <label class="flex items-center gap-2.5 border border-line rounded-[10px] p-3.5 mb-2.5 bg-[#fafafc] text-sm text-muted"><span class="w-11 h-[30px] rounded-md flex-none bg-[linear-gradient(135deg,#c9c9d2,#a9a9b5)]"></span><input type="radio" name="eventType" value="Awards" disabled class="accent-[#8b3dff] flex-none" /> <span class="min-w-0">Awards</span> <span class="ml-auto flex-none text-[10.5px] tracking-[0.03em] uppercase bg-[#ececf1] text-muted rounded-full px-2 py-0.5 whitespace-nowrap">Coming soon</span></label>
@@ -89,10 +94,22 @@
         </section>
 
         <section class="panel p-[18px]" id="panelDetails">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Details</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">These words appear on the title card and the closing card of the video. Each of those cards can also carry an optional animated effect: confetti, sparkles, hearts, or petals.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Details</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpDetails" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpDetails" hidden>
+            <p>These words appear on the title card and the closing card of the video. Each of those cards can also carry an optional animated effect: confetti, sparkles, hearts, or petals.</p>
+          </div>
           <label class="field-label" for="celebrantName">Celebrant name</label>
           <input type="text" class="field-input" id="celebrantName" value="" placeholder="e.g. Maria Clara Santos" />
+          <label class="field-label" for="titleEyebrow">Title card top line (optional)<button type="button" class="help-btn" aria-expanded="false" aria-controls="helpTitleLines" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button></label>
+          <input type="text" class="field-input" id="titleEyebrow" value="" placeholder="Happy Birthday" maxlength="90" />
+          <label class="field-label" for="titleGreeting">Title card greeting line (optional)</label>
+          <input type="text" class="field-input" id="titleGreeting" value="" placeholder="Happy Birthday," maxlength="90" />
+          <div class="help-pop" id="helpTitleLines" hidden>
+            <p>Leave either title line blank to use the automatic text; the hint inside each field shows what will appear.</p>
+          </div>
           <label class="field-label" for="titleDate">Date (title card)</label>
           <input type="text" class="field-input" id="titleDate" value="" placeholder="e.g. October 22, 2026" />
           <label class="field-label" for="titleDuration">Title card seconds</label>
@@ -105,6 +122,11 @@
             <option value="hearts">Hearts</option>
             <option value="petals">Petals</option>
           </select>
+          <label class="field-label" for="closingEyebrow">Closing card top line (optional)<button type="button" class="help-btn" aria-expanded="false" aria-controls="helpClosingEyebrow" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button></label>
+          <input type="text" class="field-input" id="closingEyebrow" value="" placeholder="Happy Birthday, Maria" maxlength="90" />
+          <div class="help-pop" id="helpClosingEyebrow" hidden>
+            <p>Leave blank to use the automatic line: the greeting plus the celebrant's first name, as hinted in the field.</p>
+          </div>
           <label class="field-label" for="closingLine">Closing line</label>
           <input type="text" class="field-input" id="closingLine" value="Wishing you a year as warm and generous as you are." />
           <div class="mt-1.5"><button type="button" class="mini-btn" id="smartClosingBtn">Generate</button></div>
@@ -134,15 +156,22 @@
             <option value="hearts">Hearts</option>
             <option value="petals">Petals</option>
           </select>
-          <label class="field-label">Closing card photos</label>
-          <p class="m-0 mb-1 text-muted text-[12.5px] leading-normal">Small framed copies of your photos can sit in a strip above the closing card, below it, or both. They appear one by one when the closing card plays. Tick Top or Bottom for each photo; a photo can be in both strips.</p>
+          <label class="field-label">Closing card photos<button type="button" class="help-btn" aria-expanded="false" aria-controls="helpClosingPhotos" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button></label>
+          <div class="help-pop" id="helpClosingPhotos" hidden>
+            <p>Small framed copies of your photos can sit in a strip above the closing card, below it, or both. They appear one by one when the closing card plays. Tick Top or Bottom for each photo; a photo can be in both strips.</p>
+            <p>Up to 5 photos per strip.</p>
+          </div>
           <div id="closingPhotoPicker"></div>
-          <p class="m-0 mt-1.5 text-muted text-[12px] leading-normal">Up to 5 photos per strip.</p>
         </section>
 
         <section class="panel p-[18px]" id="panelPhotos">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Photos</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add JPG, PNG, or WebP photos. Every photo has its own controls under it: how long it stays, its frame, and its Position. Position picks which part of the photo stays in frame, so a subject low in the shot is not cropped out. Use the arrows to change the order, and tick photos here or in the Collage tab for the photo collage.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Photos</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpPhotos" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpPhotos" hidden>
+            <p>Add JPG, PNG, or WebP photos. Every photo has its own controls under it: how long it stays, its frame, and its Position. Position picks which part of the photo stays in frame, so a subject low in the shot is not cropped out. Use the arrows to change the order, and tick photos here or in the Collage tab for the photo collage.</p>
+          </div>
           <label for="photoInput" class="flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff]">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             Add photos
@@ -152,10 +181,15 @@
         </section>
 
         <section class="panel p-[18px]" id="panelMessages">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Messages</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add up to six message cards. Set how long each card stays, which paper it is written on, and an optional animated effect. Leave a message blank to skip it. The buttons under a card move it, copy it, or remove it. Use the Scenes tab to choose where the messages play.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Messages</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpMessages" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpMessages" hidden>
+            <p>Add up to six message cards. Set how long each card stays, which paper it is written on, and an optional animated effect. Leave a message blank to skip it. The buttons under a card move it, copy it, or remove it. Use the Scenes tab to choose where the messages play.</p>
+          </div>
           <div class="border border-line rounded-[10px] p-3 mb-1 bg-[#fafafc]">
-            <label class="field-label" for="smartTone" style="margin-top: 0">Smart generate</label>
+            <label class="field-label" for="smartTone" style="margin-top: 0">Smart generate<button type="button" class="help-btn" aria-expanded="false" aria-controls="helpSmart" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button></label>
             <div class="flex gap-2">
               <select class="field-input" id="smartTone" style="flex: 1; min-width: 0; width: auto">
                 <option value="warm" selected>Warm</option>
@@ -168,7 +202,9 @@
                 Smart generate
               </button>
             </div>
-            <p class="m-0 mt-2 text-muted text-[12px] leading-normal">Fills every message below with ready-made lines in the chosen tone, greeting the celebrant by first name when one is entered. The Signed by lines are left as they are. The same tone also drives the Generate buttons on the greeting cards and the closing line.</p>
+            <div class="help-pop" id="helpSmart" hidden style="margin: 8px 0 0">
+              <p>Fills every message below with ready-made lines in the chosen tone, greeting the celebrant by first name when one is entered. The Signed by lines are left as they are. The same tone also drives the Generate buttons on the greeting cards and the closing line.</p>
+            </div>
             <p class="warn" id="smartLibraryNote">The message library could not be loaded, so Smart generate is off. Restart the app and try again.</p>
           </div>
           <div id="messageList"></div>
@@ -179,9 +215,17 @@
         </section>
 
         <section class="panel p-[18px]" id="panelCollage">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Collage</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Two optional scenes. Set how long each one stays and an optional animated effect for each. The photo collage shows 3 photos together as polaroids; the text collage shows greeting cards. Both can appear in the same video. Use the Scenes tab to choose where each one plays.</p>
-          <h3 class="m-0 mb-1 text-[13.5px] font-semibold">Photo collage</h3>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Collage</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpCollage" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpCollage" hidden>
+            <p>Two optional scenes. Set how long each one stays and an optional animated effect for each. The photo collage shows 3 photos together as polaroids; the text collage shows greeting cards. Both can appear in the same video. Use the Scenes tab to choose where each one plays.</p>
+          </div>
+          <div class="flex items-center gap-1.5 mb-1">
+            <h3 class="m-0 text-[13.5px] font-semibold">Photo collage</h3>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpPhotoCollage" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
           <div class="flex items-center gap-2.5 mt-1">
             <input type="checkbox" id="collageEnabled" checked class="w-[18px] h-[18px] accent-[#8b3dff]" />
             <span class="text-[13.5px] font-semibold">Include the photo collage scene</span>
@@ -199,10 +243,15 @@
             <option value="petals">Petals</option>
           </select>
           <div id="collagePhotoArea">
-            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Tick exactly 3 photos in the Photos tab for the polaroids.</p>
+            <div class="help-pop" id="helpPhotoCollage" hidden style="margin-top: 12px">
+              <p>Tick exactly 3 photos in the Photos tab for the polaroids.</p>
+            </div>
             <p class="warn" id="collageWarn">The photo collage needs exactly 3 photos ticked. Right now <span id="collageCount">0</span> are ticked.</p>
           </div>
-          <h3 class="m-0 mt-4 mb-1 text-[13.5px] font-semibold">Text collage</h3>
+          <div class="flex items-center gap-1.5 mt-4 mb-1">
+            <h3 class="m-0 text-[13.5px] font-semibold">Text collage</h3>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpTextCollage" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
           <div class="flex items-center gap-2.5 mt-1">
             <input type="checkbox" id="textCollageEnabled" class="w-[18px] h-[18px] accent-[#8b3dff]" />
             <span class="text-[13.5px] font-semibold">Include the text collage scene</span>
@@ -220,7 +269,9 @@
             <option value="petals">Petals</option>
           </select>
           <div id="collageTextArea">
-            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Add up to six greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped. Each card can wear its own paper, picked under the card. The buttons under a card move it, copy it, or remove it. The Generate button under each card writes a short line for you, in the tone picked in the Messages tab; signers are left as they are.</p>
+            <div class="help-pop" id="helpTextCollage" hidden style="margin-top: 12px">
+              <p>Add up to six greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped. Each card can wear its own paper, picked under the card. The buttons under a card move it, copy it, or remove it. The Generate button under each card writes a short line for you, in the tone picked in the Messages tab; signers are left as they are.</p>
+            </div>
             <div id="textCardList"></div>
             <button type="button" id="addTextCardBtn" class="w-full flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff] disabled:opacity-50 disabled:cursor-default">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -231,15 +282,25 @@
         </section>
 
         <section class="panel p-[18px]" id="panelScenes">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Scenes</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">The order the scenes play in the video. The title card always opens the video and the closing card always ends it. Use the arrows to move the middle scenes; a scene marked Off is skipped when the video is made.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Scenes</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpScenes" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpScenes" hidden>
+            <p>The order the scenes play in the video. The title card always opens the video and the closing card always ends it. Use the arrows to move the middle scenes; a scene marked Off is skipped when the video is made.</p>
+          </div>
           <div id="sceneOrderList"></div>
           <input type="hidden" id="sceneOrder" value="photos,photoCollage,textCollage,messages" />
         </section>
 
         <section class="panel p-[18px]" id="panelFonts">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Fonts</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Pick a different font for each kind of text in the video. Press Update preview above the stage to see your picks in the real design. The fonts load from Google Fonts, so the preview and the render need an internet connection; without one, each pick falls back to a similar system font.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Fonts</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpFonts" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpFonts" hidden>
+            <p>Pick a different font for each kind of text in the video. Press Update preview above the stage to see your picks in the real design. The fonts load from Google Fonts, so the preview and the render need an internet connection; without one, each pick falls back to a similar system font.</p>
+          </div>
           <label class="field-label" for="fontName">Name, the celebrant name on the title card</label>
           <select class="field-input" id="fontName">
             <option value="classic" style="font-family: Georgia, 'Times New Roman', serif" selected>Classic Serif</option>
@@ -300,8 +361,13 @@
             <option value="outfit" style="font-family: 'Outfit', system-ui, sans-serif">Outfit</option>
             <option value="dmsans" style="font-family: 'DM Sans', system-ui, sans-serif">DM Sans</option>
           </select>
-          <h3 class="m-0 mt-5 mb-1 text-[13.5px] font-semibold">Text effects</h3>
-          <p class="m-0 mb-1 text-muted text-[12.5px] leading-normal">Optional shadow, glow, and outline for the text in the video. Display text covers the celebrant name and the headings; All text adds the photo captions and the message cards too. Each effect has its own switch and strength.</p>
+          <div class="flex items-center gap-1.5 mt-5 mb-1">
+            <h3 class="m-0 text-[13.5px] font-semibold">Text effects</h3>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpTextFx" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpTextFx" hidden>
+            <p>Optional shadow, glow, and outline for the text in the video. Display text covers the celebrant name and the headings; All text adds the photo captions and the message cards too. Each effect has its own switch and strength.</p>
+          </div>
           <label class="field-label" for="textFxScope">Effects apply to</label>
           <select class="field-input" id="textFxScope">
             <option value="display" selected>Display text (name and headings)</option>
@@ -328,8 +394,14 @@
         </section>
 
         <section class="panel p-[18px]" id="panelMusic">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Music</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Add one background music track to the finished video. It loops if it is shorter than the video, fades in at the start, and fades out over the last few seconds. Leave this empty and the video stays silent.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Music</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpMusic" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpMusic" hidden>
+            <p>Add one background music track to the finished video. It loops if it is shorter than the video, fades in at the start, and fades out over the last few seconds. Leave this empty and the video stays silent.</p>
+            <p>Only use music you have the right to use, for example your own recording or a track whose license covers videos like this one.</p>
+          </div>
           <label for="musicInput" class="flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff]">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
             Choose a music file
@@ -341,12 +413,17 @@
           </div>
           <label class="field-label" for="musicVolume">Music volume</label>
           <input type="range" id="musicVolume" min="0" max="100" value="40" class="w-full accent-[#8b3dff]" />
-          <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Only use music you have the right to use, for example your own recording or a track whose license covers videos like this one.</p>
         </section>
 
         <section class="panel p-[18px]" id="panelBackground">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Background</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">The backdrop behind the title, collage, message, and closing scenes. Photos stay full screen in every backdrop, and the paper cards keep their paper.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Background</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpBackground" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpBackground" hidden>
+            <p>The backdrop behind the title, collage, message, and closing scenes. Photos stay full screen in every backdrop, and the paper cards keep their paper.</p>
+            <p>Animated backdrops drift gently in the video. Framed photos (Polaroid, Rounded, Gold frame) sit on this backdrop; full-bleed photos fill the screen in every backdrop.</p>
+          </div>
           <div class="grid grid-cols-2 gap-2.5" id="backgroundGrid">
             <button type="button" class="bg-card is-active" data-bg="deep-green">
               <span class="bg-swatch" style="background: radial-gradient(circle at 18% 12%, #2c5c46 0%, #17352b 55%, #10261e 100%)"></span>
@@ -382,12 +459,16 @@
             </button>
           </div>
           <input type="hidden" id="backgroundValue" value="deep-green" />
-          <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Animated backdrops drift gently in the video. Framed photos (Polaroid, Rounded, Gold frame) sit on this backdrop; full-bleed photos fill the screen in every backdrop.</p>
         </section>
 
         <section class="panel p-[18px]" id="panelProjects">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Projects</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">Save the whole editor, photos, music, and every setting included, under a name, then reopen it later exactly as you left it. Saving with the same name replaces the older copy. Projects are stored as files in the app's projects folder on this machine.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Projects</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpProjects" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpProjects" hidden>
+            <p>Save the whole editor, photos, music, and every setting included, under a name, then reopen it later exactly as you left it. Saving with the same name replaces the older copy. Projects are stored as files in the app's projects folder on this machine.</p>
+          </div>
           <label class="field-label" for="projectName">Project name</label>
           <input type="text" class="field-input" id="projectName" value="" placeholder="Project name" />
           <button type="button" id="saveProjectBtn" class="mt-3 w-full flex items-center justify-center gap-2 bg-brand text-white border-none rounded-lg px-4 py-2.5 text-sm font-semibold cursor-pointer hover:bg-brand-dark">
@@ -400,8 +481,13 @@
         </section>
 
         <section class="panel p-[18px]" id="panelLibrary">
-          <h2 class="m-0 mb-1 text-[15px] font-semibold">Library</h2>
-          <p class="m-0 mb-3.5 text-muted text-[12.5px] leading-normal">The message library behind Smart generate: ready-made lines in four tones, kept in a small database in the app. Add your own lines here and the composer can use them right away; delete lines you no longer want.</p>
+          <div class="flex items-center gap-1.5 mb-3.5">
+            <h2 class="m-0 text-[15px] font-semibold">Library</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpLibrary" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <div class="help-pop" id="helpLibrary" hidden>
+            <p>The message library behind Smart generate: ready-made lines in four tones, kept in a small database in the app. Add your own lines here and the composer can use them right away; delete lines you no longer want.</p>
+          </div>
           <div class="flex gap-2">
             <select class="field-input" id="libraryToneFilter" style="flex: 1; min-width: 0; width: auto" aria-label="Filter lines by tone">
               <option value="all" selected>All tones</option>
@@ -477,8 +563,13 @@
           </div>
           <div class="flex-none w-[300px] min-h-0 overflow-y-auto flex flex-col gap-3.5">
             <section class="border border-line rounded-[10px] px-4 py-3.5 bg-white" id="generate-card">
-              <h2 class="m-0 mb-1 text-sm font-semibold">Generate</h2>
-              <p class="m-0 mb-3 text-muted text-xs leading-normal">Rendering happens on this machine and usually takes a few minutes for a one minute video. When it is done, the video and the download button appear here.</p>
+              <div class="flex items-center gap-1.5 mb-3">
+                <h2 class="m-0 text-sm font-semibold">Generate</h2>
+                <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpGenerate" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+              </div>
+              <div class="help-pop" id="helpGenerate" hidden>
+                <p>Rendering happens on this machine and usually takes a few minutes for a one minute video. When it is done, the video and the download button appear here.</p>
+              </div>
               <button type="button" id="generateBtn" class="w-full flex items-center justify-center gap-2 bg-brand text-white border-none rounded-lg px-[22px] py-2.5 text-sm font-semibold cursor-pointer shadow-[0_1px_3px_rgba(139,61,255,0.35)] hover:bg-brand-dark disabled:opacity-50 disabled:cursor-default disabled:shadow-none">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
                 Generate Video
@@ -498,8 +589,13 @@
               </div>
             </section>
             <section class="border border-line rounded-[10px] px-4 py-3.5 bg-white" id="summary-card">
-              <h2 class="m-0 mb-1 text-sm font-semibold">Video summary</h2>
-              <p class="m-0 mb-2.5 text-muted text-xs leading-normal">Scenes update as you add photos and change options.</p>
+              <div class="flex items-center gap-1.5 mb-2.5">
+                <h2 class="m-0 text-sm font-semibold">Video summary</h2>
+                <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpSummary" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+              </div>
+              <div class="help-pop" id="helpSummary" hidden>
+                <p>Scenes update as you add photos and change options.</p>
+              </div>
               <ul class="scene-list list-none m-0 p-0 text-[13px]" id="sceneList"></ul>
               <div class="flex justify-between items-center font-semibold mt-2.5 text-sm">
                 <span class="flex items-center gap-1.5">
@@ -542,14 +638,14 @@
         ["hearts", "Hearts"], ["petals", "Petals"],
       ];
       let messagesState = [
-        { text: "You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.", signedBy: "Your YSE Family", duration: 6, paper: "classic", effect: "none" },
-        { text: "Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.", signedBy: "From all of us at YSE", duration: 6, paper: "classic", effect: "none" },
+        { title: "", text: "You bring so much warmth and light to everyone around you. We hope this year gives back all the kindness you share so freely.", signedBy: "Your YSE Family", duration: 6, paper: "classic", effect: "none" },
+        { title: "", text: "Thank you for leading with patience and heart. You make the hard days easier and the good days better for all of us.", signedBy: "From all of us at YSE", duration: 6, paper: "classic", effect: "none" },
       ];
       let textCardsState = [
-        { text: "Happiest birthday! Your kindness keeps this whole office going.", from: "The Programs Team", paper: "classic" },
-        { text: "Thank you for leading with patience and heart. Enjoy your day, you have earned it.", from: "The Finance Team", paper: "classic" },
-        { text: "Wishing you good health, good food, and zero paperwork today.", from: "The Field Team", paper: "classic" },
-        { text: "We are lucky to work with you. Happy birthday!", from: "Everyone at YSE", paper: "classic" },
+        { title: "", text: "Happiest birthday! Your kindness keeps this whole office going.", from: "The Programs Team", paper: "classic" },
+        { title: "", text: "Thank you for leading with patience and heart. Enjoy your day, you have earned it.", from: "The Finance Team", paper: "classic" },
+        { title: "", text: "Wishing you good health, good food, and zero paperwork today.", from: "The Field Team", paper: "classic" },
+        { title: "", text: "We are lucky to work with you. Happy birthday!", from: "Everyone at YSE", paper: "classic" },
       ];
       let smartAvailable = false;
 
@@ -1099,6 +1195,8 @@
           item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
           item.innerHTML =
             "<div class='text-[13.5px] font-semibold mb-1'>Message " + (i + 1) + "</div>" +
+            "<label class='field-label'>Card title (optional)</label>" +
+            "<input type='text' class='field-input msg-card-title' maxlength='90' />" +
             "<label class='field-label'>Message text</label>" +
             "<textarea class='field-input msg-text'></textarea>" +
             "<label class='field-label'>Signed by</label>" +
@@ -1109,6 +1207,9 @@
             "<select class='field-input msg-paper'>" + paperOptionsHtml(m.paper) + "</select>" +
             "<label class='field-label'>Effect</label>" +
             "<select class='field-input msg-effect'>" + effectOptionsHtml(m.effect) + "</select>";
+          const cardTitle = item.querySelector(".msg-card-title");
+          cardTitle.value = m.title || "";
+          cardTitle.addEventListener("input", () => { m.title = cardTitle.value; refreshSummary(); });
           const text = item.querySelector(".msg-text");
           text.value = m.text;
           text.addEventListener("input", () => { m.text = text.value; refreshSummary(); });
@@ -1140,7 +1241,7 @@
 
       $("addMessageBtn").addEventListener("click", () => {
         if (messagesState.length >= MAX_MESSAGES) return;
-        messagesState.push({ text: "", signedBy: "", duration: 6, paper: "classic", effect: "none" });
+        messagesState.push({ title: "", text: "", signedBy: "", duration: 6, paper: "classic", effect: "none" });
         renderMessageList();
       });
 
@@ -1155,6 +1256,8 @@
           item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
           item.innerHTML =
             "<div class='text-[13.5px] font-semibold mb-1'>Card " + (i + 1) + "</div>" +
+            "<label class='field-label'>Card title (optional)</label>" +
+            "<input type='text' class='field-input card-title' maxlength='90' />" +
             "<label class='field-label'>Card text</label>" +
             "<input type='text' class='field-input card-text' />" +
             "<label class='field-label'>Signed by</label>" +
@@ -1162,6 +1265,9 @@
             "<div class='mt-1.5'><button type='button' class='mini-btn' data-smart-card='" + (i + 1) + "'>Generate</button></div>" +
             "<label class='field-label'>Paper</label>" +
             "<select class='field-input card-paper'>" + paperOptionsHtml(c.paper) + "</select>";
+          const cardTitle = item.querySelector(".card-title");
+          cardTitle.value = c.title || "";
+          cardTitle.addEventListener("input", () => { c.title = cardTitle.value; refreshSummary(); });
           const text = item.querySelector(".card-text");
           text.value = c.text;
           text.addEventListener("input", () => { c.text = text.value; refreshSummary(); });
@@ -1197,18 +1303,41 @@
 
       $("addTextCardBtn").addEventListener("click", () => {
         if (textCardsState.length >= MAX_TEXT_CARDS) return;
-        textCardsState.push({ text: "", from: "", paper: "classic" });
+        textCardsState.push({ title: "", text: "", from: "", paper: "classic" });
         renderTextCardList();
       });
 
       for (const id of ["collageEnabled", "textCollageEnabled",
         "celebrantName", "titleDate", "closingLine", "closingSignOff",
+        "titleEyebrow", "titleGreeting", "closingEyebrow",
         "titleDuration", "titleEffect", "closingDuration", "closingPaper", "closingEffect",
         "collageHeading", "textCollageHeading", "photoCollageDuration", "textCollageDuration",
         "photoCollageEffect", "textCollageEffect"]) {
         $(id).addEventListener("input", refreshSummary);
         $(id).addEventListener("change", refreshSummary);
       }
+
+      // The fields for the automatic title and closing lines hint at
+      // what will appear when they are left blank: the occasion from
+      // the Templates pick, plus the celebrant's first name on the
+      // closing card. The pick itself now rides along in the payload
+      // as the occasion.
+      function selectedOccasion() {
+        const checked = document.querySelector('input[name="eventType"]:checked');
+        return checked ? checked.value : "Birthday";
+      }
+      function syncAutoLineHints() {
+        const occasion = selectedOccasion();
+        const first = $("celebrantName").value.trim().split(/\s+/)[0] || "First name";
+        $("titleEyebrow").placeholder = "Happy " + occasion;
+        $("titleGreeting").placeholder = "Happy " + occasion + ",";
+        $("closingEyebrow").placeholder = "Happy " + occasion + ", " + first;
+      }
+      $("celebrantName").addEventListener("input", syncAutoLineHints);
+      document.querySelectorAll('input[name="eventType"]').forEach((radio) => {
+        radio.addEventListener("change", () => { syncAutoLineHints(); refreshSummary(); });
+      });
+      syncAutoLineHints();
 
       // -------------------------------------------------------------- music --
       let musicFile = null;
@@ -1232,6 +1361,44 @@
           document.querySelectorAll(".rail-btn").forEach((b) => b.classList.toggle("active", b === btn));
           document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === btn.dataset.tab));
         });
+      });
+
+      // ------------------------------------------------------------ help --
+      // Every panel's explanatory text sits behind a small ? button
+      // beside the heading or label it belongs to. The popover is a
+      // plain block in the panel flow (never a floating layer), so
+      // the scrolling panel cannot clip it. Only one popover is open
+      // at a time; clicking anywhere else, or pressing Escape,
+      // closes it. Warnings and status lines are functional feedback
+      // and stay visible; they are not part of this system.
+      function closeHelps(exceptBtn) {
+        document.querySelectorAll(".help-btn").forEach((btn) => {
+          if (btn === exceptBtn) return;
+          btn.setAttribute("aria-expanded", "false");
+          const pop = document.getElementById(btn.getAttribute("aria-controls"));
+          if (pop) pop.hidden = true;
+        });
+      }
+      document.querySelectorAll(".help-btn").forEach((btn) => {
+        btn.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const pop = document.getElementById(btn.getAttribute("aria-controls"));
+          if (!pop) return;
+          const opening = pop.hidden;
+          closeHelps(btn);
+          pop.hidden = !opening;
+          btn.setAttribute("aria-expanded", opening ? "true" : "false");
+        });
+      });
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".help-pop")) closeHelps(null);
+      });
+      // Clicks inside the preview iframe never reach this document;
+      // they do blur the window, which stands in for them here.
+      window.addEventListener("blur", () => closeHelps(null));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeHelps(null);
       });
 
       // ------------------------------------------------------------ fonts --
@@ -1432,6 +1599,10 @@
       function collectFormState() {
         return {
           celebrantName: $("celebrantName").value,
+          occasion: selectedOccasion(),
+          titleEyebrow: $("titleEyebrow").value,
+          titleGreeting: $("titleGreeting").value,
+          closingEyebrow: $("closingEyebrow").value,
           titleDate: $("titleDate").value,
           titleDuration: $("titleDuration").value,
           titleEffect: $("titleEffect").value,
@@ -1452,6 +1623,7 @@
           cardTexts: textCardsState.map((c) => c.text),
           cardFroms: textCardsState.map((c) => c.from),
           cardPapers: textCardsState.map((c) => c.paper),
+          cardTitles: textCardsState.map((c) => c.title || ""),
           musicVolume: $("musicVolume").value,
           fontName: $("fontName").value,
           fontHeadings: $("fontHeadings").value,
@@ -1466,6 +1638,7 @@
           textFxOutlineWidth: $("textFxOutlineWidth").value,
           background: $("backgroundValue").value,
           messageTexts: messagesState.map((m) => m.text),
+          messageTitles: messagesState.map((m) => m.title || ""),
           messageSigners: messagesState.map((m) => m.signedBy),
           messageDurations: messagesState.map((m) => String(m.duration)),
           messagePapers: messagesState.map((m) => m.paper),
@@ -1495,6 +1668,10 @@
         const s = collectFormState();
         const form = new FormData();
         form.append("celebrantName", s.celebrantName.trim());
+        form.append("occasion", s.occasion);
+        form.append("titleEyebrow", s.titleEyebrow.trim());
+        form.append("titleGreeting", s.titleGreeting.trim());
+        form.append("closingEyebrow", s.closingEyebrow.trim());
         form.append("titleDate", s.titleDate.trim());
         form.append("titleDuration", s.titleDuration);
         form.append("titleEffect", s.titleEffect);
@@ -1516,6 +1693,7 @@
           form.append("cardTexts", s.cardTexts[i]);
           form.append("cardFroms", s.cardFroms[i]);
           form.append("cardPapers", s.cardPapers[i]);
+          form.append("cardTitles", s.cardTitles[i]);
         }
         if (withMusic && musicFile) form.append("music", musicFile, musicFile.name);
         form.append("musicVolume", s.musicVolume);
@@ -1533,6 +1711,7 @@
         form.append("background", s.background);
         for (let i = 0; i < s.messageTexts.length; i++) {
           form.append("messageTexts", s.messageTexts[i]);
+          form.append("messageTitles", s.messageTitles[i]);
           form.append("messageSigners", s.messageSigners[i]);
           form.append("messageDurations", s.messageDurations[i]);
           form.append("messagePapers", s.messagePapers[i]);
@@ -1818,13 +1997,15 @@
           texts.push(String(f.message1Text ?? ""), String(f.message2Text ?? ""));
           signers.push(String(f.message1SignedBy ?? ""), String(f.message2SignedBy ?? ""));
         }
+        const titles = Array.isArray(f.messageTitles) ? f.messageTitles.map((v) => String(v ?? "")) : [];
         const durations = Array.isArray(f.messageDurations) ? f.messageDurations : [];
         const papers = Array.isArray(f.messagePapers) ? f.messagePapers : [];
         const effects = Array.isArray(f.messageEffects) ? f.messageEffects : [];
-        const count = Math.min(MAX_MESSAGES, Math.max(texts.length, signers.length, durations.length));
+        const count = Math.min(MAX_MESSAGES, Math.max(texts.length, signers.length, durations.length, titles.length));
         const out = [];
         for (let i = 0; i < count; i++) {
           out.push({
+            title: titles[i] ?? "",
             text: texts[i] ?? "",
             signedBy: signers[i] ?? "",
             duration: clampMessageDuration(durations[i]),
@@ -1832,7 +2013,7 @@
             effect: effectOrNone(String(effects[i] ?? "")),
           });
         }
-        if (!out.length) out.push({ text: "", signedBy: "", duration: 6, paper: "classic", effect: "none" });
+        if (!out.length) out.push({ title: "", text: "", signedBy: "", duration: 6, paper: "classic", effect: "none" });
         return out;
       }
 
@@ -1840,16 +2021,18 @@
         const texts = Array.isArray(f.cardTexts) ? f.cardTexts.map((v) => String(v ?? "")) : [];
         const froms = Array.isArray(f.cardFroms) ? f.cardFroms.map((v) => String(v ?? "")) : [];
         const papers = Array.isArray(f.cardPapers) ? f.cardPapers.map((v) => String(v ?? "")) : [];
-        const count = Math.min(MAX_TEXT_CARDS, Math.max(texts.length, froms.length, papers.length));
+        const titles = Array.isArray(f.cardTitles) ? f.cardTitles.map((v) => String(v ?? "")) : [];
+        const count = Math.min(MAX_TEXT_CARDS, Math.max(texts.length, froms.length, papers.length, titles.length));
         const out = [];
         for (let i = 0; i < count; i++) {
           out.push({
+            title: titles[i] ?? "",
             text: texts[i] ?? "",
             from: froms[i] ?? "",
             paper: paperOrClassic(String(papers[i] ?? "")),
           });
         }
-        if (!out.length) out.push({ text: "", from: "", paper: "classic" });
+        if (!out.length) out.push({ title: "", text: "", from: "", paper: "classic" });
         return out;
       }
 
@@ -1863,6 +2046,20 @@
           if (v !== undefined && v !== null) $(id).value = String(v);
         };
         setVal("celebrantName", f.celebrantName);
+        // The custom title and closing lines default to blank when a
+        // project predates them, so a stray line from whatever was on
+        // screen before never rides into an older project.
+        setVal("titleEyebrow", f.titleEyebrow ?? "");
+        setVal("titleGreeting", f.titleGreeting ?? "");
+        setVal("closingEyebrow", f.closingEyebrow ?? "");
+        // Restore the Templates pick the project was saved with; only
+        // an enabled template can be selected, anything else keeps the
+        // current pick. Old projects carry no occasion at all.
+        if (f.occasion) {
+          const radio = document.querySelector('input[name="eventType"][value="' + f.occasion + '"]');
+          if (radio && !radio.disabled) radio.checked = true;
+        }
+        syncAutoLineHints();
         setVal("titleDate", f.titleDate);
         setVal("titleDuration", f.titleDuration);
         setVal("titleEffect", f.titleEffect);

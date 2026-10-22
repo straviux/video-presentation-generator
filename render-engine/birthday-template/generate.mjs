@@ -57,6 +57,13 @@ const CLOSING_PAPER = pickPaper(config.closingPaper ?? config.closing?.paper);
 const TITLE_DATE = String(config.titleDate ?? "").trim();
 // The closing eyebrow greets the celebrant by first name only.
 const FIRST_NAME = String(config.celebrantName ?? "").trim().split(/\s+/)[0] || "";
+// Optional custom lines for the title card eyebrow and greeting and
+// the closing card eyebrow. Blank (the default, and what older configs
+// carry) keeps the automatic text built from the occasion, so a config
+// that never sets them renders exactly as before.
+const TITLE_EYEBROW = String(config.titleEyebrow ?? "").trim();
+const TITLE_GREETING = String(config.titleGreeting ?? "").trim();
+const CLOSING_EYEBROW = String(config.closingEyebrow ?? "").trim();
 
 // ------------------------------------------------------------ card effects --
 // Optional animated assets layered over a card scene: confetti, sparkles,
@@ -74,7 +81,7 @@ const CLOSING_EFFECT = pickEffect(config.closingEffect);
 // ------------------------------------------------------- collage content ---
 // The two collages are separate scenes. collage.photo builds polaroids from
 // collage.photo.photoIndexes; collage.text builds greeting cards from
-// collage.text.cards instead: up to 4 { text, from } entries, and cards
+// collage.text.cards instead: up to 6 { title, text, from } entries, and cards
 // with blank text are skipped. Each scene has its own heading. (The older
 // flat fields, collage.heading / collage.photoIndexes / collage.cards, are
 // still read when the nested objects are absent.)
@@ -92,6 +99,7 @@ const TEXT_CARDS = (Array.isArray(textCfg.cards)
   : (Array.isArray(rawCollage.cards) ? rawCollage.cards : []))
   .slice(0, 6)
   .map((card) => ({
+    title: String((card && card.title) ?? "").trim(),
     text: String((card && card.text) ?? "").trim(),
     from: String((card && card.from) ?? "").trim(),
     paper: pickPaper(card && card.paper),
@@ -178,6 +186,7 @@ const CLOSING_BOTTOM_PHOTOS = sanitizeStripIndexes(config.closingBottomPhotos);
 
 // -------------------------------------------------- per-message setup ----
 const MESSAGES = config.messages.map((message) => ({
+  title: String(message.title ?? "").trim(),
   text: message.text,
   signedBy: message.signedBy,
   duration: clampNum(message.duration, 6, 4, 15),
@@ -565,7 +574,7 @@ function buildTextFxCss() {
   const fx = TEXTFX;
   if (!fx.shadow.on && !fx.glow.on && !fx.outline.on) return "";
   const bgSelectors = [".name-line", "#title-eyebrow", "#title-greeting", ".collage-heading"];
-  const paperSelectors = [".scrap-eyebrow", ".closing-line", ".greet-from"];
+  const paperSelectors = [".scrap-eyebrow", ".closing-line", ".greet-from", ".msg-title", ".greet-title"];
   if (fx.scope === "all") {
     bgSelectors.push(".caption-bar");
     paperSelectors.push(
@@ -619,7 +628,7 @@ const TEXT_FX_CSS = buildTextFxCss();
 
 // ------------------------------------------------------------ title card ---
 function buildTitle(s) {
-  const titleLine1 = wordSpans(`Happy ${config.occasion},`);
+  const titleLine1 = wordSpans(TITLE_GREETING || `Happy ${config.occasion},`);
   const nameParts = splitName(config.celebrantName);
   const titleLine2 = `<span class="name-chunk" id="title-name-left">${esc(nameParts.left)}</span>${nameParts.sep}<span class="name-chunk" id="title-name-right">${esc(nameParts.right)}!</span>`;
   const nameLineClass = FONT_SLOTS.name.script ? "name-line name-script" : "name-line";
@@ -629,7 +638,7 @@ function buildTitle(s) {
       ${ORB_A}
       ${ORB_B}${fx.html}
       <div class="card-inner">
-        <div class="eyebrow" id="title-eyebrow">Happy ${esc(config.occasion)}</div>
+        <div class="eyebrow" id="title-eyebrow">${esc(TITLE_EYEBROW || `Happy ${config.occasion}`)}</div>
         <h1 class="big-title" id="title-name"><span id="title-greeting">${titleLine1}</span><br /><span class="${nameLineClass}">${titleLine2}</span></h1>
         <div class="rule" id="title-rule"></div>${TITLE_DATE ? `
         <div class="title-date" id="title-date">${esc(TITLE_DATE)}</div>` : ""}
@@ -785,7 +794,8 @@ function buildCollage(kind, s) {
   if (isText) {
     const cards = TEXT_CARDS
       .map((card, k) => `
-        <div class="greet-card paper-${card.paper}${card.paper === "folder" ? " paper-folder-sm" : ""}" id="greet-card-${k}">
+        <div class="greet-card paper-${card.paper}${card.paper === "folder" ? " paper-folder-sm" : ""}" id="greet-card-${k}">${card.title ? `
+          <p class="greet-title" id="greet-title-${k}">${esc(card.title)}</p>` : ""}
           <p class="greet-text">${esc(card.text)}</p>${card.from ? `
           <p class="greet-from" id="greet-from-${k}">${esc(card.from)}</p>` : ""}
         </div>`)
@@ -904,7 +914,8 @@ function buildMessages(blockStart) {
       ${ORB_A}${fx.html}
       <div class="msg-card paper-${message.paper}" id="msg-card-${i}">
         <div class="msg-tape"></div>
-        <div class="quote-mark" id="msg-quote-${i}">&ldquo;</div>
+        <div class="quote-mark" id="msg-quote-${i}">&ldquo;</div>${message.title ? `
+        <h3 class="msg-title" id="msg-title-${i}">${esc(message.title)}</h3>` : ""}
         <p class="msg-text" id="msg-text-${i}">${typewriterSpans(message.text)}</p>
         <p class="msg-sign" id="msg-sign-${i}">${esc(message.signedBy)}</p>
       </div>
@@ -919,6 +930,11 @@ function buildMessages(blockStart) {
     ] : []),
     `tl.fromTo("#msg-card-${i}", { opacity: 0, y: 66, scale: 0.97, rotationX: 6, transformPerspective: 1350 }, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.85, ease: "power3.out" }, ${s + 0.25});`,
     `tl.fromTo("#msg-quote-${i}", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)", transformOrigin: "50% 50%" }, ${s + 0.55});`,
+    ...(message.title ? [
+      // The title settles in with the quote mark pop, just before
+      // typing starts at 1s in; the typing window is unchanged.
+      `tl.fromTo("#msg-title-${i}", { opacity: 0, y: 21 }, { opacity: 1, y: 0, duration: 0.42, ease: "power2.out" }, ${s + 0.62});`,
+    ] : []),
     `tl.fromTo("#msg-text-${i} .tw-c", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05, ease: "none", stagger: ${typeStagger} }, ${s + typeStart});`,
     `tl.fromTo("#msg-sign-${i}", { opacity: 0, x: -27 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, ${s + typeEnd + 0.15});`,
     `tl.to("#scene-msg-${i}", { opacity: 0, duration: 0.5, ease: "power1.in" }, ${s + dur});`,
@@ -1006,7 +1022,7 @@ function buildClosing(s) {
       ${ORB_B}${fx.html}
       <div class="scrap-wrap" id="closing-card">
         <div class="scrap-card paper-${CLOSING_PAPER}">
-          <div class="eyebrow scrap-eyebrow" id="closing-eyebrow">Happy ${esc(config.occasion)}, ${esc(FIRST_NAME)}</div>
+          <div class="eyebrow scrap-eyebrow" id="closing-eyebrow">${esc(CLOSING_EYEBROW || `Happy ${config.occasion}, ${FIRST_NAME}`)}</div>
           <p class="closing-line" id="closing-line">${wordSpans(config.closingLine)}</p>
           <div class="rule scrap-rule" id="closing-rule"></div>
           <p class="closing-sign" id="closing-sign">${esc(config.closingSignOff)}</p>
@@ -1264,6 +1280,13 @@ ${TEXT_FX_CSS}
       .cards-3 .greet-text { font-size: 38px; }
       .cards-5 .greet-text { font-size: 38px; }
       .cards-6 .greet-text { font-size: 38px; }
+      /* Optional greeting card title: a card heading above the body
+         text in the headings slot, a step larger than the body. Only
+         emitted when the card sets a title. */
+      .greet-title { font-family: var(--font-headings); font-size: 46px; font-weight: 700; line-height: 1.25; color: var(--paper-ink, #22301f); margin-bottom: 14px; }
+      .cards-3 .greet-title { font-size: 42px; }
+      .cards-5 .greet-title { font-size: 42px; }
+      .cards-6 .greet-title { font-size: 42px; }
       .greet-from {
         font-family: var(--font-headings);
         font-size: 25.5px; letter-spacing: 0.07em; text-transform: uppercase;
@@ -1324,6 +1347,12 @@ ${TEXT_FX_CSS}
         box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
       }
       .quote-mark { font-family: var(--font-messages); font-size: 96px; line-height: 0.6; color: var(--paper-accent, #ac8a21); margin-bottom: 39px; }
+      /* Optional message card title in the headings slot, sitting
+         between the quote mark and the message text. Only emitted
+         when the card sets a title; the quote mark closes its gap
+         up a little when a title follows it. */
+      .quote-mark:has(+ .msg-title) { margin-bottom: 22px; }
+      .msg-title { font-family: var(--font-headings); font-size: 44px; font-weight: 700; line-height: 1.3; color: var(--paper-ink, #22301f); margin-bottom: 26px; }
       .msg-text { font-family: var(--font-messages); font-size: 46.5px; line-height: 1.5; color: var(--paper-ink, #22301f); }
       .msg-sign {
         font-family: var(--font-messages);

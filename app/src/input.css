@@ -48,6 +48,59 @@ select {
   line-height: 1.5;
 }
 
+/* Help buttons and popovers: each panel's explanatory text sits
+   behind a small ? button beside the heading or label it belongs
+   to. The popover is a plain block in the panel flow (never a
+   floating layer), so the scrolling panel can never clip it. The
+   toggle JS lives with the other panel wiring in index.html. */
+.help-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #9a9aa6;
+  cursor: pointer;
+}
+.help-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.help-btn:hover {
+  color: #7329d6;
+  background: #f1e8ff;
+}
+.help-btn[aria-expanded="true"] {
+  color: #7329d6;
+  background: #f1e8ff;
+}
+.field-label .help-btn {
+  vertical-align: -5px;
+  margin-left: 2px;
+}
+.help-pop {
+  background: #fff;
+  border: 1px solid #e3e3ea;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(20, 16, 40, 0.08);
+  padding: 10px 12px;
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #6b6b78;
+}
+.help-pop p {
+  margin: 0 0 8px;
+}
+.help-pop p:last-child {
+  margin-bottom: 0;
+}
+
 /* Scenes panel rows (built by JS): order controls for the middle blocks */
 .scene-row {
   display: flex;

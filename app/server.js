@@ -424,6 +424,10 @@ const PAPER_KEYS = [
   "crumpled", "folder", "asymmetrical", "felt", "specialty",
 ];
 const EFFECT_KEYS = ["none", "confetti", "sparkles", "hearts", "petals"];
+// Occasions the Templates panel can pick. Only the Birthday template
+// is enabled today; widening this list is what turns another template
+// on end to end (the auto lines and the download name follow it).
+const OCCASION_KEYS = ["Birthday"];
 
 function clampNumber(value, fallback, min, max) {
   const n = Number(value);
@@ -437,6 +441,21 @@ function parseForm(body, photoCount, { requirePhotos }) {
   const asArray = (v) => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
   const celebrantName = text(body.celebrantName);
   if (!celebrantName) return { error: "Please enter the celebrant name." };
+
+  // The occasion comes from the Templates panel pick; an unknown or
+  // missing value falls back to Birthday, the only enabled template.
+  const occasion = OCCASION_KEYS.includes(text(body.occasion))
+    ? text(body.occasion)
+    : "Birthday";
+
+  // Optional custom lines for the title card (eyebrow and greeting)
+  // and the closing card (eyebrow). Blank (the default) keeps the
+  // generator's automatic text; each is capped at 90 characters so a
+  // pasted paragraph cannot break the card layout.
+  const capLine = (v) => text(v).slice(0, 90);
+  const titleEyebrow = capLine(body.titleEyebrow);
+  const titleGreeting = capLine(body.titleGreeting);
+  const closingEyebrow = capLine(body.closingEyebrow);
   if (requirePhotos && photoCount === 0) {
     return { error: "Please add at least one photo." };
   }
@@ -458,17 +477,20 @@ function parseForm(body, photoCount, { requirePhotos }) {
   }
   const textCollageEnabled = text(body.textCollageEnabled) === "true";
 
-  // Text collage cards: pair the card texts with their signers and
-  // papers, cap at 6, and drop pairs where both are empty.
+  // Text collage cards: pair the card titles, texts, signers, and
+  // papers, cap at 6, and drop pairs where both text and signer are
+  // empty (the generator skips textless cards anyway).
   const cardTexts = asArray(body.cardTexts);
   const cardFroms = asArray(body.cardFroms);
   const cardPapers = asArray(body.cardPapers);
+  const cardTitles = asArray(body.cardTitles);
   const collageCards = [];
-  for (let i = 0; i < Math.min(6, Math.max(cardTexts.length, cardFroms.length)); i++) {
+  for (let i = 0; i < Math.min(6, Math.max(cardTexts.length, cardFroms.length, cardTitles.length)); i++) {
     const cardText = String(cardTexts[i] ?? "").trim();
     const cardFrom = String(cardFroms[i] ?? "").trim();
     if (cardText || cardFrom) {
       collageCards.push({
+        title: String(cardTitles[i] ?? "").trim().slice(0, 90),
         text: cardText,
         from: cardFrom,
         paper: PAPER_KEYS.includes(text(cardPapers[i])) ? text(cardPapers[i]) : "classic",
@@ -494,14 +516,15 @@ function parseForm(body, photoCount, { requirePhotos }) {
     ? text(body.background)
     : "deep-green";
 
-  // Messages: aligned arrays (texts, signers, durations, papers,
-  // effects), capped at 6 cards. The legacy message1Text /
+  // Messages: aligned arrays (titles, texts, signers, durations,
+  // papers, effects), capped at 6 cards. The legacy message1Text /
   // message2Text scalar fields are still accepted when no arrays were
   // sent, so an older payload keeps working. Blank texts are skipped;
   // the filled cards play in order.
   const messageDurations = asArray(body.messageDurations);
   const messagePapers = asArray(body.messagePapers);
   const messageEffects = asArray(body.messageEffects);
+  const messageTitles = asArray(body.messageTitles).map((v) => String(v ?? ""));
   let messageTexts = asArray(body.messageTexts).map((v) => String(v ?? ""));
   let messageSigners = asArray(body.messageSigners).map((v) => String(v ?? ""));
   if (
@@ -516,13 +539,14 @@ function parseForm(body, photoCount, { requirePhotos }) {
   }
   const messageSlots = Math.min(
     6,
-    Math.max(messageTexts.length, messageSigners.length, messageDurations.length),
+    Math.max(messageTexts.length, messageSigners.length, messageDurations.length, messageTitles.length),
   );
   const messages = [];
   for (let i = 0; i < messageSlots; i++) {
     const msgText = text(messageTexts[i]);
     if (msgText) {
       messages.push({
+        title: text(messageTitles[i]).slice(0, 90),
         text: msgText,
         signedBy: text(messageSigners[i]),
         duration: Math.round(clampNumber(messageDurations[i], 6, 4, 15)),
@@ -630,6 +654,10 @@ function parseForm(body, photoCount, { requirePhotos }) {
   return {
     values: {
       celebrantName,
+      occasion,
+      titleEyebrow,
+      titleGreeting,
+      closingEyebrow,
       captions,
       collageEnabled,
       collageIndexes,
@@ -699,7 +727,10 @@ function buildConfig(values) {
     fonts: values.fonts,
     textFx: values.textFx,
     messages: values.messages,
-    occasion: "Birthday",
+    occasion: values.occasion,
+    titleEyebrow: values.titleEyebrow,
+    titleGreeting: values.titleGreeting,
+    closingEyebrow: values.closingEyebrow,
     photos: [],
   };
 }
@@ -1145,6 +1176,7 @@ app.post(
           projectArray(body.messageTexts).length,
           projectArray(body.messageSigners).length,
           projectArray(body.messageDurations).length,
+          projectArray(body.messageTitles).length,
         ),
       );
       const savedCardCount = Math.min(
@@ -1153,6 +1185,7 @@ app.post(
           projectArray(body.cardTexts).length,
           projectArray(body.cardFroms).length,
           projectArray(body.cardPapers).length,
+          projectArray(body.cardTitles).length,
         ),
       );
 
@@ -1161,6 +1194,10 @@ app.post(
         savedAt: new Date().toISOString(),
         fields: {
           celebrantName: projectField(body.celebrantName),
+          occasion: projectField(body.occasion),
+          titleEyebrow: projectField(body.titleEyebrow),
+          titleGreeting: projectField(body.titleGreeting),
+          closingEyebrow: projectField(body.closingEyebrow),
           titleDuration: projectField(body.titleDuration),
           titleDate: projectField(body.titleDate),
           titleEffect: projectField(body.titleEffect),
@@ -1181,6 +1218,7 @@ app.post(
           cardTexts: projectArrayOf(body.cardTexts, savedCardCount),
           cardFroms: projectArrayOf(body.cardFroms, savedCardCount),
           cardPapers: projectArrayOf(body.cardPapers, savedCardCount),
+          cardTitles: projectArrayOf(body.cardTitles, savedCardCount),
           musicVolume: projectField(body.musicVolume),
           fontName: projectField(body.fontName),
           fontHeadings: projectField(body.fontHeadings),
@@ -1195,6 +1233,7 @@ app.post(
           textFxOutlineWidth: projectField(body.textFxOutlineWidth),
           background: projectField(body.background),
           messageTexts: projectArrayOf(body.messageTexts, savedMessageCount),
+          messageTitles: projectArrayOf(body.messageTitles, savedMessageCount),
           messageSigners: projectArrayOf(body.messageSigners, savedMessageCount),
           messageDurations: projectArrayOf(body.messageDurations, savedMessageCount),
           messagePapers: projectArrayOf(body.messagePapers, savedMessageCount),
@@ -1311,14 +1350,19 @@ app.get("/api/jobs/:id/download", (req, res) => {
   let base = "birthday-video";
   try {
     const cfg = JSON.parse(readFileSync(path.join(job.dir, "config.json"), "utf8"));
-    if (cfg.celebrantName) {
-      const firstName = String(cfg.celebrantName)
+    const slugify = (value) =>
+      String(value ?? "")
         .trim()
-        .split(/\s+/)[0]
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
-      if (firstName) base = `birthday-${firstName}`;
+    // The name follows the video's occasion (Birthday today), with the
+    // celebrant's first name when there is one.
+    const occasionSlug = slugify(cfg.occasion) || "birthday";
+    base = `${occasionSlug}-video`;
+    if (cfg.celebrantName) {
+      const firstName = slugify(String(cfg.celebrantName).split(/\s+/)[0]);
+      if (firstName) base = `${occasionSlug}-${firstName}`;
     }
   } catch {
     // keep the default file name
