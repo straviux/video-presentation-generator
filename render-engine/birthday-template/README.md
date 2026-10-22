@@ -149,11 +149,12 @@ full-bleed ones; the white layer covers the whole canvas.
 
 ## Paper styles
 
-Message cards and the closing card can each pick a paper with `paper`
-(on each `messages[]` entry, and `closingPaper` at the top level). Every
-paper stays light enough for the standard dark ink, except `folder`,
-whose deeper manila tone switches the card's text to a dark warm brown
-through the paper's own ink variables:
+Message cards, text collage cards, and the closing card can each pick
+a paper: `paper` on each `messages[]` entry, `paper` on each
+`collage.text.cards[]` entry, and `closingPaper` at the top level.
+Every paper stays light enough for the standard dark ink, except
+`folder`, whose deeper manila tone switches the card's text to a dark
+warm brown through the paper's own ink variables:
 
 - `classic` (default): the original warm cream gradient with grain.
 - `white`: clean near-white, minimal grain.
@@ -173,8 +174,22 @@ through the paper's own ink variables:
 - `specialty`: elegant ivory with a fine gold speckle and a thin double
   gold border inset, like formal stationery.
 
-Unknown keys fall back to `classic`. Text collage cards always use
-`classic`.
+Unknown keys fall back to `classic`. A folder greeting card in the
+text collage wears a smaller, scaled tab (a share of the card's width)
+instead of the fixed tab the big cards use.
+
+## Closing photo strips
+
+The closing scene can also show small framed copies of the montage
+photos in a strip above the scrap card, below it, or both.
+`closingTopPhotos` and `closingBottomPhotos` are lists of photo indexes
+(zero-based positions in the `photos` list); a photo may appear in both
+strips. Each strip holds up to 5 photos: the prints pop in one by one
+with gold accents between them (the top strip first, then the bottom
+strip once the card has landed), and each print sways gently for the
+rest of the scene. Out-of-range indexes are dropped and duplicates
+collapse. Both lists empty (the default) leaves the closing scene
+exactly as it was.
 
 ## Card effects
 
@@ -221,7 +236,8 @@ appear in the same video:
   unless `collage.photo.enabled` is set to `false`.
 - Text collage (`collage.text`): greeting cards from
   `collage.text.cards`, up to 4 entries of `{ "text": "...", "from":
-  "..." }`, under its own heading `collage.text.heading`. Four cards
+  "..." }`, each with an optional `paper` (see Paper styles), under
+  its own heading `collage.text.heading`. Four cards
   land in a 2x2 grid, 3 cards sit in one row, and 2 in a single centered
   row, building in one by one. Card text uses the `messages` font slot
   and the signer line the `headings` slot. Cards with blank text are
@@ -341,6 +357,9 @@ ffprobe renders/birthday-sample.mp4
    - `fonts`: one pick per text slot (`name`, `headings`, `captions`,
      `messages`) from the pool in the Fonts section above
    - `closingLine`, `closingSignOff`, `closingPaper`
+   - `closingTopPhotos`, `closingBottomPhotos`: optional photo indexes
+     for the small framed strips above and below the closing card (see
+     Closing photo strips); up to 5 per strip, empty means no strip
 3. Re-run `node generate.mjs`, then the render command above.
 4. The new MP4 lands wherever you point `-o`; rename it per person, for
    example `renders/birthday-juan.mp4`.

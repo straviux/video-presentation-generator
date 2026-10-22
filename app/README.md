@@ -53,7 +53,10 @@ no environment variables to set, on any platform.
    pink, Mint green, Sky blue, Crumpled, Folder, Asymmetrical, Felt,
    or Specialty. The title and closing cards can each
    also carry an optional animated Effect: Confetti, Sparkles, Hearts,
-   or Petals.
+   or Petals. The Closing card photos picker at the bottom of the tab
+   adds small framed copies of your photos in a strip above the
+   closing card, below it, or both (up to 5 per strip), chosen per
+   photo with the Top and Bottom chips.
 3. **Photos.** Add JPG, PNG, or WebP photos.
    - Photos play in the order shown. Use the Up and Down buttons to
      reorder, Remove to drop one.
@@ -103,7 +106,8 @@ no environment variables to set, on any platform.
    be in the same video. The photo collage shows the 3 ticked photos as
    polaroids under its own heading. The text collage shows up to 4 short
    greeting cards under its own heading instead; write at least 2 cards
-   with text. Each scene runs 6 seconds by default and has its own
+   with text, and pick each card's paper under the card, from the same
+   eleven papers as the message cards. Each scene runs 6 seconds by default and has its own
    length setting, its own switch, and its own optional Effect.
 8. **Scenes.** In the Scenes tab, drag the middle scenes into the order
    you want with the Up and Down buttons: Photos, Photo collage, Text

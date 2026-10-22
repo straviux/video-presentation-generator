@@ -94,6 +94,7 @@ const TEXT_CARDS = (Array.isArray(textCfg.cards)
   .map((card) => ({
     text: String((card && card.text) ?? "").trim(),
     from: String((card && card.from) ?? "").trim(),
+    paper: pickPaper(card && card.paper),
   }))
   .filter((card) => card.text !== "");
 
@@ -154,6 +155,26 @@ const PHOTO_OFFSETS = [];
     acc += photo.duration;
   }
 }
+
+// ------------------------------------------------- closing photo strips --
+// Optional small framed photos in a strip above the closing card and/or
+// below it, picked per photo: config.closingTopPhotos and
+// config.closingBottomPhotos are lists of photo indexes (a photo may
+// sit in both strips). Out-of-range indexes drop, duplicates collapse,
+// and each strip caps at 5 photos. Both empty (the default) leaves the
+// closing scene exactly as it was.
+function sanitizeStripIndexes(value) {
+  if (!Array.isArray(value)) return [];
+  const out = [];
+  for (const v of value) {
+    const n = Number(v);
+    if (Number.isInteger(n) && n >= 0 && n < PHOTOS.length && !out.includes(n)) out.push(n);
+    if (out.length >= 5) break;
+  }
+  return out;
+}
+const CLOSING_TOP_PHOTOS = sanitizeStripIndexes(config.closingTopPhotos);
+const CLOSING_BOTTOM_PHOTOS = sanitizeStripIndexes(config.closingBottomPhotos);
 
 // -------------------------------------------------- per-message setup ----
 const MESSAGES = config.messages.map((message) => ({
@@ -764,7 +785,7 @@ function buildCollage(kind, s) {
   if (isText) {
     const cards = TEXT_CARDS
       .map((card, k) => `
-        <div class="greet-card" id="greet-card-${k}">
+        <div class="greet-card paper-${card.paper}${card.paper === "folder" ? " paper-folder-sm" : ""}" id="greet-card-${k}">
           <p class="greet-text">${esc(card.text)}</p>${card.from ? `
           <p class="greet-from" id="greet-from-${k}">${esc(card.from)}</p>` : ""}
         </div>`)
@@ -903,8 +924,77 @@ function buildMessages(blockStart) {
   });
 }
 
+// One closing photo strip ("top" or "bottom"): a centered row of small
+// framed prints with gold accents between them, built like the collage
+// (prints pop in one by one with a rotation settle, accents pop after
+// the print before them), then each print sways gently for the rest of
+// the scene. The sway rides on an inner span so it never fights the
+// pop tween on the frame, and it runs in finite yoyo legs that end
+// before the scene does, so the timeline stays deterministic and
+// bounded at any closing duration. popStart is when the first print
+// lands: the top strip starts at 0.35s, the bottom strip at 1.6s,
+// after the card has landed. Frame geometry: the image area is capped
+// at 284px wide and 0.72 as tall as it is wide, and shrinks as the
+// strip fills, so five prints plus accents and gaps fit a 1680px row
+// budget and the frame stays at most 226px tall. The strips are
+// emitted after the scrap card in the closing scene, so they paint
+// above it: the card's tape tips, which rise into the top band at the
+// corners, pass behind the outer prints instead of crossing them.
+function buildClosingStrip(which, indexes, s, popStart) {
+  const n = indexes.length;
+  if (n === 0) return { html: "", tweens: [] };
+  const GAP = 30;
+  const ACCENT_W = 30;
+  const FRAME_PAD = 11;
+  const ROW_BUDGET = 1680;
+  const imgW = Math.min(
+    284,
+    Math.floor((ROW_BUDGET - (2 * n - 2) * GAP - (n - 1) * ACCENT_W - n * FRAME_PAD * 2) / n),
+  );
+  const imgH = Math.round(imgW * 0.72);
+  const rotations = [-3, 2.5, -2, 3, -2.5];
+  const shapes = [ACCENT_HEART, ACCENT_STAR, ACCENT_DOT];
+  const parts = [];
+  const tweens = [];
+  // The sway starts once the whole strip has been built.
+  const swayStart = popStart + (n - 1) * 0.18 + 0.65;
+  const swayLeg = 1.15;
+  const swayLegs = Math.floor((CLOSING_DUR - swayStart) / swayLeg);
+  indexes.forEach((photoIndex, k) => {
+    const rot = rotations[k % rotations.length];
+    const popAt = Number((s + popStart + k * 0.18).toFixed(3));
+    parts.push(`
+        <figure class="strip-photo" id="closing-${which}-${k}" style="width: ${imgW + FRAME_PAD * 2}px">
+          <span class="strip-sway" id="closing-${which}-sway-${k}"><img src="${esc(PHOTOS[photoIndex].file)}" alt="" style="width: ${imgW}px; height: ${imgH}px" /></span>
+        </figure>`);
+    tweens.push(
+      `tl.fromTo("#closing-${which}-${k}", { opacity: 0, scale: 0.5, y: 26, rotation: ${rot - 11} }, { opacity: 1, scale: 1, y: 0, rotation: ${rot}, duration: 0.55, ease: "back.out(1.7)" }, ${popAt});`,
+    );
+    if (k < n - 1) {
+      parts.push(`
+        <span class="strip-accent" id="closing-${which}-accent-${k}" style="width: ${ACCENT_W}px; height: ${ACCENT_W}px">${shapes[k % shapes.length]}</span>`);
+      tweens.push(
+        `tl.fromTo("#closing-${which}-accent-${k}", { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2)" }, ${Number((popAt + 0.3).toFixed(3))});`,
+      );
+    }
+    if (swayLegs >= 2) {
+      tweens.push(
+        `tl.fromTo("#closing-${which}-sway-${k}", { rotation: -1.1 }, { rotation: 1.1, duration: ${swayLeg}, ease: "sine.inOut", yoyo: true, repeat: ${swayLegs - 1}, transformOrigin: "50% 12%" }, ${Number((s + swayStart).toFixed(3))});`,
+      );
+    }
+  });
+  return {
+    html: `
+      <div class="closing-strip closing-strip-${which}">${parts.join("")}
+      </div>`,
+    tweens,
+  };
+}
+
 function buildClosing(s) {
   const fx = buildEffect(CLOSING_EFFECT, "fx-closing", s, CLOSING_DUR);
+  const topStrip = buildClosingStrip("top", CLOSING_TOP_PHOTOS, s, 0.35);
+  const bottomStrip = buildClosingStrip("bottom", CLOSING_BOTTOM_PHOTOS, s, 1.6);
   scenes.push(`
     <section class="clip scene scene-card" id="scene-closing" style="opacity: 0" data-start="${s}" data-duration="${CLOSING_DUR}" data-track-index="${nextTrack()}">
       ${ORB_A}
@@ -918,13 +1008,15 @@ function buildClosing(s) {
         </div>
         <div class="tape tape-left" id="tape-left"></div>
         <div class="tape tape-right" id="tape-right"></div>
-      </div>
+      </div>${topStrip.html}${bottomStrip.html}
     </section>`);
   sceneMeta.push({ key: "closing", label: "Closing card", start: s, duration: CLOSING_DUR });
 
   timeline.push(
     `tl.fromTo("#scene-closing", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, ${s});`,
     ...fx.tweens,
+    ...topStrip.tweens,
+    ...bottomStrip.tweens,
     ...(ORBS_ANIMATED ? [
       `tl.fromTo("#scene-closing .orb-a", { x: 0, y: 0 }, { x: -45, y: 30, duration: ${CLOSING_DUR}, ease: "sine.inOut" }, ${s});`,
       `tl.fromTo("#scene-closing .orb-b", { x: 0, y: 0 }, { x: 36, y: -24, duration: ${CLOSING_DUR}, ease: "sine.inOut" }, ${s});`,
@@ -1160,12 +1252,12 @@ ${TEXT_FX_CSS}
       .cards-2 .greet-card { width: 640px; }
       .cards-3 .greet-card { width: 528px; }
       .cards-4 .greet-card { width: 620px; }
-      .greet-text { font-family: var(--font-messages); font-size: 42px; line-height: 1.4; color: #22301f; }
+      .greet-text { font-family: var(--font-messages); font-size: 42px; line-height: 1.4; color: var(--paper-ink, #22301f); }
       .cards-3 .greet-text { font-size: 38px; }
       .greet-from {
         font-family: var(--font-headings);
         font-size: 25.5px; letter-spacing: 0.07em; text-transform: uppercase;
-        color: #9a7b1c; margin-top: 24px;
+        color: var(--paper-ink-soft, #9a7b1c); margin-top: 24px;
       }
       /* Paper styles for the message and closing cards: the shared grain
          layer plus a light gradient, one class per registry key. */
@@ -1255,6 +1347,31 @@ ${TEXT_FX_CSS}
       }
       .tape-left { left: 46px; }
       .tape-right { right: 46px; }
+      /* Closing photo strips: rows of small framed prints above and
+         below the scrap card, in the free bands at the scene edges.
+         Frame sizes are computed per strip in buildClosingStrip (the
+         image area is capped at 284px wide and shrinks as the strip
+         fills), so a strip stays inside its band: the top strip lives
+         in roughly the first 240px of the scene, the bottom strip in
+         the last 240px, clear of the centered card and its tape. */
+      .closing-strip {
+        position: absolute; left: 0; right: 0;
+        display: flex; justify-content: center; align-items: center; gap: 30px;
+        pointer-events: none;
+      }
+      .closing-strip-top { top: 14px; }
+      .closing-strip-bottom { bottom: 14px; }
+      .strip-photo {
+        flex: none;
+        background: #fdfcf8;
+        padding: 11px;
+        box-shadow: 0 22px 44px rgba(0, 0, 0, 0.42);
+        line-height: 0;
+      }
+      .strip-sway { display: block; }
+      .strip-photo img { display: block; object-fit: cover; }
+      .strip-accent { flex: none; align-self: center; color: var(--accent); }
+      .strip-accent svg { display: block; width: 100%; height: 100%; }
       /* Paper extras that need the card rules above to be in place.
          Folder: a raised tab standing proud of the top edge, riding
          behind the card face. The tab is deliberately lighter than the
@@ -1276,6 +1393,25 @@ ${TEXT_FX_CSS}
         box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.55), 0 -4px 10px rgba(24, 14, 2, 0.25);
       }
       .scrap-wrap:has(> .scrap-card.paper-folder)::before { left: 330px; }
+      /* Text collage cards are much smaller than the message and
+         closing cards, so a folder greeting card wears a scaled tab:
+         its width is a share of the card (38%, capped at 220px)
+         instead of the fixed 360px tab the big cards use. The
+         paper-folder-sm class rides along with paper-folder on
+         greeting cards only. */
+      .greet-card.paper-folder { border: 1px solid rgba(96, 64, 18, 0.45); }
+      .paper-folder-sm { position: relative; }
+      .paper-folder-sm::before {
+        content: ""; position: absolute; z-index: -1;
+        top: -21px; left: 9%; width: 38%; max-width: 220px; height: 30px;
+        border-radius: 10px 12px 0 0;
+        background: linear-gradient(180deg, #f6d78f 0%, #ecbe6e 100%);
+        border: 1px solid rgba(96, 64, 18, 0.55); border-bottom: none;
+        box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.55), 0 -4px 8px rgba(24, 14, 2, 0.25);
+      }
+      /* A specialty greeting card keeps its own drop shadow alongside
+         the gold inset rules the shared paper class draws. */
+      .greet-card.paper-specialty { box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 3.5px rgba(160, 118, 26, 0.8), inset 0 0 0 10px rgba(253, 250, 241, 0.9), inset 0 0 0 13.5px rgba(160, 118, 26, 0.6); }
       /* Specialty: the double gold border inset, two visible gold rules
          with an ivory gap between them (about 3.5px and 13.5px in from
          the edge). The message card needs its outer shadow restated

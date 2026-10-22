@@ -134,6 +134,10 @@
             <option value="hearts">Hearts</option>
             <option value="petals">Petals</option>
           </select>
+          <label class="field-label">Closing card photos</label>
+          <p class="m-0 mb-1 text-muted text-[12.5px] leading-normal">Small framed copies of your photos can sit in a strip above the closing card, below it, or both. They appear one by one when the closing card plays. Tick Top or Bottom for each photo; a photo can be in both strips.</p>
+          <div id="closingPhotoPicker"></div>
+          <p class="m-0 mt-1.5 text-muted text-[12px] leading-normal">Up to 5 photos per strip.</p>
         </section>
 
         <section class="panel p-[18px]" id="panelPhotos">
@@ -267,27 +271,83 @@
             <option value="petals">Petals</option>
           </select>
           <div id="collageTextArea">
-            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped. The Generate button under each card writes a short line for you, in the tone picked in the Messages tab; signers are left as they are.</p>
+            <p class="m-0 mt-3 text-muted text-[12.5px] leading-normal">Up to 4 greeting cards, shown one by one in the text collage scene. Cards with blank text are skipped. Each card can wear its own paper, picked under the card. The Generate button under each card writes a short line for you, in the tone picked in the Messages tab; signers are left as they are.</p>
             <label class="field-label" for="cardText1">Card 1</label>
             <input type="text" class="field-input" id="cardText1" value="Happiest birthday! Your kindness keeps this whole office going." />
             <label class="field-label" for="cardFrom1">Signed by</label>
             <input type="text" class="field-input" id="cardFrom1" value="The Programs Team" />
             <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="1">Generate</button></div>
+            <label class="field-label" for="cardPaper1">Card 1 paper</label>
+            <select class="field-input" id="cardPaper1">
+              <option value="classic" selected>Classic cream</option>
+              <option value="white">Clean white</option>
+              <option value="kraft">Kraft tan</option>
+              <option value="blush">Blush pink</option>
+              <option value="mint">Mint green</option>
+              <option value="sky">Sky blue</option>
+              <option value="crumpled">Crumpled</option>
+              <option value="folder">Folder</option>
+              <option value="asymmetrical">Asymmetrical</option>
+              <option value="felt">Felt</option>
+              <option value="specialty">Specialty</option>
+            </select>
             <label class="field-label" for="cardText2">Card 2</label>
             <input type="text" class="field-input" id="cardText2" value="Thank you for leading with patience and heart. Enjoy your day, you have earned it." />
             <label class="field-label" for="cardFrom2">Signed by</label>
             <input type="text" class="field-input" id="cardFrom2" value="The Finance Team" />
             <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="2">Generate</button></div>
+            <label class="field-label" for="cardPaper2">Card 2 paper</label>
+            <select class="field-input" id="cardPaper2">
+              <option value="classic" selected>Classic cream</option>
+              <option value="white">Clean white</option>
+              <option value="kraft">Kraft tan</option>
+              <option value="blush">Blush pink</option>
+              <option value="mint">Mint green</option>
+              <option value="sky">Sky blue</option>
+              <option value="crumpled">Crumpled</option>
+              <option value="folder">Folder</option>
+              <option value="asymmetrical">Asymmetrical</option>
+              <option value="felt">Felt</option>
+              <option value="specialty">Specialty</option>
+            </select>
             <label class="field-label" for="cardText3">Card 3</label>
             <input type="text" class="field-input" id="cardText3" value="Wishing you good health, good food, and zero paperwork today." />
             <label class="field-label" for="cardFrom3">Signed by</label>
             <input type="text" class="field-input" id="cardFrom3" value="The Field Team" />
             <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="3">Generate</button></div>
+            <label class="field-label" for="cardPaper3">Card 3 paper</label>
+            <select class="field-input" id="cardPaper3">
+              <option value="classic" selected>Classic cream</option>
+              <option value="white">Clean white</option>
+              <option value="kraft">Kraft tan</option>
+              <option value="blush">Blush pink</option>
+              <option value="mint">Mint green</option>
+              <option value="sky">Sky blue</option>
+              <option value="crumpled">Crumpled</option>
+              <option value="folder">Folder</option>
+              <option value="asymmetrical">Asymmetrical</option>
+              <option value="felt">Felt</option>
+              <option value="specialty">Specialty</option>
+            </select>
             <label class="field-label" for="cardText4">Card 4</label>
             <input type="text" class="field-input" id="cardText4" value="We are lucky to work with you. Happy birthday!" />
             <label class="field-label" for="cardFrom4">Signed by</label>
             <input type="text" class="field-input" id="cardFrom4" value="Everyone at YSE" />
             <div class="mt-1.5"><button type="button" class="mini-btn" data-smart-card="4">Generate</button></div>
+            <label class="field-label" for="cardPaper4">Card 4 paper</label>
+            <select class="field-input" id="cardPaper4">
+              <option value="classic" selected>Classic cream</option>
+              <option value="white">Clean white</option>
+              <option value="kraft">Kraft tan</option>
+              <option value="blush">Blush pink</option>
+              <option value="mint">Mint green</option>
+              <option value="sky">Sky blue</option>
+              <option value="crumpled">Crumpled</option>
+              <option value="folder">Folder</option>
+              <option value="asymmetrical">Asymmetrical</option>
+              <option value="felt">Felt</option>
+              <option value="specialty">Specialty</option>
+            </select>
             <p class="warn" id="collageTextWarn">The text collage needs at least 2 cards with text. Right now <span id="collageCardCount">0</span> cards have text.</p>
           </div>
         </section>
@@ -584,7 +644,7 @@
     </div>
     <script>
       const $ = (id) => document.getElementById(id);
-      const photos = []; // { file, url, caption, inCollage, duration, zoom, frame, focusX, focusY, brightness, saturation }
+      const photos = []; // { file, url, caption, inCollage, inClosingTop, inClosingBottom, duration, zoom, frame, focusX, focusY, brightness, saturation }
 
       // Genuine Lucide icon paths (lucide v1.61.0, ISC), inlined as SVG.
       const ICON_PATHS = {
@@ -873,7 +933,7 @@
           item.querySelector("img").src = p.url;
           const caption = item.querySelector(".caption");
           caption.value = p.caption;
-          caption.addEventListener("input", () => { p.caption = caption.value; markPreviewDirty(); });
+          caption.addEventListener("input", () => { p.caption = caption.value; markPreviewDirty(); renderClosingPhotoPicker(); });
           const box = item.querySelector(".collage-box");
           box.checked = p.inCollage;
           box.addEventListener("change", () => { p.inCollage = box.checked; refreshSummary(); });
@@ -933,12 +993,56 @@
           });
           list.appendChild(item);
         });
+        renderClosingPhotoPicker();
         refreshSummary();
+      }
+
+      // The closing photo picker in the Details tab: one row per
+      // uploaded photo with Top and Bottom toggle chips for the two
+      // closing card strips. It rebuilds whenever the photo list
+      // changes (renderPhotoList calls it), so rows always follow the
+      // current photo order and captions.
+      function renderClosingPhotoPicker() {
+        const box = $("closingPhotoPicker");
+        if (!box) return;
+        box.innerHTML = "";
+        if (!photos.length) {
+          const p = document.createElement("p");
+          p.className = "m-0 text-muted text-[12.5px] leading-normal";
+          p.textContent = "No photos yet. Add photos in the Photos tab, then choose the strips here.";
+          box.appendChild(p);
+          return;
+        }
+        photos.forEach((p, i) => {
+          const row = document.createElement("div");
+          row.className = "closing-photo-row";
+          const label = document.createElement("span");
+          label.className = "cp-label";
+          label.textContent = "Photo " + (i + 1) + (p.caption ? ": " + p.caption : "");
+          label.title = label.textContent;
+          const mkChip = (chipText, key) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "mini-btn strip-chip";
+            btn.textContent = chipText;
+            btn.setAttribute("aria-pressed", p[key] ? "true" : "false");
+            btn.addEventListener("click", () => {
+              p[key] = !p[key];
+              btn.setAttribute("aria-pressed", p[key] ? "true" : "false");
+              refreshSummary();
+            });
+            return btn;
+          };
+          row.appendChild(label);
+          row.appendChild(mkChip("Top", "inClosingTop"));
+          row.appendChild(mkChip("Bottom", "inClosingBottom"));
+          box.appendChild(row);
+        });
       }
 
       $("photoInput").addEventListener("change", (event) => {
         for (const file of event.target.files) {
-          photos.push({ file, url: URL.createObjectURL(file), caption: "", inCollage: false, duration: 5, zoom: 115, frame: "full", focusX: 50, focusY: 50, brightness: 100, saturation: 100 });
+          photos.push({ file, url: URL.createObjectURL(file), caption: "", inCollage: false, inClosingTop: false, inClosingBottom: false, duration: 5, zoom: 115, frame: "full", focusX: 50, focusY: 50, brightness: 100, saturation: 100 });
         }
         event.target.value = "";
         renderPhotoList();
@@ -952,7 +1056,8 @@
         "collageHeading", "textCollageHeading", "photoCollageDuration", "textCollageDuration",
         "photoCollageEffect", "textCollageEffect",
         "cardText1", "cardText2", "cardText3", "cardText4",
-        "cardFrom1", "cardFrom2", "cardFrom3", "cardFrom4"]) {
+        "cardFrom1", "cardFrom2", "cardFrom3", "cardFrom4",
+        "cardPaper1", "cardPaper2", "cardPaper3", "cardPaper4"]) {
         $(id).addEventListener("input", refreshSummary);
         $(id).addEventListener("change", refreshSummary);
       }
@@ -1198,6 +1303,7 @@
           sceneOrder: sceneOrderState.join(","),
           cardTexts: [1, 2, 3, 4].map((n) => $("cardText" + n).value),
           cardFroms: [1, 2, 3, 4].map((n) => $("cardFrom" + n).value),
+          cardPapers: [1, 2, 3, 4].map((n) => $("cardPaper" + n).value),
           musicVolume: $("musicVolume").value,
           fontName: $("fontName").value,
           fontHeadings: $("fontHeadings").value,
@@ -1222,6 +1328,8 @@
             name: p.file ? p.file.name : "",
             caption: p.caption || "",
             inCollage: Boolean(p.inCollage),
+            inClosingTop: Boolean(p.inClosingTop),
+            inClosingBottom: Boolean(p.inClosingBottom),
             duration: p.duration,
             zoom: p.zoom,
             focusX: p.focusX,
@@ -1261,6 +1369,7 @@
         for (const n of [1, 2, 3, 4]) {
           form.append("cardTexts", s.cardTexts[n - 1]);
           form.append("cardFroms", s.cardFroms[n - 1]);
+          form.append("cardPapers", s.cardPapers[n - 1]);
         }
         if (withMusic && musicFile) form.append("music", musicFile, musicFile.name);
         form.append("musicVolume", s.musicVolume);
@@ -1287,6 +1396,8 @@
           form.append("photos", p.file, p.file.name);
           form.append("captions", s.photos[i].caption);
           if (s.photos[i].inCollage) form.append("collageIndexes", String(i));
+          if (s.photos[i].inClosingTop) form.append("closingTopIndexes", String(i));
+          if (s.photos[i].inClosingBottom) form.append("closingBottomIndexes", String(i));
           form.append("photoDurations", String(s.photos[i].duration));
           form.append("photoZooms", String(s.photos[i].zoom));
           form.append("photoFocusX", String(s.photos[i].focusX));
@@ -1610,9 +1721,11 @@
         setVal("message2Effect", me[1]);
         const ct = f.cardTexts || [];
         const cf = f.cardFroms || [];
+        const cp = f.cardPapers || [];
         for (const n of [1, 2, 3, 4]) {
           setVal("cardText" + n, ct[n - 1]);
           setVal("cardFrom" + n, cf[n - 1]);
+          setVal("cardPaper" + n, cp[n - 1]);
         }
         if (f.background) {
           $("backgroundValue").value = f.background;
@@ -1644,6 +1757,8 @@
             url: URL.createObjectURL(file),
             caption: meta.caption || "",
             inCollage: Boolean(meta.inCollage),
+            inClosingTop: Boolean(meta.inClosingTop),
+            inClosingBottom: Boolean(meta.inClosingBottom),
             duration: meta.duration ?? 5,
             zoom: meta.zoom ?? 115,
             frame: meta.frame || "full",

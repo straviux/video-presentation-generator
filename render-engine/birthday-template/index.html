@@ -200,12 +200,12 @@
       .cards-2 .greet-card { width: 640px; }
       .cards-3 .greet-card { width: 528px; }
       .cards-4 .greet-card { width: 620px; }
-      .greet-text { font-family: var(--font-messages); font-size: 42px; line-height: 1.4; color: #22301f; }
+      .greet-text { font-family: var(--font-messages); font-size: 42px; line-height: 1.4; color: var(--paper-ink, #22301f); }
       .cards-3 .greet-text { font-size: 38px; }
       .greet-from {
         font-family: var(--font-headings);
         font-size: 25.5px; letter-spacing: 0.07em; text-transform: uppercase;
-        color: #9a7b1c; margin-top: 24px;
+        color: var(--paper-ink-soft, #9a7b1c); margin-top: 24px;
       }
       /* Paper styles for the message and closing cards: the shared grain
          layer plus a light gradient, one class per registry key. */
@@ -295,6 +295,31 @@
       }
       .tape-left { left: 46px; }
       .tape-right { right: 46px; }
+      /* Closing photo strips: rows of small framed prints above and
+         below the scrap card, in the free bands at the scene edges.
+         Frame sizes are computed per strip in buildClosingStrip (the
+         image area is capped at 284px wide and shrinks as the strip
+         fills), so a strip stays inside its band: the top strip lives
+         in roughly the first 240px of the scene, the bottom strip in
+         the last 240px, clear of the centered card and its tape. */
+      .closing-strip {
+        position: absolute; left: 0; right: 0;
+        display: flex; justify-content: center; align-items: center; gap: 30px;
+        pointer-events: none;
+      }
+      .closing-strip-top { top: 14px; }
+      .closing-strip-bottom { bottom: 14px; }
+      .strip-photo {
+        flex: none;
+        background: #fdfcf8;
+        padding: 11px;
+        box-shadow: 0 22px 44px rgba(0, 0, 0, 0.42);
+        line-height: 0;
+      }
+      .strip-sway { display: block; }
+      .strip-photo img { display: block; object-fit: cover; }
+      .strip-accent { flex: none; align-self: center; color: var(--accent); }
+      .strip-accent svg { display: block; width: 100%; height: 100%; }
       /* Paper extras that need the card rules above to be in place.
          Folder: a raised tab standing proud of the top edge, riding
          behind the card face. The tab is deliberately lighter than the
@@ -316,6 +341,25 @@
         box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.55), 0 -4px 10px rgba(24, 14, 2, 0.25);
       }
       .scrap-wrap:has(> .scrap-card.paper-folder)::before { left: 330px; }
+      /* Text collage cards are much smaller than the message and
+         closing cards, so a folder greeting card wears a scaled tab:
+         its width is a share of the card (38%, capped at 220px)
+         instead of the fixed 360px tab the big cards use. The
+         paper-folder-sm class rides along with paper-folder on
+         greeting cards only. */
+      .greet-card.paper-folder { border: 1px solid rgba(96, 64, 18, 0.45); }
+      .paper-folder-sm { position: relative; }
+      .paper-folder-sm::before {
+        content: ""; position: absolute; z-index: -1;
+        top: -21px; left: 9%; width: 38%; max-width: 220px; height: 30px;
+        border-radius: 10px 12px 0 0;
+        background: linear-gradient(180deg, #f6d78f 0%, #ecbe6e 100%);
+        border: 1px solid rgba(96, 64, 18, 0.55); border-bottom: none;
+        box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.55), 0 -4px 8px rgba(24, 14, 2, 0.25);
+      }
+      /* A specialty greeting card keeps its own drop shadow alongside
+         the gold inset rules the shared paper class draws. */
+      .greet-card.paper-specialty { box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 3.5px rgba(160, 118, 26, 0.8), inset 0 0 0 10px rgba(253, 250, 241, 0.9), inset 0 0 0 13.5px rgba(160, 118, 26, 0.6); }
       /* Specialty: the double gold border inset, two visible gold rules
          with an ivory gap between them (about 3.5px and 13.5px in from
          the edge). The message card needs its outer shadow restated

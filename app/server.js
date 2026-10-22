@@ -416,15 +416,22 @@ function parseForm(body, photoCount, { requirePhotos }) {
   }
   const textCollageEnabled = text(body.textCollageEnabled) === "true";
 
-  // Text collage cards: pair the card texts with their signers, cap at 4,
-  // and drop pairs where both are empty.
+  // Text collage cards: pair the card texts with their signers and
+  // papers, cap at 4, and drop pairs where both are empty.
   const cardTexts = asArray(body.cardTexts);
   const cardFroms = asArray(body.cardFroms);
+  const cardPapers = asArray(body.cardPapers);
   const collageCards = [];
   for (let i = 0; i < Math.min(4, Math.max(cardTexts.length, cardFroms.length)); i++) {
     const cardText = String(cardTexts[i] ?? "").trim();
     const cardFrom = String(cardFroms[i] ?? "").trim();
-    if (cardText || cardFrom) collageCards.push({ text: cardText, from: cardFrom });
+    if (cardText || cardFrom) {
+      collageCards.push({
+        text: cardText,
+        from: cardFrom,
+        paper: PAPER_KEYS.includes(text(cardPapers[i])) ? text(cardPapers[i]) : "classic",
+      });
+    }
   }
   if (textCollageEnabled && collageCards.filter((c) => c.text).length < 2) {
     return {
@@ -543,12 +550,31 @@ function parseForm(body, photoCount, { requirePhotos }) {
     if (!sceneOrder.includes(k)) sceneOrder.push(k);
   }
 
+  // Closing photo strips: photo indexes for the small framed rows
+  // above and below the closing card. Deliberately forgiving, unlike
+  // the collage rules: out-of-range indexes drop, duplicates collapse,
+  // and each strip caps at 5 photos, so a stale selection can never
+  // fail a render. Empty simply means no strip.
+  const stripIndexes = (v) => {
+    const out = [];
+    for (const raw of asArray(v)) {
+      const n = Number.parseInt(raw, 10);
+      if (Number.isInteger(n) && n >= 0 && n < photoCount && !out.includes(n)) out.push(n);
+      if (out.length >= 5) break;
+    }
+    return out;
+  };
+  const closingTopIndexes = stripIndexes(body.closingTopIndexes);
+  const closingBottomIndexes = stripIndexes(body.closingBottomIndexes);
+
   return {
     values: {
       celebrantName,
       captions,
       collageEnabled,
       collageIndexes,
+      closingTopIndexes,
+      closingBottomIndexes,
       collageHeading: text(body.collageHeading),
       textCollageEnabled,
       textCollageHeading: text(body.textCollageHeading),
@@ -591,6 +617,8 @@ function buildConfig(values) {
       values.closingLine || "Wishing you a year as warm and generous as you are.",
     closingPaper: values.closingPaper,
     closingSignOff: values.closingSignOff,
+    closingTopPhotos: values.closingTopIndexes,
+    closingBottomPhotos: values.closingBottomIndexes,
     collage: {
       photo: {
         enabled: values.collageEnabled,
@@ -958,6 +986,16 @@ app.post(
           .map((v) => Number.parseInt(v, 10))
           .filter((n) => Number.isInteger(n)),
       );
+      const closingTopSet = new Set(
+        projectArray(body.closingTopIndexes)
+          .map((v) => Number.parseInt(v, 10))
+          .filter((n) => Number.isInteger(n)),
+      );
+      const closingBottomSet = new Set(
+        projectArray(body.closingBottomIndexes)
+          .map((v) => Number.parseInt(v, 10))
+          .filter((n) => Number.isInteger(n)),
+      );
       const captions = projectArray(body.captions);
       const durations = projectArray(body.photoDurations);
       const zooms = projectArray(body.photoZooms);
@@ -978,6 +1016,8 @@ app.post(
             name: file.originalname || `photo-${i + 1}${ext}`,
             caption: String(captions[i] ?? ""),
             inCollage: collageSet.has(i),
+            inClosingTop: closingTopSet.has(i),
+            inClosingBottom: closingBottomSet.has(i),
             duration: Math.round(clampNumber(durations[i], 5, 2, 12)),
             zoom: clampNumber(zooms[i], 115, 100, 150),
             focusX: clampNumber(focusXs[i], 50, 0, 100),
@@ -1037,6 +1077,7 @@ app.post(
           sceneOrder: projectField(body.sceneOrder),
           cardTexts: projectArrayOf(body.cardTexts, 4),
           cardFroms: projectArrayOf(body.cardFroms, 4),
+          cardPapers: projectArrayOf(body.cardPapers, 4),
           musicVolume: projectField(body.musicVolume),
           fontName: projectField(body.fontName),
           fontHeadings: projectField(body.fontHeadings),
