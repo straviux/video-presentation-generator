@@ -888,8 +888,92 @@
         });
       }
 
+      // ------------------------------------------------- caption library --
+      // Ready-made captions for the photos, from GET /api/captions (the
+      // caption_lines table in the same SQLite database as the message
+      // library). Fetched once on load and cached. Each photo row's
+      // Captions button opens a small menu under its caption field,
+      // grouped by category; picking one fills the caption through the
+      // field's own input event, so the photo state, the preview dirty
+      // flag, and the closing picker snippets stay in sync. The menu is
+      // an expanding block inside the row (not a floating popup), so
+      // the scrolling panel can never clip it. If the library cannot
+      // be loaded, the Captions buttons switch off and typing captions
+      // by hand still works.
+      let captionLibrary = null; // { categories: { portrait: [{id, text}...], ... } }
+      let captionsAvailable = false;
+      let openCaptionMenu = null;
+      const CAPTION_CATEGORY_LABELS = [
+        ["portrait", "Portraits"],
+        ["group", "Group"],
+        ["candid", "Candid"],
+        ["celebration", "Celebration"],
+      ];
+
+      async function loadCaptions() {
+        try {
+          const resp = await fetch("/api/captions");
+          if (!resp.ok) throw new Error("The server refused the caption library.");
+          captionLibrary = await resp.json();
+          captionsAvailable = true;
+        } catch (err) {
+          captionLibrary = null;
+          captionsAvailable = false;
+        }
+        document.querySelectorAll(".caption-pick-btn").forEach((btn) => {
+          btn.disabled = !captionsAvailable;
+        });
+      }
+
+      function closeCaptionMenu() {
+        if (openCaptionMenu) {
+          openCaptionMenu.hidden = true;
+          openCaptionMenu = null;
+        }
+      }
+
+      function toggleCaptionMenu(menu, captionInput) {
+        if (openCaptionMenu === menu) { closeCaptionMenu(); return; }
+        closeCaptionMenu();
+        if (!captionLibrary) return;
+        menu.innerHTML = "";
+        for (const [key, label] of CAPTION_CATEGORY_LABELS) {
+          const lines = (captionLibrary.categories || {})[key] || [];
+          if (!lines.length) continue;
+          const heading = document.createElement("div");
+          heading.className = "caption-cat";
+          heading.textContent = label;
+          menu.appendChild(heading);
+          for (const line of lines) {
+            const opt = document.createElement("button");
+            opt.type = "button";
+            opt.className = "caption-option";
+            opt.textContent = line.text;
+            opt.addEventListener("click", () => {
+              captionInput.value = line.text;
+              captionInput.dispatchEvent(new Event("input", { bubbles: true }));
+              closeCaptionMenu();
+              captionInput.focus();
+            });
+            menu.appendChild(opt);
+          }
+        }
+        menu.hidden = false;
+        openCaptionMenu = menu;
+      }
+
+      document.addEventListener("click", (event) => {
+        if (!openCaptionMenu) return;
+        if (event.target.closest(".caption-menu") || event.target.closest(".caption-pick-btn")) return;
+        closeCaptionMenu();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeCaptionMenu();
+      });
+
       function renderPhotoList() {
         const list = $("photoList");
+        openCaptionMenu = null;
         list.innerHTML = "";
         photos.forEach((p, i) => {
           const item = document.createElement("div");
@@ -897,7 +981,11 @@
           item.innerHTML =
             "<img alt='' />" +
             "<div>" +
-              "<input type='text' class='caption' placeholder='Caption for this photo' />" +
+              "<div class='caption-row'>" +
+                "<input type='text' class='caption' placeholder='Caption for this photo' />" +
+                "<button type='button' class='mini-btn caption-pick-btn' title='Pick a caption'>" + svgIcon(ICON_PATHS.messageSquareText) + "Captions</button>" +
+              "</div>" +
+              "<div class='caption-menu' hidden></div>" +
               "<label class='collage-check'><input type='checkbox' class='collage-box' /> Include in the collage</label>" +
             "</div>" +
             "<div class='photo-actions'>" +
@@ -934,6 +1022,10 @@
           const caption = item.querySelector(".caption");
           caption.value = p.caption;
           caption.addEventListener("input", () => { p.caption = caption.value; markPreviewDirty(); renderClosingPhotoPicker(); });
+          const pickBtn = item.querySelector(".caption-pick-btn");
+          const captionMenu = item.querySelector(".caption-menu");
+          pickBtn.disabled = !captionsAvailable;
+          pickBtn.addEventListener("click", () => toggleCaptionMenu(captionMenu, caption));
           const box = item.querySelector(".collage-box");
           box.checked = p.inCollage;
           box.addEventListener("change", () => { p.inCollage = box.checked; refreshSummary(); });
@@ -1967,6 +2059,7 @@
       renderPhotoList();
       refreshProjectList();
       refreshLibrary();
+      loadCaptions();
     </script>
   </body>
 </html>

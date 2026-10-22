@@ -60,7 +60,10 @@ no environment variables to set, on any platform.
 3. **Photos.** Add JPG, PNG, or WebP photos.
    - Photos play in the order shown. Use the Up and Down buttons to
      reorder, Remove to drop one.
-   - Type a caption for each photo if you want one on screen.
+   - Type a caption for each photo if you want one on screen, or tap
+     the Captions button beside the field to pick a ready-made one
+     from the caption library (grouped into Portraits, Group, Candid,
+     and Celebration).
    - Every photo has its own controls under it: how long it stays
      (5 seconds by default), its Frame (Full bleed, Thin border,
      Polaroid, Rounded, or Gold frame), the Ken Burns Zoom, Brightness,
@@ -162,6 +165,11 @@ they never remove anything, so your own additions are safe. Manage the
 library in the Library tab: filter by tone and kind, add your own
 lines, and delete ones you no longer want. The composer uses a new line
 right away.
+
+The photo captions live in the same database, in their own
+`caption_lines` table, seeded from `app/lib/caption-banks.json` and
+topped up the same way; the Photos tab's Captions button picks from
+them.
 
 ## Where things land
 

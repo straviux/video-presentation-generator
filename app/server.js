@@ -70,6 +70,8 @@ mkdirSync(PROJECTS_DIR, { recursive: true });
 const DATA_DIR = path.join(APP_DIR, "data");
 const MESSAGE_DB_FILE = path.join(DATA_DIR, "messages.db");
 const MESSAGE_SEED_FILE = path.join(APP_DIR, "lib", "message-banks.json");
+const CAPTION_SEED_FILE = path.join(APP_DIR, "lib", "caption-banks.json");
+const CAPTION_CATEGORIES = ["portrait", "group", "candid", "celebration"];
 const MESSAGE_TONES = ["warm", "grateful", "playful", "formal"];
 const MESSAGE_KINDS = ["opener", "middle", "closer", "short", "closing"];
 const MESSAGE_GROUPS = [
@@ -93,6 +95,9 @@ try {
       ");" +
       "CREATE TABLE IF NOT EXISTS meta (" +
       "key TEXT PRIMARY KEY, value TEXT" +
+      ");" +
+      "CREATE TABLE IF NOT EXISTS caption_lines (" +
+      "id INTEGER PRIMARY KEY, category TEXT, text TEXT" +
       ");",
   );
   const countRow = messageDb
@@ -131,6 +136,43 @@ try {
           "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
       )
       .run(String(seedVersion));
+  }
+  // The photo caption library lives in the same database, in its own
+  // table, seeded from app/lib/caption-banks.json with the same
+  // discipline: a fresh table gets every seed caption, and a seed
+  // version bump only tops up the (category, text) pairs that are not
+  // already there. Its version is tracked under its own meta key.
+  const captionSeed = JSON.parse(readFileSync(CAPTION_SEED_FILE, "utf8"));
+  const captionSeedVersion = Number(captionSeed.version) || 1;
+  const captionCountRow = messageDb
+    .prepare("SELECT COUNT(*) AS n FROM caption_lines")
+    .get();
+  const captionVersionRow = messageDb
+    .prepare("SELECT value FROM meta WHERE key = 'captions_seeded_version'")
+    .get();
+  const storedCaptionVersion = captionVersionRow
+    ? Number(captionVersionRow.value) || 0
+    : 0;
+  if (Number(captionCountRow.n) === 0 || storedCaptionVersion < captionSeedVersion) {
+    const captionExistsStmt = messageDb.prepare(
+      "SELECT id FROM caption_lines WHERE category = ? AND text = ?",
+    );
+    const captionInsertStmt = messageDb.prepare(
+      "INSERT INTO caption_lines (category, text) VALUES (?, ?)",
+    );
+    for (const category of CAPTION_CATEGORIES) {
+      for (const text of (captionSeed.categories || {})[category] || []) {
+        if (typeof text !== "string" || !text) continue;
+        if (captionExistsStmt.get(category, text)) continue;
+        captionInsertStmt.run(category, text);
+      }
+    }
+    messageDb
+      .prepare(
+        "INSERT INTO meta (key, value) VALUES ('captions_seeded_version', ?) " +
+          "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+      )
+      .run(String(captionSeedVersion));
   }
 } catch (err) {
   messageDb = null;
@@ -918,6 +960,29 @@ app.delete("/api/message-bank/lines/:id", (req, res) => {
       return res.status(404).json({ error: "Library line not found." });
     }
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
+// --------------------------------------------------------- captions ------
+// The photo caption library, grouped by category for the caption
+// picker in the Photos panel. Same database as the message library.
+app.get("/api/captions", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "The caption library is not available." });
+  }
+  try {
+    const rows = messageDb
+      .prepare("SELECT id, category, text FROM caption_lines ORDER BY id")
+      .all();
+    const categories = {};
+    for (const category of CAPTION_CATEGORIES) categories[category] = [];
+    for (const row of rows) {
+      if (!categories[row.category]) continue;
+      categories[row.category].push({ id: row.id, text: row.text });
+    }
+    res.json({ categories });
   } catch (err) {
     res.status(500).json({ error: String(err && err.message ? err.message : err) });
   }
