@@ -298,10 +298,11 @@
       /* Closing photo strips: rows of small framed prints above and
          below the scrap card, in the free bands at the scene edges.
          Frame sizes are computed per strip in buildClosingStrip (the
-         image area is capped at 284px wide and shrinks as the strip
-         fills), so a strip stays inside its band: the top strip lives
-         in roughly the first 240px of the scene, the bottom strip in
-         the last 240px, clear of the centered card and its tape. */
+         fitted image width is scaled by STRIP_SCALE, 0.85, and shrinks
+         further as the strip fills), so a strip stays inside its band:
+         the top strip lives in roughly the first 215px of the scene,
+         the bottom strip in the last 215px, clear of the centered card
+         and its tape. */
       .closing-strip {
         position: absolute; left: 0; right: 0;
         display: flex; justify-content: center; align-items: center; gap: 30px;

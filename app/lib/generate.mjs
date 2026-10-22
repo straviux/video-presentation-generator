@@ -925,10 +925,11 @@ function buildMessages(blockStart) {
 // before the scene does, so the timeline stays deterministic and
 // bounded at any closing duration. popStart is when the first print
 // lands: the top strip starts at 0.35s, the bottom strip at 1.6s,
-// after the card has landed. Frame geometry: the image area is capped
-// at 284px wide and 0.72 as tall as it is wide, and shrinks as the
-// strip fills, so five prints plus accents and gaps fit a 1680px row
-// budget and the frame stays at most 226px tall. The strips are
+// after the card has landed. Frame geometry: the image area would fit
+// at up to 284px wide (0.72 as tall as it is wide, shrinking as the
+// strip fills so five prints plus accents and gaps fit a 1680px row
+// budget), and STRIP_SCALE then shrinks every print by about 15% from
+// that fit, so frames top out around 196px tall. The strips are
 // emitted after the scrap card in the closing scene, so they paint
 // above it: the card's tape tips, which rise into the top band at the
 // corners, pass behind the outer prints instead of crossing them.
@@ -939,10 +940,12 @@ function buildClosingStrip(which, indexes, s, popStart) {
   const ACCENT_W = 30;
   const FRAME_PAD = 11;
   const ROW_BUDGET = 1680;
-  const imgW = Math.min(
+  // Prints run about 15% smaller than the row-budget fit.
+  const STRIP_SCALE = 0.85;
+  const imgW = Math.round(STRIP_SCALE * Math.min(
     284,
     Math.floor((ROW_BUDGET - (2 * n - 2) * GAP - (n - 1) * ACCENT_W - n * FRAME_PAD * 2) / n),
-  );
+  ));
   const imgH = Math.round(imgW * 0.72);
   const rotations = [-3, 2.5, -2, 3, -2.5];
   const shapes = [ACCENT_HEART, ACCENT_STAR, ACCENT_DOT];
@@ -1342,10 +1345,11 @@ ${TEXT_FX_CSS}
       /* Closing photo strips: rows of small framed prints above and
          below the scrap card, in the free bands at the scene edges.
          Frame sizes are computed per strip in buildClosingStrip (the
-         image area is capped at 284px wide and shrinks as the strip
-         fills), so a strip stays inside its band: the top strip lives
-         in roughly the first 240px of the scene, the bottom strip in
-         the last 240px, clear of the centered card and its tape. */
+         fitted image width is scaled by STRIP_SCALE, 0.85, and shrinks
+         further as the strip fills), so a strip stays inside its band:
+         the top strip lives in roughly the first 215px of the scene,
+         the bottom strip in the last 215px, clear of the centered card
+         and its tape. */
       .closing-strip {
         position: absolute; left: 0; right: 0;
         display: flex; justify-content: center; align-items: center; gap: 30px;
