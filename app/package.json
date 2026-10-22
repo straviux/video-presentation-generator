@@ -8,7 +8,7 @@
   "name": "video-presentation-generator-app",
   "private": true,
   "scripts": {
-    "build:css": "tailwindcss -i ./src/input.css -o ./public/styles.css",
+    "build:css": "node scripts/build-css.mjs",
     "prestart": "npm run build:css",
     "start": "node server.js"
   },
