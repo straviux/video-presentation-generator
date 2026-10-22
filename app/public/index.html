@@ -932,12 +932,15 @@
           tile.appendChild(thumb);
           tile.appendChild(name);
           tile.appendChild(dur);
-          // One click does both jobs: select the scene (its settings
-          // gather in the Card panel, and the tile takes the selected
-          // ring) and seek the preview to it, as before.
+          // One click does all three jobs: select the scene (the tile
+          // takes the selected ring), open the Card panel with its
+          // settings, and seek the preview to it, as before.
           tile.addEventListener("click", () => {
             const sel = selectionFromSceneKey(tileData.key);
-            if (sel) selectScene(sel);
+            if (sel) {
+              selectScene(sel);
+              showPanel("panelInspector");
+            }
             seekPreview(i);
           });
           strip.appendChild(tile);
