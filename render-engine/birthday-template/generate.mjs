@@ -1355,16 +1355,16 @@ ${TEXT_FX_CSS}
          Frame sizes are computed per strip in buildClosingStrip (the
          fitted image width is scaled by STRIP_SCALE, 0.85, and shrinks
          further as the strip fills), so a strip stays inside its band:
-         the top strip lives in roughly the first 215px of the scene,
-         the bottom strip in the last 215px, clear of the centered card
-         and its tape. */
+         inset 38px from the scene edge, the top strip lives in roughly
+         the first 240px of the scene, the bottom strip in the last
+         240px, clear of the centered card and its tape. */
       .closing-strip {
         position: absolute; left: 0; right: 0;
         display: flex; justify-content: center; align-items: center; gap: 30px;
         pointer-events: none;
       }
-      .closing-strip-top { top: 14px; }
-      .closing-strip-bottom { bottom: 14px; }
+      .closing-strip-top { top: 38px; }
+      .closing-strip-bottom { bottom: 38px; }
       .strip-photo {
         flex: none;
         background: #fdfcf8;
