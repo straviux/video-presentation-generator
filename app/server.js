@@ -621,18 +621,36 @@ function parseForm(body, photoCount, { requirePhotos }) {
     messages: fontPick(body.fontMessages, "classic"),
   };
 
-  // Scene order for the four middle blocks, sanitized exactly like the
-  // generator does it: unknown keys dropped, duplicates removed, and
-  // blocks missing from the list appended in the default order.
-  const SCENE_ORDER_KEYS = ["photos", "photoCollage", "textCollage", "messages"];
+  // Scene sequence for the middle of the video: a list of individual
+  // card keys ("photo:<i>", "message:<i>", plus "photoCollage" and
+  // "textCollage" as units), sanitized exactly like the generator and
+  // the client do it: known keys with in-range indexes are kept in the
+  // given order, duplicates and stale keys drop, and any current item
+  // missing from the list is appended at the end in natural order
+  // (photos, then the collages, then messages). The pre-sequence block
+  // keys ("photos", "messages") expand to their items in place, so an
+  // older payload keeps its order. The message count here is the
+  // filled count, matching the config the generator will see.
+  const itemKeys = [];
+  for (let i = 0; i < photoCount; i++) itemKeys.push(`photo:${i}`);
+  itemKeys.push("photoCollage", "textCollage");
+  for (let i = 0; i < messages.length; i++) itemKeys.push(`message:${i}`);
+  const knownItems = new Set(itemKeys);
   const sceneOrder = [];
-  for (const key of text(body.sceneOrder).split(",")) {
-    const k = key.trim();
-    if (SCENE_ORDER_KEYS.includes(k) && !sceneOrder.includes(k)) sceneOrder.push(k);
+  const pushItem = (k) => {
+    if (knownItems.has(k) && !sceneOrder.includes(k)) sceneOrder.push(k);
+  };
+  for (const part of text(body.sceneOrder).split(",")) {
+    const k = part.trim();
+    if (k === "photos") {
+      for (let i = 0; i < photoCount; i++) pushItem(`photo:${i}`);
+    } else if (k === "messages") {
+      for (let i = 0; i < messages.length; i++) pushItem(`message:${i}`);
+    } else if (k) {
+      pushItem(k);
+    }
   }
-  for (const k of SCENE_ORDER_KEYS) {
-    if (!sceneOrder.includes(k)) sceneOrder.push(k);
-  }
+  for (const k of itemKeys) pushItem(k);
 
   // Closing photo strips: photo indexes for the small framed rows
   // above and below the closing card. Deliberately forgiving, unlike
