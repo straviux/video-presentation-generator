@@ -56,6 +56,10 @@
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="21" y1="6" y2="6"/><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
           Scenes
         </button>
+        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelInspector">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><path d="M16 10h2"/><path d="M16 14h2"/></svg>
+          Card
+        </button>
         <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelFonts">
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
           Fonts
@@ -291,6 +295,18 @@
           </div>
           <div id="sceneOrderList"></div>
           <input type="hidden" id="sceneOrder" value="photos,photoCollage,textCollage,messages" />
+        </section>
+
+        <section class="panel p-[18px]" id="panelInspector">
+          <div class="flex items-center gap-1.5 mb-1">
+            <h2 class="m-0 text-[15px] font-semibold" id="inspectorName">Title card</h2>
+            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpInspector" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          </div>
+          <p class="m-0 mb-3 text-[12.5px] text-muted leading-normal" id="inspectorSpan"></p>
+          <div class="help-pop" id="helpInspector" hidden>
+            <p>Everything for one card, gathered in one place. Pick a card in the filmstrip below the stage, in the Video summary, or in the Scenes list, and its words, timing, paper, and effects all show here. The other tabs keep the same settings grouped by kind, so use whichever view suits the job.</p>
+          </div>
+          <div id="inspectorBody"></div>
         </section>
 
         <section class="panel p-[18px]" id="panelFonts">
@@ -752,9 +768,9 @@
         const list = $("sceneOrderList");
         list.innerHTML = "";
         const lockSvg = "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>";
-        const lockedRow = (name, dur) => {
+        const lockedRow = (name, dur, sel) => {
           const row = document.createElement("div");
-          row.className = "scene-row locked";
+          row.className = "scene-row locked clickable";
           const label = document.createElement("span");
           label.className = "scene-row-name";
           label.textContent = name;
@@ -767,13 +783,24 @@
           row.appendChild(label);
           row.appendChild(d);
           row.appendChild(lock);
+          row.addEventListener("click", () => {
+            selectScene(sel);
+            showPanel("panelInspector");
+          });
           return row;
         };
-        list.appendChild(lockedRow("Title card", titleDur()));
+        list.appendChild(lockedRow("Title card", titleDur(), { kind: "title" }));
         sceneOrderState.forEach((key, i) => {
           const info = blockInfo(key);
           const row = document.createElement("div");
-          row.className = "scene-row";
+          row.className = "scene-row clickable";
+          row.addEventListener("click", (event) => {
+            // The Up / Down buttons keep their own job; a click on
+            // the row itself selects the block's card in the inspector.
+            if (event.target.closest("button")) return;
+            selectScene(selectionForBlock(key));
+            showPanel("panelInspector");
+          });
           const label = document.createElement("span");
           label.className = "scene-row-name";
           label.textContent = info.name;
@@ -815,7 +842,7 @@
           row.appendChild(down);
           list.appendChild(row);
         });
-        list.appendChild(lockedRow("Closing card", closingDur()));
+        list.appendChild(lockedRow("Closing card", closingDur(), { kind: "closing" }));
         $("sceneOrder").value = sceneOrderState.join(",");
       }
 
@@ -823,13 +850,30 @@
         markPreviewDirty();
         const scenes = computeScenes();
         let t = 0;
-        $("sceneList").innerHTML = scenes
-          .map((sc) => {
-            const label = fmt(t) + "  " + sc.name;
-            t += sc.dur;
-            return "<li><span>" + label + "</span><span class='dur'>" + sc.dur + "s</span></li>";
-          })
-          .join("");
+        // Summary rows are buttons for the inspector: a click selects
+        // the scene and opens the Card panel showing all its settings.
+        const sceneList = $("sceneList");
+        sceneList.innerHTML = "";
+        for (const sc of scenes) {
+          const li = document.createElement("li");
+          li.className = "scene-link";
+          const left = document.createElement("span");
+          left.textContent = fmt(t) + "  " + sc.name;
+          const right = document.createElement("span");
+          right.className = "dur";
+          right.textContent = sc.dur + "s";
+          li.appendChild(left);
+          li.appendChild(right);
+          li.addEventListener("click", () => {
+            const sel = selectionFromSceneKey(sc.key);
+            if (sel) {
+              selectScene(sel);
+              showPanel("panelInspector");
+            }
+          });
+          sceneList.appendChild(li);
+          t += sc.dur;
+        }
         $("totalRuntime").textContent = fmt(t);
         $("totalRuntimeTop").textContent = fmt(t);
         $("outputLength").textContent = fmt(t);
@@ -844,6 +888,7 @@
         $("generateBtn").disabled = bad || textBad || photos.length === 0;
         renderTimeline(currentTiles(scenes));
         renderScenesPanel();
+        syncInspectorDynamic();
       }
 
       // ------------------------------------------------------------ timeline --
@@ -862,6 +907,7 @@
           tile.type = "button";
           tile.className = "tl-tile";
           tile.dataset.sceneIndex = i;
+          tile.dataset.sceneKey = tileData.key || "";
           const thumb = document.createElement("span");
           thumb.className = "tl-thumb";
           const photoIdx = tileData.key && tileData.key.startsWith("photo-") ? Number(tileData.key.slice(6)) : -1;
@@ -886,9 +932,17 @@
           tile.appendChild(thumb);
           tile.appendChild(name);
           tile.appendChild(dur);
-          tile.addEventListener("click", () => seekPreview(i));
+          // One click does both jobs: select the scene (its settings
+          // gather in the Card panel, and the tile takes the selected
+          // ring) and seek the preview to it, as before.
+          tile.addEventListener("click", () => {
+            const sel = selectionFromSceneKey(tileData.key);
+            if (sel) selectScene(sel);
+            seekPreview(i);
+          });
           strip.appendChild(tile);
         });
+        markSelectedTile();
       }
 
       // Tiles use the provisional client-side math until a preview has
@@ -1091,21 +1145,25 @@
           item.querySelector(".down").disabled = i === photos.length - 1;
           item.querySelector(".up").addEventListener("click", () => {
             [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]];
+            notePhotoStructural("up", i);
             renderPhotoList(); refreshSummary();
           });
           item.querySelector(".down").addEventListener("click", () => {
             [photos[i + 1], photos[i]] = [photos[i], photos[i + 1]];
+            notePhotoStructural("down", i);
             renderPhotoList(); refreshSummary();
           });
           item.querySelector(".remove").addEventListener("click", () => {
             URL.revokeObjectURL(p.url);
             photos.splice(i, 1);
+            notePhotoStructural("remove", i);
             renderPhotoList(); refreshSummary();
           });
           list.appendChild(item);
         });
         renderClosingPhotoPicker();
         refreshSummary();
+        refreshInspectorIfActive();
       }
 
       // The closing photo picker in the Details tab: one row per
@@ -1177,7 +1235,9 @@
         };
         row.appendChild(mk(ICON_PATHS.chevronUp, "Up", opts.onUp, { disabled: opts.upDisabled }));
         row.appendChild(mk(ICON_PATHS.chevronDown, "Down", opts.onDown, { disabled: opts.downDisabled }));
-        row.appendChild(mk(ICON_PATHS.copy, "Copy", opts.onDuplicate, { disabled: opts.dupDisabled }));
+        if (opts.onDuplicate) {
+          row.appendChild(mk(ICON_PATHS.copy, "Copy", opts.onDuplicate, { disabled: opts.dupDisabled }));
+        }
         const spacer = document.createElement("span");
         spacer.className = "flex-1";
         row.appendChild(spacer);
@@ -1185,58 +1245,72 @@
         return row;
       }
 
-      // Message editors, rendered from messagesState. Typing updates
-      // state only; the structural buttons re-render the list.
+      // One message editor, built from state. The same builder feeds
+      // the Messages panel list and the Card inspector (which shows a
+      // single card); rerender is the host's rebuild after a
+      // structural action (move, copy, remove). Typing updates state
+      // only, as before. The header doubles as a shortcut: clicking
+      // it selects this card and opens the Card panel.
+      function buildMessageEditor(m, i, rerender) {
+        const item = document.createElement("div");
+        item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
+        item.innerHTML =
+          "<div class='text-[13.5px] font-semibold mb-1 card-editor-head' title='Open this card in the Card tab'>Message " + (i + 1) + "</div>" +
+          "<label class='field-label'>Card title (optional)</label>" +
+          "<input type='text' class='field-input msg-card-title' maxlength='90' />" +
+          "<label class='field-label'>Message text</label>" +
+          "<textarea class='field-input msg-text'></textarea>" +
+          "<label class='field-label'>Signed by</label>" +
+          "<input type='text' class='field-input msg-signed' />" +
+          "<label class='field-label'>Seconds on screen</label>" +
+          "<input type='number' class='field-input msg-duration' min='4' max='15' step='1' />" +
+          "<label class='field-label'>Paper</label>" +
+          "<select class='field-input msg-paper'>" + paperOptionsHtml(m.paper) + "</select>" +
+          "<label class='field-label'>Effect</label>" +
+          "<select class='field-input msg-effect'>" + effectOptionsHtml(m.effect) + "</select>";
+        item.querySelector(".card-editor-head").addEventListener("click", () => {
+          selectScene({ kind: "message", index: i });
+          showPanel("panelInspector");
+        });
+        const cardTitle = item.querySelector(".msg-card-title");
+        cardTitle.value = m.title || "";
+        cardTitle.addEventListener("input", () => { m.title = cardTitle.value; refreshSummary(); });
+        const text = item.querySelector(".msg-text");
+        text.value = m.text;
+        text.addEventListener("input", () => { m.text = text.value; refreshSummary(); });
+        const signed = item.querySelector(".msg-signed");
+        signed.value = m.signedBy;
+        signed.addEventListener("input", () => { m.signedBy = signed.value; refreshSummary(); });
+        const dur = item.querySelector(".msg-duration");
+        dur.value = m.duration;
+        dur.addEventListener("input", () => { m.duration = clampMessageDuration(dur.value); refreshSummary(); });
+        const paper = item.querySelector(".msg-paper");
+        paper.addEventListener("change", () => { m.paper = paper.value; refreshSummary(); });
+        const effect = item.querySelector(".msg-effect");
+        effect.addEventListener("change", () => { m.effect = effect.value; refreshSummary(); });
+        item.appendChild(cardActions({
+          upDisabled: i === 0,
+          downDisabled: i === messagesState.length - 1,
+          dupDisabled: messagesState.length >= MAX_MESSAGES,
+          removeDisabled: messagesState.length <= 1,
+          onUp: () => { [messagesState[i - 1], messagesState[i]] = [messagesState[i], messagesState[i - 1]]; noteMessageStructural("up", i); rerender(); },
+          onDown: () => { [messagesState[i + 1], messagesState[i]] = [messagesState[i], messagesState[i + 1]]; noteMessageStructural("down", i); rerender(); },
+          onDuplicate: () => { messagesState.splice(i + 1, 0, { ...m }); rerender(); },
+          onRemove: () => { messagesState.splice(i, 1); noteMessageStructural("remove", i); rerender(); },
+        }));
+        return item;
+      }
+
+      // Message editors, rendered from messagesState.
       function renderMessageList() {
         const list = $("messageList");
         list.innerHTML = "";
         messagesState.forEach((m, i) => {
-          const item = document.createElement("div");
-          item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
-          item.innerHTML =
-            "<div class='text-[13.5px] font-semibold mb-1'>Message " + (i + 1) + "</div>" +
-            "<label class='field-label'>Card title (optional)</label>" +
-            "<input type='text' class='field-input msg-card-title' maxlength='90' />" +
-            "<label class='field-label'>Message text</label>" +
-            "<textarea class='field-input msg-text'></textarea>" +
-            "<label class='field-label'>Signed by</label>" +
-            "<input type='text' class='field-input msg-signed' />" +
-            "<label class='field-label'>Seconds on screen</label>" +
-            "<input type='number' class='field-input msg-duration' min='4' max='15' step='1' />" +
-            "<label class='field-label'>Paper</label>" +
-            "<select class='field-input msg-paper'>" + paperOptionsHtml(m.paper) + "</select>" +
-            "<label class='field-label'>Effect</label>" +
-            "<select class='field-input msg-effect'>" + effectOptionsHtml(m.effect) + "</select>";
-          const cardTitle = item.querySelector(".msg-card-title");
-          cardTitle.value = m.title || "";
-          cardTitle.addEventListener("input", () => { m.title = cardTitle.value; refreshSummary(); });
-          const text = item.querySelector(".msg-text");
-          text.value = m.text;
-          text.addEventListener("input", () => { m.text = text.value; refreshSummary(); });
-          const signed = item.querySelector(".msg-signed");
-          signed.value = m.signedBy;
-          signed.addEventListener("input", () => { m.signedBy = signed.value; refreshSummary(); });
-          const dur = item.querySelector(".msg-duration");
-          dur.value = m.duration;
-          dur.addEventListener("input", () => { m.duration = clampMessageDuration(dur.value); refreshSummary(); });
-          const paper = item.querySelector(".msg-paper");
-          paper.addEventListener("change", () => { m.paper = paper.value; refreshSummary(); });
-          const effect = item.querySelector(".msg-effect");
-          effect.addEventListener("change", () => { m.effect = effect.value; refreshSummary(); });
-          item.appendChild(cardActions({
-            upDisabled: i === 0,
-            downDisabled: i === messagesState.length - 1,
-            dupDisabled: messagesState.length >= MAX_MESSAGES,
-            removeDisabled: messagesState.length <= 1,
-            onUp: () => { [messagesState[i - 1], messagesState[i]] = [messagesState[i], messagesState[i - 1]]; renderMessageList(); },
-            onDown: () => { [messagesState[i + 1], messagesState[i]] = [messagesState[i], messagesState[i + 1]]; renderMessageList(); },
-            onDuplicate: () => { messagesState.splice(i + 1, 0, { ...m }); renderMessageList(); },
-            onRemove: () => { messagesState.splice(i, 1); renderMessageList(); },
-          }));
-          list.appendChild(item);
+          list.appendChild(buildMessageEditor(m, i, renderMessageList));
         });
         $("addMessageBtn").disabled = messagesState.length >= MAX_MESSAGES;
         refreshSummary();
+        refreshInspectorIfActive();
       }
 
       $("addMessageBtn").addEventListener("click", () => {
@@ -1245,60 +1319,72 @@
         renderMessageList();
       });
 
-      // Text collage card editors, rendered from textCardsState. Each
-      // card keeps its own Smart generate button; the click fills that
+      // One greeting card editor, built from state; the same builder
+      // feeds the Collage panel list and the Card inspector. Each card
+      // keeps its own Smart generate button; the click fills that
       // card's text from the library's short lines, signers untouched.
+      // The header is a shortcut to the text collage in the Card tab.
+      function buildTextCardEditor(c, i, rerender) {
+        const item = document.createElement("div");
+        item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
+        item.innerHTML =
+          "<div class='text-[13.5px] font-semibold mb-1 card-editor-head' title='Open the text collage in the Card tab'>Card " + (i + 1) + "</div>" +
+          "<label class='field-label'>Card title (optional)</label>" +
+          "<input type='text' class='field-input card-title' maxlength='90' />" +
+          "<label class='field-label'>Card text</label>" +
+          "<input type='text' class='field-input card-text' />" +
+          "<label class='field-label'>Signed by</label>" +
+          "<input type='text' class='field-input card-from' />" +
+          "<div class='mt-1.5'><button type='button' class='mini-btn' data-smart-card='" + (i + 1) + "'>Generate</button></div>" +
+          "<label class='field-label'>Paper</label>" +
+          "<select class='field-input card-paper'>" + paperOptionsHtml(c.paper) + "</select>";
+        item.querySelector(".card-editor-head").addEventListener("click", () => {
+          selectScene({ kind: "textCollage" });
+          showPanel("panelInspector");
+        });
+        const cardTitle = item.querySelector(".card-title");
+        cardTitle.value = c.title || "";
+        cardTitle.addEventListener("input", () => { c.title = cardTitle.value; refreshSummary(); });
+        const text = item.querySelector(".card-text");
+        text.value = c.text;
+        text.addEventListener("input", () => { c.text = text.value; refreshSummary(); });
+        const from = item.querySelector(".card-from");
+        from.value = c.from;
+        from.addEventListener("input", () => { c.from = from.value; refreshSummary(); });
+        const paper = item.querySelector(".card-paper");
+        paper.addEventListener("change", () => { c.paper = paper.value; refreshSummary(); });
+        const genBtn = item.querySelector("[data-smart-card]");
+        genBtn.disabled = !smartAvailable;
+        genBtn.addEventListener("click", () => {
+          const tone = smartTone();
+          if (!tone) return;
+          const entry = pickSmart(tone.shorts, "card" + (i + 1));
+          if (entry) { c.text = entry.text; text.value = entry.text; }
+          refreshSummary();
+        });
+        item.appendChild(cardActions({
+          upDisabled: i === 0,
+          downDisabled: i === textCardsState.length - 1,
+          dupDisabled: textCardsState.length >= MAX_TEXT_CARDS,
+          removeDisabled: textCardsState.length <= 1,
+          onUp: () => { [textCardsState[i - 1], textCardsState[i]] = [textCardsState[i], textCardsState[i - 1]]; rerender(); },
+          onDown: () => { [textCardsState[i + 1], textCardsState[i]] = [textCardsState[i], textCardsState[i + 1]]; rerender(); },
+          onDuplicate: () => { textCardsState.splice(i + 1, 0, { ...c }); rerender(); },
+          onRemove: () => { textCardsState.splice(i, 1); rerender(); },
+        }));
+        return item;
+      }
+
+      // Text collage card editors, rendered from textCardsState.
       function renderTextCardList() {
         const list = $("textCardList");
         list.innerHTML = "";
         textCardsState.forEach((c, i) => {
-          const item = document.createElement("div");
-          item.className = "border border-line rounded-[10px] p-3 mb-3 bg-[#fafafc]";
-          item.innerHTML =
-            "<div class='text-[13.5px] font-semibold mb-1'>Card " + (i + 1) + "</div>" +
-            "<label class='field-label'>Card title (optional)</label>" +
-            "<input type='text' class='field-input card-title' maxlength='90' />" +
-            "<label class='field-label'>Card text</label>" +
-            "<input type='text' class='field-input card-text' />" +
-            "<label class='field-label'>Signed by</label>" +
-            "<input type='text' class='field-input card-from' />" +
-            "<div class='mt-1.5'><button type='button' class='mini-btn' data-smart-card='" + (i + 1) + "'>Generate</button></div>" +
-            "<label class='field-label'>Paper</label>" +
-            "<select class='field-input card-paper'>" + paperOptionsHtml(c.paper) + "</select>";
-          const cardTitle = item.querySelector(".card-title");
-          cardTitle.value = c.title || "";
-          cardTitle.addEventListener("input", () => { c.title = cardTitle.value; refreshSummary(); });
-          const text = item.querySelector(".card-text");
-          text.value = c.text;
-          text.addEventListener("input", () => { c.text = text.value; refreshSummary(); });
-          const from = item.querySelector(".card-from");
-          from.value = c.from;
-          from.addEventListener("input", () => { c.from = from.value; refreshSummary(); });
-          const paper = item.querySelector(".card-paper");
-          paper.addEventListener("change", () => { c.paper = paper.value; refreshSummary(); });
-          const genBtn = item.querySelector("[data-smart-card]");
-          genBtn.disabled = !smartAvailable;
-          genBtn.addEventListener("click", () => {
-            const tone = smartTone();
-            if (!tone) return;
-            const entry = pickSmart(tone.shorts, "card" + (i + 1));
-            if (entry) { c.text = entry.text; text.value = entry.text; }
-            refreshSummary();
-          });
-          item.appendChild(cardActions({
-            upDisabled: i === 0,
-            downDisabled: i === textCardsState.length - 1,
-            dupDisabled: textCardsState.length >= MAX_TEXT_CARDS,
-            removeDisabled: textCardsState.length <= 1,
-            onUp: () => { [textCardsState[i - 1], textCardsState[i]] = [textCardsState[i], textCardsState[i - 1]]; renderTextCardList(); },
-            onDown: () => { [textCardsState[i + 1], textCardsState[i]] = [textCardsState[i], textCardsState[i + 1]]; renderTextCardList(); },
-            onDuplicate: () => { textCardsState.splice(i + 1, 0, { ...c }); renderTextCardList(); },
-            onRemove: () => { textCardsState.splice(i, 1); renderTextCardList(); },
-          }));
-          list.appendChild(item);
+          list.appendChild(buildTextCardEditor(c, i, renderTextCardList));
         });
         $("addTextCardBtn").disabled = textCardsState.length >= MAX_TEXT_CARDS;
         refreshSummary();
+        refreshInspectorIfActive();
       }
 
       $("addTextCardBtn").addEventListener("click", () => {
@@ -1356,11 +1442,21 @@
       });
 
       // ------------------------------------------------------------ rail tabs --
+      // One panel switcher for the rail buttons and for the jumps the
+      // inspector entry points make. State-driven lists re-render
+      // when their panel opens, so edits made in the Card inspector
+      // (or anywhere else) are always what the panel shows.
+      function showPanel(panelId) {
+        document.querySelectorAll(".rail-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === panelId));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === panelId));
+        if (panelId === "panelInspector") renderInspector();
+        else if (panelId === "panelPhotos") renderPhotoList();
+        else if (panelId === "panelMessages") renderMessageList();
+        else if (panelId === "panelCollage") renderTextCardList();
+        else if (panelId === "panelDetails") renderClosingPhotoPicker();
+      }
       document.querySelectorAll(".rail-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".rail-btn").forEach((b) => b.classList.toggle("active", b === btn));
-          document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === btn.dataset.tab));
-        });
+        btn.addEventListener("click", () => showPanel(btn.dataset.tab));
       });
 
       // ------------------------------------------------------------ help --
@@ -1785,6 +1881,7 @@
           el.disabled = !on;
         }
         document.querySelectorAll("[data-smart-card]").forEach((btn) => { btn.disabled = !on; });
+        document.querySelectorAll(".insp-closing-gen").forEach((btn) => { btn.disabled = !on; });
         $("smartLibraryNote").style.display = on ? "none" : "block";
       }
 
@@ -2329,6 +2426,593 @@
           setStatus("Could not start the job. " + err.message, true);
         }
       });
+
+      // ------------------------------------------------------ card inspector --
+      // The Card panel gathers everything for ONE scene in one place.
+      // selectedScene names the card: { kind: "title" },
+      // { kind: "photo", index }, { kind: "photoCollage" },
+      // { kind: "textCollage" }, { kind: "message", index }, or
+      // { kind: "closing" }. Photo and message indexes are STATE
+      // indexes (the editor arrays). The filmstrip and the summary
+      // number message cards by filled order (blank messages compact
+      // away), so keys crossing between the two worlds go through
+      // filledMessageStateIndexes: filmstrip key "message-0" is the
+      // first FILLED message, whichever editor slot that is.
+      let selectedScene = { kind: "title" };
+
+      function filledMessageStateIndexes() {
+        const out = [];
+        messagesState.forEach((m, i) => {
+          if (m.text.trim()) out.push(i);
+        });
+        return out;
+      }
+
+      // The computeScenes / scenes.json key for the current selection,
+      // or null when the selected card does not play (a blank message).
+      function selectionSceneKey() {
+        const s = selectedScene;
+        switch (s.kind) {
+          case "title": return "title";
+          case "closing": return "closing";
+          case "photoCollage": return "photoCollage";
+          case "textCollage": return "textCollage";
+          case "photo": return "photo-" + s.index;
+          case "message": {
+            const pos = filledMessageStateIndexes().indexOf(s.index);
+            return pos >= 0 ? "message-" + pos : null;
+          }
+        }
+        return null;
+      }
+
+      // Inverse of selectionSceneKey, for filmstrip tiles and summary
+      // rows: a message key's number is a filled-order position and
+      // maps back to that message's state index here.
+      function selectionFromSceneKey(key) {
+        if (!key) return null;
+        if (key === "title") return { kind: "title" };
+        if (key === "closing") return { kind: "closing" };
+        if (key === "photoCollage") return { kind: "photoCollage" };
+        if (key === "textCollage") return { kind: "textCollage" };
+        if (key.startsWith("photo-")) {
+          const n = Number(key.slice(6));
+          return Number.isFinite(n) ? { kind: "photo", index: n } : null;
+        }
+        if (key.startsWith("message-")) {
+          const pos = Number(key.slice(8));
+          const stateIndex = filledMessageStateIndexes()[pos];
+          return stateIndex === undefined ? null : { kind: "message", index: stateIndex };
+        }
+        return null;
+      }
+
+      // The Scenes panel works in blocks, not cards: a block row
+      // selects the block's own card, or its first card for the two
+      // multi-card blocks.
+      function selectionForBlock(key) {
+        if (key === "photos") return { kind: "photo", index: 0 };
+        if (key === "photoCollage") return { kind: "photoCollage" };
+        if (key === "textCollage") return { kind: "textCollage" };
+        const filled = filledMessageStateIndexes();
+        return { kind: "message", index: filled.length ? filled[0] : 0 };
+      }
+
+      function normalizeSelection(sel) {
+        if (!sel || !sel.kind) return { kind: "title" };
+        if (sel.kind === "message") {
+          const idx = Math.min(Math.max(0, sel.index || 0), Math.max(0, messagesState.length - 1));
+          return { kind: "message", index: idx };
+        }
+        if (sel.kind === "photo") {
+          const idx = photos.length
+            ? Math.min(Math.max(0, sel.index || 0), photos.length - 1)
+            : 0;
+          return { kind: "photo", index: idx };
+        }
+        return { kind: sel.kind };
+      }
+
+      function selectScene(sel) {
+        selectedScene = normalizeSelection(sel);
+        markSelectedTile();
+        if ($("panelInspector").classList.contains("active")) renderInspector();
+        else syncInspectorDynamic();
+      }
+
+      // The filmstrip's selected ring. Playback's .playing class is a
+      // separate state and is never touched here.
+      function markSelectedTile() {
+        const key = selectionSceneKey();
+        document.querySelectorAll(".tl-tile").forEach((tile) => {
+          tile.classList.toggle("selected", key !== null && tile.dataset.sceneKey === key);
+        });
+      }
+
+      function selectionDisplayName() {
+        const s = selectedScene;
+        switch (s.kind) {
+          case "title": return "Title card";
+          case "closing": return "Closing card";
+          case "photoCollage": return "Photo collage";
+          case "textCollage": return "Text collage";
+          case "photo": return "Photo " + (s.index + 1);
+          case "message": {
+            const pos = filledMessageStateIndexes().indexOf(s.index);
+            return pos >= 0
+              ? "Message card " + (pos + 1)
+              : "Message " + (s.index + 1) + " (blank, skipped)";
+          }
+        }
+        return "";
+      }
+
+      function selectionSpanText() {
+        const key = selectionSceneKey();
+        if (key !== null) {
+          let t = 0;
+          for (const sc of computeScenes()) {
+            if (sc.key === key) return "Plays " + fmt(t) + " to " + fmt(t + sc.dur);
+            t += sc.dur;
+          }
+        }
+        switch (selectedScene.kind) {
+          case "message": return "Blank, so this card is skipped in the video";
+          case "photoCollage":
+          case "textCollage": return "Switched off, so it does not play";
+          case "photo": return photos.length === 0 ? "No photos yet" : "";
+          default: return "";
+        }
+      }
+
+      // Text-only inspector sync, safe to run on every refreshSummary:
+      // the header name and span, and the two collage count lines.
+      // It never rebuilds the body, so typing in an inspector field
+      // (which flows through refreshSummary) cannot lose focus.
+      function syncInspectorDynamic() {
+        const nameEl = $("inspectorName");
+        if (!nameEl) return;
+        nameEl.textContent = selectionDisplayName();
+        $("inspectorSpan").textContent = selectionSpanText();
+        const pc = $("inspPhotoCollageCount");
+        if (pc) {
+          const n = photos.filter((p) => p.inCollage).length;
+          pc.textContent = "The photo collage needs exactly 3 photos ticked. Right now " + n + " are ticked.";
+          pc.style.display = $("collageEnabled").checked && n !== 3 ? "block" : "none";
+        }
+        const tc = $("inspTextCollageCount");
+        if (tc) {
+          const n = filledCards().length;
+          tc.textContent = "The text collage needs at least 2 cards with text. Right now " + n + (n === 1 ? " card has" : " cards have") + " text.";
+          tc.style.display = $("textCollageEnabled").checked && n < 2 ? "block" : "none";
+        }
+      }
+
+      // Selection maintenance for structural edits, shared by the
+      // type panels and the inspector: after a move the selection
+      // follows the card; after a remove it lands on the nearest
+      // sibling. Duplicating keeps the selection on the original.
+      function noteMessageStructural(action, i) {
+        if (selectedScene.kind !== "message") return;
+        const s = selectedScene.index;
+        if (action === "up") {
+          if (s === i) selectedScene = { kind: "message", index: i - 1 };
+          else if (s === i - 1) selectedScene = { kind: "message", index: i };
+        } else if (action === "down") {
+          if (s === i) selectedScene = { kind: "message", index: i + 1 };
+          else if (s === i + 1) selectedScene = { kind: "message", index: i };
+        } else if (action === "remove") {
+          if (s === i) selectedScene = { kind: "message", index: Math.min(i, messagesState.length - 1) };
+          else if (s > i) selectedScene = { kind: "message", index: s - 1 };
+        }
+      }
+
+      function notePhotoStructural(action, i) {
+        if (selectedScene.kind !== "photo") return;
+        const s = selectedScene.index;
+        if (action === "up") {
+          if (s === i) selectedScene = { kind: "photo", index: i - 1 };
+          else if (s === i - 1) selectedScene = { kind: "photo", index: i };
+        } else if (action === "down") {
+          if (s === i) selectedScene = { kind: "photo", index: i + 1 };
+          else if (s === i + 1) selectedScene = { kind: "photo", index: i };
+        } else if (action === "remove") {
+          if (photos.length === 0) selectedScene = { kind: "photo", index: 0 };
+          else if (s === i) selectedScene = { kind: "photo", index: Math.min(i, photos.length - 1) };
+          else if (s > i) selectedScene = { kind: "photo", index: s - 1 };
+        }
+      }
+
+      // ------------------------------------------------ inspector mirrors --
+      // Static form fields keep ONE canonical home (their existing
+      // inputs in Details / Collage). An inspector control for such a
+      // field is a mirror: it starts from the canonical value, and
+      // every edit writes through to the canonical input and fires
+      // its input and change events, so the existing listeners, the
+      // hint updaters, and the form collectors behave exactly as if
+      // the type panel had been used. Collectors never read these.
+      function mirrorControl(canonicalId) {
+        const src = $(canonicalId);
+        let el;
+        if (src.tagName === "SELECT") {
+          el = document.createElement("select");
+          el.innerHTML = src.innerHTML;
+        } else if (src.tagName === "TEXTAREA") {
+          el = document.createElement("textarea");
+        } else {
+          el = document.createElement("input");
+          el.type = src.getAttribute("type") || "text";
+          for (const a of ["min", "max", "step", "maxlength", "placeholder"]) {
+            const v = src.getAttribute(a);
+            if (v !== null) el.setAttribute(a, v);
+          }
+        }
+        el.className = "field-input";
+        el.value = src.value;
+        const write = () => {
+          src.value = el.value;
+          src.dispatchEvent(new Event("input", { bubbles: true }));
+          src.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+        el.addEventListener("input", write);
+        el.addEventListener("change", write);
+        return el;
+      }
+
+      function mirrorCheckbox(canonicalId) {
+        const src = $(canonicalId);
+        const el = document.createElement("input");
+        el.type = "checkbox";
+        el.className = "w-[18px] h-[18px] accent-[#8b3dff]";
+        el.checked = src.checked;
+        el.addEventListener("change", () => {
+          src.checked = el.checked;
+          src.dispatchEvent(new Event("input", { bubbles: true }));
+          src.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        return el;
+      }
+
+      function fieldWrap(labelText, control) {
+        const wrap = document.createElement("div");
+        wrap.className = "insp-field";
+        const label = document.createElement("label");
+        label.className = "field-label";
+        label.textContent = labelText;
+        wrap.appendChild(label);
+        wrap.appendChild(control);
+        return wrap;
+      }
+
+      function enableRow(canonicalId, labelText) {
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-2.5 mt-1";
+        row.appendChild(mirrorCheckbox(canonicalId));
+        const span = document.createElement("span");
+        span.className = "text-[13.5px] font-semibold";
+        span.textContent = labelText;
+        row.appendChild(span);
+        return row;
+      }
+
+      function subHead(text) {
+        const h = document.createElement("div");
+        h.className = "text-[12.5px] font-semibold mt-4 mb-1.5";
+        h.textContent = text;
+        return h;
+      }
+
+      function emptyNote(text) {
+        const p = document.createElement("p");
+        p.className = "m-0 text-muted text-[12.5px] leading-normal";
+        p.textContent = text;
+        return p;
+      }
+
+      // Top / Bottom strip chips for one photo, bound to the photo's
+      // own state, exactly like the Details picker chips.
+      function stripChips(p) {
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-1.5";
+        const mkChip = (chipText, key) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "mini-btn strip-chip";
+          btn.textContent = chipText;
+          btn.setAttribute("aria-pressed", p[key] ? "true" : "false");
+          btn.addEventListener("click", () => {
+            p[key] = !p[key];
+            btn.setAttribute("aria-pressed", p[key] ? "true" : "false");
+            renderClosingPhotoPicker();
+            refreshSummary();
+          });
+          return btn;
+        };
+        row.appendChild(mkChip("Top", "inClosingTop"));
+        row.appendChild(mkChip("Bottom", "inClosingBottom"));
+        return row;
+      }
+
+      // -------------------------------------------------- inspector views --
+      function buildTitleInspector(body) {
+        body.appendChild(fieldWrap("Celebrant name", mirrorControl("celebrantName")));
+        body.appendChild(fieldWrap("Date (title card)", mirrorControl("titleDate")));
+        body.appendChild(fieldWrap("Title card top line (optional)", mirrorControl("titleEyebrow")));
+        body.appendChild(fieldWrap("Title card greeting line (optional)", mirrorControl("titleGreeting")));
+        body.appendChild(fieldWrap("Title card seconds", mirrorControl("titleDuration")));
+        body.appendChild(fieldWrap("Title card effect", mirrorControl("titleEffect")));
+      }
+
+      function buildPhotoInspector(body) {
+        if (!photos.length) {
+          body.appendChild(emptyNote("No photos yet. Add photos in the Photos tab; each photo is a card you can then pick here, in the filmstrip, or in the Video summary."));
+          return;
+        }
+        const i = selectedScene.index;
+        const p = photos[i];
+        const img = document.createElement("img");
+        img.className = "insp-photo-thumb";
+        img.src = p.url;
+        img.alt = "";
+        body.appendChild(img);
+        const capRow = document.createElement("div");
+        capRow.className = "caption-row";
+        const caption = document.createElement("input");
+        caption.type = "text";
+        caption.className = "field-input caption";
+        caption.placeholder = "Caption for this photo";
+        caption.value = p.caption;
+        caption.addEventListener("input", () => { p.caption = caption.value; markPreviewDirty(); renderClosingPhotoPicker(); });
+        const pickBtn = document.createElement("button");
+        pickBtn.type = "button";
+        pickBtn.className = "mini-btn caption-pick-btn";
+        pickBtn.title = "Pick a caption";
+        pickBtn.innerHTML = svgIcon(ICON_PATHS.messageSquareText) + "Captions";
+        pickBtn.disabled = !captionsAvailable;
+        capRow.appendChild(caption);
+        capRow.appendChild(pickBtn);
+        body.appendChild(capRow);
+        const captionMenu = document.createElement("div");
+        captionMenu.className = "caption-menu";
+        captionMenu.hidden = true;
+        body.appendChild(captionMenu);
+        pickBtn.addEventListener("click", () => toggleCaptionMenu(captionMenu, caption));
+        const adjust = document.createElement("div");
+        adjust.className = "photo-adjust";
+        adjust.style.marginTop = "12px";
+        adjust.innerHTML =
+          "<div class='adj-field'><label>Duration (sec)</label><input type='number' class='adj-duration' min='2' max='12' step='1' /></div>" +
+          "<div class='adj-field'><label>Frame</label><select class='adj-frame'>" +
+            "<option value='full'>Full bleed</option>" +
+            "<option value='thin'>Thin border</option>" +
+            "<option value='polaroid'>Polaroid</option>" +
+            "<option value='rounded'>Rounded</option>" +
+            "<option value='gold'>Gold frame</option>" +
+          "</select></div>" +
+          "<div class='adj-field'><label>Zoom <span class='adj-zoom-val'></span></label><input type='range' class='adj-zoom' min='100' max='150' step='1' /></div>" +
+          "<div class='adj-field'><label>Brightness</label><input type='range' class='adj-bright' min='80' max='120' step='1' /></div>" +
+          "<div class='adj-field'><label>Saturation</label><input type='range' class='adj-sat' min='0' max='150' step='1' /></div>" +
+          "<div class='adj-field'><label>Position: Horizontal</label><input type='range' class='adj-fx' min='0' max='100' step='1' />" +
+            "<div class='adj-quick'>" +
+              "<button type='button' data-axis='focusX' data-val='0'>Left</button>" +
+              "<button type='button' data-axis='focusX' data-val='50'>Center</button>" +
+              "<button type='button' data-axis='focusX' data-val='100'>Right</button>" +
+            "</div></div>" +
+          "<div class='adj-field'><label>Position: Vertical</label><input type='range' class='adj-fy' min='0' max='100' step='1' />" +
+            "<div class='adj-quick'>" +
+              "<button type='button' data-axis='focusY' data-val='0'>Top</button>" +
+              "<button type='button' data-axis='focusY' data-val='50'>Center</button>" +
+              "<button type='button' data-axis='focusY' data-val='100'>Bottom</button>" +
+            "</div></div>";
+        const durInput = adjust.querySelector(".adj-duration");
+        durInput.value = p.duration;
+        durInput.addEventListener("input", () => {
+          const v = Number.parseInt(durInput.value, 10);
+          p.duration = Number.isFinite(v) ? Math.min(12, Math.max(2, v)) : 5;
+          refreshSummary();
+        });
+        const frameSel = adjust.querySelector(".adj-frame");
+        frameSel.value = p.frame;
+        frameSel.addEventListener("change", () => { p.frame = frameSel.value; markPreviewDirty(); });
+        const zoomInput = adjust.querySelector(".adj-zoom");
+        const zoomVal = adjust.querySelector(".adj-zoom-val");
+        zoomInput.value = p.zoom;
+        zoomVal.textContent = p.zoom + "%";
+        zoomInput.addEventListener("input", () => {
+          p.zoom = Number(zoomInput.value);
+          zoomVal.textContent = p.zoom + "%";
+          markPreviewDirty();
+        });
+        const bindRange = (sel, key) => {
+          const input = adjust.querySelector(sel);
+          input.value = p[key];
+          input.addEventListener("input", () => { p[key] = Number(input.value); markPreviewDirty(); });
+          return input;
+        };
+        bindRange(".adj-bright", "brightness");
+        bindRange(".adj-sat", "saturation");
+        const fxInput = bindRange(".adj-fx", "focusX");
+        const fyInput = bindRange(".adj-fy", "focusY");
+        adjust.querySelectorAll(".adj-quick button").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const val = Number(btn.dataset.val);
+            p[btn.dataset.axis] = val;
+            (btn.dataset.axis === "focusX" ? fxInput : fyInput).value = val;
+            markPreviewDirty();
+          });
+        });
+        body.appendChild(adjust);
+        const collageLabel = document.createElement("label");
+        collageLabel.className = "flex items-center gap-1.5 mt-3.5 text-[12.5px] text-muted cursor-pointer";
+        const collageBox = document.createElement("input");
+        collageBox.type = "checkbox";
+        collageBox.className = "w-4 h-4 accent-[#8b3dff]";
+        collageBox.checked = p.inCollage;
+        collageBox.addEventListener("change", () => { p.inCollage = collageBox.checked; refreshSummary(); });
+        collageLabel.appendChild(collageBox);
+        collageLabel.appendChild(document.createTextNode("Include in the collage"));
+        body.appendChild(collageLabel);
+        body.appendChild(subHead("Closing card strips"));
+        body.appendChild(stripChips(p));
+        body.appendChild(cardActions({
+          upDisabled: i === 0,
+          downDisabled: i === photos.length - 1,
+          onUp: () => {
+            [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]];
+            notePhotoStructural("up", i);
+            renderPhotoList();
+          },
+          onDown: () => {
+            [photos[i + 1], photos[i]] = [photos[i], photos[i + 1]];
+            notePhotoStructural("down", i);
+            renderPhotoList();
+          },
+          onRemove: () => {
+            URL.revokeObjectURL(p.url);
+            photos.splice(i, 1);
+            notePhotoStructural("remove", i);
+            renderPhotoList();
+          },
+        }));
+      }
+
+      function buildPhotoCollageInspector(body) {
+        body.appendChild(enableRow("collageEnabled", "Include the photo collage scene"));
+        body.appendChild(fieldWrap("Photo collage heading", mirrorControl("collageHeading")));
+        body.appendChild(fieldWrap("Photo collage seconds", mirrorControl("photoCollageDuration")));
+        body.appendChild(fieldWrap("Photo collage effect", mirrorControl("photoCollageEffect")));
+        body.appendChild(subHead("Photos in the collage"));
+        if (!photos.length) {
+          body.appendChild(emptyNote("No photos yet. Add photos in the Photos tab, then tick three of them here."));
+        }
+        photos.forEach((p, i) => {
+          const row = document.createElement("div");
+          row.className = "insp-pick";
+          const img = document.createElement("img");
+          img.src = p.url;
+          img.alt = "";
+          const label = document.createElement("span");
+          label.className = "insp-pick-label";
+          label.textContent = "Photo " + (i + 1) + (p.caption ? ": " + p.caption : "");
+          label.title = label.textContent;
+          const box = document.createElement("input");
+          box.type = "checkbox";
+          box.checked = p.inCollage;
+          box.setAttribute("aria-label", "Include photo " + (i + 1) + " in the collage");
+          box.addEventListener("change", () => { p.inCollage = box.checked; refreshSummary(); });
+          row.appendChild(img);
+          row.appendChild(label);
+          row.appendChild(box);
+          body.appendChild(row);
+        });
+        const warn = document.createElement("p");
+        warn.className = "warn";
+        warn.id = "inspPhotoCollageCount";
+        body.appendChild(warn);
+        syncInspectorDynamic();
+      }
+
+      function buildTextCollageInspector(body) {
+        body.appendChild(enableRow("textCollageEnabled", "Include the text collage scene"));
+        body.appendChild(fieldWrap("Text collage heading", mirrorControl("textCollageHeading")));
+        body.appendChild(fieldWrap("Text collage seconds", mirrorControl("textCollageDuration")));
+        body.appendChild(fieldWrap("Text collage effect", mirrorControl("textCollageEffect")));
+        body.appendChild(subHead("Greeting cards"));
+        textCardsState.forEach((c, i) => {
+          body.appendChild(buildTextCardEditor(c, i, renderTextCardList));
+        });
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "w-full flex items-center justify-center gap-2 border border-dashed border-[#c9b8f5] rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-dark bg-brand-soft cursor-pointer hover:bg-[#e9dcff] disabled:opacity-50 disabled:cursor-default";
+        addBtn.innerHTML = "<svg class='w-4 h-4' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add a greeting card";
+        addBtn.disabled = textCardsState.length >= MAX_TEXT_CARDS;
+        addBtn.addEventListener("click", () => {
+          if (textCardsState.length >= MAX_TEXT_CARDS) return;
+          textCardsState.push({ title: "", text: "", from: "", paper: "classic" });
+          renderTextCardList();
+        });
+        body.appendChild(addBtn);
+        const warn = document.createElement("p");
+        warn.className = "warn";
+        warn.id = "inspTextCollageCount";
+        body.appendChild(warn);
+        syncInspectorDynamic();
+      }
+
+      function buildMessageInspector(body) {
+        const i = selectedScene.index;
+        const m = messagesState[i];
+        if (!m) {
+          body.appendChild(emptyNote("This message is gone. Pick another card from the filmstrip or the Video summary."));
+          return;
+        }
+        body.appendChild(buildMessageEditor(m, i, renderMessageList));
+      }
+
+      function buildClosingInspector(body) {
+        body.appendChild(fieldWrap("Closing card top line (optional)", mirrorControl("closingEyebrow")));
+        body.appendChild(fieldWrap("Closing line", mirrorControl("closingLine")));
+        const genWrap = document.createElement("div");
+        genWrap.className = "mt-1.5";
+        const genBtn = document.createElement("button");
+        genBtn.type = "button";
+        genBtn.className = "mini-btn insp-closing-gen";
+        genBtn.textContent = "Generate";
+        genBtn.disabled = !smartAvailable;
+        // The canonical button in Details does the composing; this
+        // one simply presses it, so the tone and library stay shared.
+        genBtn.addEventListener("click", () => { $("smartClosingBtn").click(); });
+        genWrap.appendChild(genBtn);
+        body.appendChild(genWrap);
+        body.appendChild(fieldWrap("Closing sign-off", mirrorControl("closingSignOff")));
+        body.appendChild(fieldWrap("Closing card seconds", mirrorControl("closingDuration")));
+        body.appendChild(fieldWrap("Closing card paper", mirrorControl("closingPaper")));
+        body.appendChild(fieldWrap("Closing card effect", mirrorControl("closingEffect")));
+        body.appendChild(subHead("Closing card photos"));
+        if (!photos.length) {
+          body.appendChild(emptyNote("No photos yet. Add photos in the Photos tab, then choose the strips here."));
+        }
+        photos.forEach((p, i) => {
+          const row = document.createElement("div");
+          row.className = "closing-photo-row";
+          const img = document.createElement("img");
+          img.className = "cp-thumb";
+          img.src = p.url;
+          img.alt = "";
+          const label = document.createElement("span");
+          label.className = "cp-label";
+          label.textContent = "Photo " + (i + 1) + (p.caption ? ": " + p.caption : "");
+          label.title = label.textContent;
+          row.appendChild(img);
+          row.appendChild(label);
+          row.appendChild(stripChips(p));
+          body.appendChild(row);
+        });
+      }
+
+      function renderInspector() {
+        selectedScene = normalizeSelection(selectedScene);
+        syncInspectorDynamic();
+        const body = $("inspectorBody");
+        body.innerHTML = "";
+        switch (selectedScene.kind) {
+          case "title": buildTitleInspector(body); break;
+          case "photo": buildPhotoInspector(body); break;
+          case "photoCollage": buildPhotoCollageInspector(body); break;
+          case "textCollage": buildTextCollageInspector(body); break;
+          case "message": buildMessageInspector(body); break;
+          case "closing": buildClosingInspector(body); break;
+        }
+        markSelectedTile();
+      }
+
+      // Structural re-renders (photo list, message list, card list,
+      // project load) call this so an open inspector never shows a
+      // stale card. Typing does not rebuild the body; the header and
+      // count lines stay current through syncInspectorDynamic.
+      function refreshInspectorIfActive() {
+        if ($("panelInspector").classList.contains("active")) renderInspector();
+      }
 
       renderMessageList();
       renderTextCardList();

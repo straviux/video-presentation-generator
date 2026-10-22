@@ -145,6 +145,14 @@ select {
   background: #fafafc;
   color: #6b6b78;
 }
+/* Scenes panel rows are clickable too: a click selects the scene
+   (or the block's first card) and opens the Card panel. */
+.scene-row.clickable {
+  cursor: pointer;
+}
+.scene-row.clickable:hover {
+  border-color: #c9b8f5;
+}
 .scene-row-lock {
   margin-left: auto;
   display: inline-flex;
@@ -380,6 +388,19 @@ select {
   padding: 6px 0;
   border-bottom: 1px solid #f0f0f4;
 }
+/* Summary rows are clickable: a click selects the scene and opens
+   the Card (inspector) panel for it. */
+.scene-list li.scene-link {
+  cursor: pointer;
+  border-radius: 6px;
+  padding-left: 6px;
+  padding-right: 6px;
+  margin-left: -6px;
+  margin-right: -6px;
+}
+.scene-list li.scene-link:hover {
+  background: #f5f5f8;
+}
 .scene-list li:last-child {
   border-bottom: none;
 }
@@ -481,6 +502,13 @@ select {
 .tl-tile.playing {
   border-color: #8b3dff;
   background: #f1e8ff;
+}
+/* The selected tile (the card open in the inspector) gets a violet
+   ring, distinct from the lighter .playing fill so the two states
+   can show at once without confusion. */
+.tl-tile.selected {
+  border-color: #7329d6;
+  box-shadow: 0 0 0 2px rgba(139, 61, 255, 0.55);
 }
 .tl-tile .tl-thumb {
   height: 44px;
@@ -656,4 +684,69 @@ textarea.field-input {
 .bg-tag-ic {
   width: 11px;
   height: 11px;
+}
+
+/* Card inspector (panelInspector): per-card settings gathered in one
+   panel. The photo thumbnail heads the photo view; the collage pick
+   rows pair a thumbnail with its checkbox; the closing strip rows
+   reuse .closing-photo-row with a small thumbnail added. Editor
+   headers in the Messages and Collage lists double as shortcuts to
+   the Card panel. */
+.insp-field {
+  margin-top: 13px;
+}
+#inspectorBody > .insp-field:first-child {
+  margin-top: 0;
+}
+.card-editor-head {
+  cursor: pointer;
+}
+.card-editor-head:hover {
+  color: #7329d6;
+}
+.insp-photo-thumb {
+  width: 100%;
+  max-height: 190px;
+  object-fit: cover;
+  border: 1px solid #e3e3ea;
+  border-radius: 8px;
+  display: block;
+  margin-bottom: 10px;
+}
+.insp-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #e3e3ea;
+}
+.insp-pick img {
+  width: 52px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 5px;
+  flex: none;
+  display: block;
+}
+.insp-pick .insp-pick-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+.insp-pick input {
+  width: 18px;
+  height: 18px;
+  accent-color: #8b3dff;
+  flex: none;
+}
+.closing-photo-row img.cp-thumb {
+  width: 44px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex: none;
+  display: block;
 }
