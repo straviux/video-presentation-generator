@@ -20,7 +20,7 @@
       "cards": [
         {
           "from": "The Programs Team",
-          "text": "Happiest birthday, Nur-Aina! Your kindness keeps this whole office going."
+          "text": "Happiest birthday! Your kindness keeps this whole office going."
         },
         {
           "from": "The Finance Team",
@@ -97,5 +97,11 @@
     "textCollage",
     "messages"
   ],
+  "textFx": {
+    "scope": "display",
+    "shadow": { "on": false, "strength": 50 },
+    "glow": { "on": false, "strength": 50 },
+    "outline": { "on": false, "width": 40 }
+  },
   "titleEffect": "none"
 }

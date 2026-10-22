@@ -18,11 +18,13 @@ import express from "express";
 import multer from "multer";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { DatabaseSync } from "node:sqlite";
 import {
   copyFileSync,
   existsSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -48,6 +50,94 @@ mkdirSync(JOBS_DIR, { recursive: true });
 // served at /previews/current/index.html.
 const PREVIEW_DIR = path.join(APP_DIR, "previews", "current");
 
+// Saved projects live here, one folder per project (state.json plus the
+// project's photo and music files). Plain files, so they survive server
+// restarts; the folder is gitignored, as they are the user's own data.
+const PROJECTS_DIR = path.join(APP_DIR, "projects");
+mkdirSync(PROJECTS_DIR, { recursive: true });
+
+// ------------------------------------------------------- message library ---
+// The Smart generate composer draws its lines from a small SQLite
+// database at app/data/messages.db (Node's built-in node:sqlite, no
+// extra dependency). The database is seeded from the curated lines in
+// app/lib/message-banks.json: a fresh database gets every seed line,
+// and when the seed file's version moves ahead of the stored one, only
+// the lines that are not already present are inserted (matched on
+// kind + tone + text). Rows are never deleted by seeding, so lines the
+// user adds through the Library panel survive seed updates and
+// restarts. If the database cannot be opened, the server still runs;
+// the message-bank endpoints answer 500 instead.
+const DATA_DIR = path.join(APP_DIR, "data");
+const MESSAGE_DB_FILE = path.join(DATA_DIR, "messages.db");
+const MESSAGE_SEED_FILE = path.join(APP_DIR, "lib", "message-banks.json");
+const MESSAGE_TONES = ["warm", "grateful", "playful", "formal"];
+const MESSAGE_KINDS = ["opener", "middle", "closer", "short", "closing"];
+const MESSAGE_GROUPS = [
+  ["openers", "opener"],
+  ["middles", "middle"],
+  ["closers", "closer"],
+  ["shorts", "short"],
+  ["closings", "closing"],
+];
+
+let messageDb = null;
+let messageDbError = null;
+try {
+  mkdirSync(DATA_DIR, { recursive: true });
+  const seed = JSON.parse(readFileSync(MESSAGE_SEED_FILE, "utf8"));
+  const seedVersion = Number(seed.version) || 1;
+  messageDb = new DatabaseSync(MESSAGE_DB_FILE);
+  messageDb.exec(
+    "CREATE TABLE IF NOT EXISTS message_lines (" +
+      "id INTEGER PRIMARY KEY, kind TEXT, tone TEXT, text TEXT, uses_name INTEGER" +
+      ");" +
+      "CREATE TABLE IF NOT EXISTS meta (" +
+      "key TEXT PRIMARY KEY, value TEXT" +
+      ");",
+  );
+  const countRow = messageDb
+    .prepare("SELECT COUNT(*) AS n FROM message_lines")
+    .get();
+  const versionRow = messageDb
+    .prepare("SELECT value FROM meta WHERE key = 'seeded_version'")
+    .get();
+  const storedVersion = versionRow ? Number(versionRow.value) || 0 : 0;
+  if (Number(countRow.n) === 0 || storedVersion < seedVersion) {
+    const existsStmt = messageDb.prepare(
+      "SELECT id FROM message_lines WHERE kind = ? AND tone = ? AND text = ?",
+    );
+    const insertStmt = messageDb.prepare(
+      "INSERT INTO message_lines (kind, tone, text, uses_name) VALUES (?, ?, ?, ?)",
+    );
+    for (const [tone, groups] of Object.entries(seed.tones || {})) {
+      if (!MESSAGE_TONES.includes(tone)) continue;
+      for (const [group, kind] of MESSAGE_GROUPS) {
+        for (const line of groups[group] || []) {
+          const lineText = typeof line === "string" ? line : line && line.text;
+          if (!lineText) continue;
+          if (existsStmt.get(kind, tone, lineText)) continue;
+          insertStmt.run(
+            kind,
+            tone,
+            lineText,
+            line && line.usesName ? 1 : 0,
+          );
+        }
+      }
+    }
+    messageDb
+      .prepare(
+        "INSERT INTO meta (key, value) VALUES ('seeded_version', ?) " +
+          "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+      )
+      .run(String(seedVersion));
+  }
+} catch (err) {
+  messageDb = null;
+  messageDbError = String(err && err.message ? err.message : err);
+  console.log(`Warning: the message library database could not be opened. ${messageDbError}`);
+}
+
 const HF_BIN = path.join(
   RENDER_ENGINE_DIR,
   "node_modules",
@@ -59,7 +149,9 @@ const RENDER_TIMEOUT_MS = 15 * 60 * 1000;
 
 const app = express();
 app.use(express.static(path.join(APP_DIR, "public")));
+app.use(express.json());
 app.use("/previews", express.static(path.join(APP_DIR, "previews")));
+app.use("/project-assets", express.static(PROJECTS_DIR));
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -285,7 +377,10 @@ const BACKGROUND_KEYS = [
   "sunset", "charcoal", "cream", "sky",
 ];
 const PHOTO_FRAME_KEYS = ["full", "thin", "polaroid", "rounded", "gold"];
-const PAPER_KEYS = ["classic", "white", "kraft", "blush", "mint", "sky"];
+const PAPER_KEYS = [
+  "classic", "white", "kraft", "blush", "mint", "sky",
+  "crumpled", "folder", "asymmetrical", "felt", "specialty",
+];
 const EFFECT_KEYS = ["none", "confetti", "sparkles", "hearts", "petals"];
 
 function clampNumber(value, fallback, min, max) {
@@ -376,6 +471,27 @@ function parseForm(body, photoCount, { requirePhotos }) {
   const effectPick = (value) =>
     EFFECT_KEYS.includes(text(value)) ? text(value) : "none";
 
+  // Text effects (Fonts tab): a scope plus three toggles with strength
+  // values, validated into the config.textFx shape the generator reads.
+  // Unknown scope falls back to "display"; missing strengths fall back
+  // to the slider defaults.
+  const fxOn = (value) => text(value) === "true";
+  const textFx = {
+    scope: text(body.textFxScope) === "all" ? "all" : "display",
+    shadow: {
+      on: fxOn(body.textFxShadowOn),
+      strength: Math.round(clampNumber(body.textFxShadowStrength, 50, 0, 100)),
+    },
+    glow: {
+      on: fxOn(body.textFxGlowOn),
+      strength: Math.round(clampNumber(body.textFxGlowStrength, 50, 0, 100)),
+    },
+    outline: {
+      on: fxOn(body.textFxOutlineOn),
+      width: Math.round(clampNumber(body.textFxOutlineWidth, 40, 0, 100)),
+    },
+  };
+
   // Per-photo settings, aligned by photo index. Missing or invalid
   // values fall back to the defaults that reproduce the original
   // montage, and every value is clamped to its control's range.
@@ -456,6 +572,7 @@ function parseForm(body, photoCount, { requirePhotos }) {
       closingEffect: effectPick(body.closingEffect),
       photoCollageEffect: effectPick(body.photoCollageEffect),
       textCollageEffect: effectPick(body.textCollageEffect),
+      textFx,
     },
   };
 }
@@ -490,6 +607,7 @@ function buildConfig(values) {
     },
     sceneOrder: values.sceneOrder,
     fonts: values.fonts,
+    textFx: values.textFx,
     messages: values.messages,
     occasion: "Birthday",
     photos: [],
@@ -686,6 +804,324 @@ app.post(
     }
   },
 );
+
+// -------------------------------------------------------- message bank ---
+// The whole library, grouped by tone and kind for the Smart generate
+// composer and the Library panel. Every line carries its database id.
+app.get("/api/message-bank", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "The message library is not available." });
+  }
+  try {
+    const rows = messageDb
+      .prepare("SELECT id, kind, tone, text, uses_name FROM message_lines ORDER BY id")
+      .all();
+    const tones = {};
+    for (const tone of MESSAGE_TONES) {
+      tones[tone] = { openers: [], middles: [], closers: [], shorts: [], closings: [] };
+    }
+    const groupByKind = Object.fromEntries(MESSAGE_GROUPS.map(([g, k]) => [k, g]));
+    for (const row of rows) {
+      const group = groupByKind[row.kind];
+      if (!group || !tones[row.tone]) continue;
+      const line = { id: row.id, text: row.text };
+      if (row.kind === "opener") line.usesName = Boolean(row.uses_name);
+      tones[row.tone][group].push(line);
+    }
+    res.json({ tones });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
+// Add one line to the library. The composer picks it up on its next
+// fetch, and the Library panel re-fetches right after adding.
+app.post("/api/message-bank/lines", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "The message library is not available." });
+  }
+  const body = req.body || {};
+  const kind = typeof body.kind === "string" ? body.kind.trim() : "";
+  const tone = typeof body.tone === "string" ? body.tone.trim() : "";
+  const lineText = typeof body.text === "string" ? body.text.trim() : "";
+  if (!MESSAGE_KINDS.includes(kind)) {
+    return res.status(400).json({ error: "Please pick a valid kind for the line." });
+  }
+  if (!MESSAGE_TONES.includes(tone)) {
+    return res.status(400).json({ error: "Please pick a valid tone for the line." });
+  }
+  if (!lineText) {
+    return res.status(400).json({ error: "The line cannot be empty." });
+  }
+  const maxLength = kind === "short" ? 280 : 600;
+  if (lineText.length > maxLength) {
+    return res
+      .status(400)
+      .json({ error: `The line is too long (keep it under ${maxLength} characters).` });
+  }
+  // The by-name flag only means anything on openers, whose text greets
+  // the celebrant through the {name} placeholder.
+  const usesName = kind === "opener" && body.usesName === true ? 1 : 0;
+  try {
+    const result = messageDb
+      .prepare("INSERT INTO message_lines (kind, tone, text, uses_name) VALUES (?, ?, ?, ?)")
+      .run(kind, tone, lineText, usesName);
+    res.json({ ok: true, id: Number(result.lastInsertRowid) });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
+app.delete("/api/message-bank/lines/:id", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "The message library is not available." });
+  }
+  const id = Number.parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) {
+    return res.status(404).json({ error: "Library line not found." });
+  }
+  try {
+    const result = messageDb
+      .prepare("DELETE FROM message_lines WHERE id = ?")
+      .run(id);
+    if (Number(result.changes) === 0) {
+      return res.status(404).json({ error: "Library line not found." });
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
+// -------------------------------------------------------------- projects ---
+// Save / load for whole editor states. A project is a folder under
+// app/projects/<slug>/ holding state.json (every form field, including
+// the per-photo settings and each photo's original file name) plus the
+// photo files (photo-01.jpg, ...) and the music file, if any. Saving
+// over an existing name replaces its folder. Projects are plain files
+// and survive restarts.
+function slugifyProjectName(name) {
+  return String(name || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function readProjectState(slug) {
+  const file = path.join(PROJECTS_DIR, slug, "state.json");
+  if (!existsSync(file)) return null;
+  try {
+    return JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+const projectField = (v) => (typeof v === "string" ? v : "");
+const projectArray = (v) => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
+const projectArrayOf = (v, length, fallback = "") => {
+  const arr = projectArray(v).map((x) => String(x ?? ""));
+  while (arr.length < length) arr.push(fallback);
+  return arr.slice(0, length);
+};
+
+app.post(
+  "/api/projects",
+  upload.fields([
+    { name: "photos", maxCount: 20 },
+    { name: "music", maxCount: 1 },
+  ]),
+  (req, res) => {
+    try {
+      const body = req.body || {};
+      const name = projectField(body.projectName).trim();
+      if (!name) return res.status(400).json({ error: "Please enter a project name." });
+      const slug = slugifyProjectName(name);
+      if (!slug) {
+        return res.status(400).json({ error: "Please enter a project name with letters or numbers." });
+      }
+      const files = (req.files && req.files.photos) || [];
+      const musicUpload = ((req.files && req.files.music) || [])[0] || null;
+
+      // Photo files are stored in order with generated names that keep
+      // each file's extension; the original names ride along in state.
+      const extByMime = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+      };
+      const collageSet = new Set(
+        projectArray(body.collageIndexes)
+          .map((v) => Number.parseInt(v, 10))
+          .filter((n) => Number.isInteger(n)),
+      );
+      const captions = projectArray(body.captions);
+      const durations = projectArray(body.photoDurations);
+      const zooms = projectArray(body.photoZooms);
+      const focusXs = projectArray(body.photoFocusX);
+      const focusYs = projectArray(body.photoFocusY);
+      const brightnesses = projectArray(body.photoBrightness);
+      const saturations = projectArray(body.photoSaturation);
+      const frames = projectArray(body.photoFrames);
+      const photos = files.map((file, i) => {
+        const extFromName = path.extname(file.originalname || "").toLowerCase();
+        const ext = [".jpg", ".jpeg", ".png", ".webp"].includes(extFromName)
+          ? extFromName
+          : extByMime[file.mimetype] || ".jpg";
+        return {
+          buffer: file.buffer,
+          stored: {
+            file: `photo-${String(i + 1).padStart(2, "0")}${ext}`,
+            name: file.originalname || `photo-${i + 1}${ext}`,
+            caption: String(captions[i] ?? ""),
+            inCollage: collageSet.has(i),
+            duration: Math.round(clampNumber(durations[i], 5, 2, 12)),
+            zoom: clampNumber(zooms[i], 115, 100, 150),
+            focusX: clampNumber(focusXs[i], 50, 0, 100),
+            focusY: clampNumber(focusYs[i], 50, 0, 100),
+            brightness: clampNumber(brightnesses[i], 100, 80, 120),
+            saturation: clampNumber(saturations[i], 100, 0, 150),
+            frame: PHOTO_FRAME_KEYS.includes(projectField(frames[i]).trim())
+              ? projectField(frames[i]).trim()
+              : "full",
+          },
+        };
+      });
+
+      let music = null;
+      if (musicUpload) {
+        const musicExtFromName = path.extname(musicUpload.originalname || "").toLowerCase();
+        const musicExtByMime = {
+          "audio/mpeg": ".mp3",
+          "audio/mp4": ".m4a",
+          "audio/x-m4a": ".m4a",
+          "audio/wav": ".wav",
+          "audio/x-wav": ".wav",
+          "audio/wave": ".wav",
+          "audio/ogg": ".ogg",
+          "audio/vorbis": ".ogg",
+        };
+        const musicExt = [".mp3", ".m4a", ".wav", ".ogg"].includes(musicExtFromName)
+          ? musicExtFromName
+          : musicExtByMime[musicUpload.mimetype] || ".mp3";
+        music = {
+          buffer: musicUpload.buffer,
+          stored: { file: `music${musicExt}`, name: musicUpload.originalname || `music${musicExt}` },
+        };
+      }
+
+      const state = {
+        name,
+        savedAt: new Date().toISOString(),
+        fields: {
+          celebrantName: projectField(body.celebrantName),
+          titleDuration: projectField(body.titleDuration),
+          titleEffect: projectField(body.titleEffect),
+          closingDuration: projectField(body.closingDuration),
+          closingEffect: projectField(body.closingEffect),
+          closingLine: projectField(body.closingLine),
+          closingSignOff: projectField(body.closingSignOff),
+          closingPaper: projectField(body.closingPaper),
+          collageHeading: projectField(body.collageHeading),
+          collageEnabled: projectField(body.collageEnabled) === "true",
+          photoCollageDuration: projectField(body.photoCollageDuration),
+          photoCollageEffect: projectField(body.photoCollageEffect),
+          textCollageEnabled: projectField(body.textCollageEnabled) === "true",
+          textCollageHeading: projectField(body.textCollageHeading),
+          textCollageDuration: projectField(body.textCollageDuration),
+          textCollageEffect: projectField(body.textCollageEffect),
+          sceneOrder: projectField(body.sceneOrder),
+          cardTexts: projectArrayOf(body.cardTexts, 4),
+          cardFroms: projectArrayOf(body.cardFroms, 4),
+          musicVolume: projectField(body.musicVolume),
+          fontName: projectField(body.fontName),
+          fontHeadings: projectField(body.fontHeadings),
+          fontCaptions: projectField(body.fontCaptions),
+          fontMessages: projectField(body.fontMessages),
+          textFxScope: projectField(body.textFxScope),
+          textFxShadowOn: projectField(body.textFxShadowOn) === "true",
+          textFxShadowStrength: projectField(body.textFxShadowStrength),
+          textFxGlowOn: projectField(body.textFxGlowOn) === "true",
+          textFxGlowStrength: projectField(body.textFxGlowStrength),
+          textFxOutlineOn: projectField(body.textFxOutlineOn) === "true",
+          textFxOutlineWidth: projectField(body.textFxOutlineWidth),
+          background: projectField(body.background),
+          message1Text: projectField(body.message1Text),
+          message1SignedBy: projectField(body.message1SignedBy),
+          message2Text: projectField(body.message2Text),
+          message2SignedBy: projectField(body.message2SignedBy),
+          messageDurations: projectArrayOf(body.messageDurations, 2),
+          messagePapers: projectArrayOf(body.messagePapers, 2),
+          messageEffects: projectArrayOf(body.messageEffects, 2),
+        },
+        photos: photos.map((p) => p.stored),
+        music: music ? music.stored : null,
+      };
+
+      // Save-over replaces the whole folder, so stale assets from a
+      // bigger earlier save never linger.
+      const dir = path.join(PROJECTS_DIR, slug);
+      rmSync(dir, { recursive: true, force: true });
+      mkdirSync(dir, { recursive: true });
+      for (const p of photos) writeFileSync(path.join(dir, p.stored.file), p.buffer);
+      if (music) writeFileSync(path.join(dir, music.stored.file), music.buffer);
+      writeFileSync(path.join(dir, "state.json"), JSON.stringify(state, null, 2));
+
+      res.json({ ok: true, slug, name, savedAt: state.savedAt });
+    } catch (err) {
+      res.status(500).json({ error: String(err && err.message ? err.message : err) });
+    }
+  },
+);
+
+app.get("/api/projects", (req, res) => {
+  const out = [];
+  for (const entry of readdirSync(PROJECTS_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const state = readProjectState(entry.name);
+    if (!state) continue;
+    out.push({
+      slug: entry.name,
+      name: state.name || entry.name,
+      savedAt: state.savedAt || null,
+      photoCount: Array.isArray(state.photos) ? state.photos.length : 0,
+      hasMusic: Boolean(state.music),
+    });
+  }
+  out.sort((a, b) => String(b.savedAt || "").localeCompare(String(a.savedAt || "")));
+  res.json(out);
+});
+
+app.get("/api/projects/:slug", (req, res) => {
+  const slug = req.params.slug;
+  if (!/^[a-z0-9-]+$/.test(slug)) return res.status(404).json({ error: "Project not found." });
+  const state = readProjectState(slug);
+  if (!state) return res.status(404).json({ error: "Project not found." });
+  res.json({
+    slug,
+    name: state.name,
+    savedAt: state.savedAt,
+    fields: state.fields || {},
+    photos: (state.photos || []).map((p) => ({
+      ...p,
+      url: `/project-assets/${slug}/${p.file}`,
+    })),
+    music: state.music || null,
+    musicUrl: state.music ? `/project-assets/${slug}/${state.music.file}` : null,
+  });
+});
+
+app.delete("/api/projects/:slug", (req, res) => {
+  const slug = req.params.slug;
+  if (!/^[a-z0-9-]+$/.test(slug)) return res.status(404).json({ error: "Project not found." });
+  const dir = path.join(PROJECTS_DIR, slug);
+  if (!existsSync(path.join(dir, "state.json"))) {
+    return res.status(404).json({ error: "Project not found." });
+  }
+  rmSync(dir, { recursive: true, force: true });
+  res.json({ ok: true });
+});
 
 function loadJob(req, res) {
   const id = req.params.id;

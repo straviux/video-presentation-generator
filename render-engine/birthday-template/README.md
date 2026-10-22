@@ -62,6 +62,18 @@ each pick (a similar serif, sans, or cursive). Script picks (`greatvibes`,
 `caveat`) used for the name get an automatic size bump, since script faces
 run small at the title size.
 
+## Text effects
+
+`config.textFx` can dress the text with a soft drop shadow, a warm gold
+glow, and an outline, each with its own `on` flag and a 0 to 100 strength
+(`width` for the outline). `scope` picks the slots: `display` covers the
+name and headings slots, `all` adds captions and messages. The shadow and
+glow merge into a single `text-shadow` per surface; the outline is drawn
+with `-webkit-text-stroke`, off-white over the dark background presets
+and deep ink over the paper cards and the light presets, with the name's
+stroke clamped to 2px so script faces keep their counters open. All
+effects default to off, which emits no extra CSS at all.
+
 ## Scene timing
 
 The video is a title card, four middle blocks, and a closing card. The
@@ -138,8 +150,10 @@ full-bleed ones; the white layer covers the whole canvas.
 ## Paper styles
 
 Message cards and the closing card can each pick a paper with `paper`
-(on each `messages[]` entry, and `closingPaper` at the top level). All
-six are light papers, so the dark ink stays readable on every one:
+(on each `messages[]` entry, and `closingPaper` at the top level). Every
+paper stays light enough for the standard dark ink, except `folder`,
+whose deeper manila tone switches the card's text to a dark warm brown
+through the paper's own ink variables:
 
 - `classic` (default): the original warm cream gradient with grain.
 - `white`: clean near-white, minimal grain.
@@ -147,6 +161,17 @@ six are light papers, so the dark ink stays readable on every one:
 - `blush`: soft pink.
 - `mint`: soft green.
 - `sky`: soft blue.
+- `crumpled`: warm white with crossing crease bands and a heavier
+  grain, like a sheet smoothed back out.
+- `folder`: manila folder tan with a raised tab along the top edge and
+  a darker edge line; the ink turns deep brown (#3d2a10).
+- `asymmetrical`: the classic warm paper under the closing card's torn,
+  irregular outline; on message cards the tape strip tucks inside the
+  safe area so the torn edge cannot cut it.
+- `felt`: muted sage-grey-green with a dense, soft fibre noise; calm
+  and matte.
+- `specialty`: elegant ivory with a fine gold speckle and a thin double
+  gold border inset, like formal stationery.
 
 Unknown keys fall back to `classic`. Text collage cards always use
 `classic`.

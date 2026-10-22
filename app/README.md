@@ -48,7 +48,8 @@ no environment variables to set, on any platform.
    exactly as it should appear on the title card), how long the title
    and closing cards stay, the closing line and sign-off, and the
    closing card's paper: Classic cream, Clean white, Kraft tan, Blush
-   pink, Mint green, or Sky blue. The title and closing cards can each
+   pink, Mint green, Sky blue, Crumpled, Folder, Asymmetrical, Felt,
+   or Specialty. The title and closing cards can each
    also carry an optional animated Effect: Confetti, Sparkles, Hearts,
    or Petals.
 3. **Photos.** Add JPG, PNG, or WebP photos.
@@ -68,15 +69,26 @@ no environment variables to set, on any platform.
    - For the photo collage, tick exactly 3 photos, or untick the photo
      collage switch in the Collage tab to skip that scene entirely.
 4. **Messages.** Up to two message cards. Each one has its own length
-   (6 seconds by default), its own paper, picked from the same six
+   (6 seconds by default), its own paper, picked from the same eleven
    papers as the closing card, and its own optional Effect. Leave a message blank to skip it. The
-   Scenes tab decides where in the video they play.
+   Scenes tab decides where in the video they play. The Smart generate
+   row at the top of the tab writes ready-made messages for you: pick a
+   tone (Warm, Grateful, Playful, or Formal) and it fills both messages
+   with lines composed from the message library (see Message library
+   below), greeting the
+   celebrant by first name when one is entered. The same tone drives
+   the small Generate buttons under each greeting card in the Collage
+   tab and beside the closing line in the Details tab. Signers are
+   never overwritten.
 5. **Fonts.** Use the Fonts tab to pick a font for each kind of text: the
    celebrant name, the headings, the captions, and the message text.
    Press Update preview above the stage to see your picks in the real
    design. Picks beyond the two built-in stacks
    load from Google Fonts, so keep the machine online while rendering;
-   offline, the video falls back to similar system fonts.
+   offline, the video falls back to similar system fonts. The same tab
+   holds Text effects: an optional shadow, glow, and outline for the
+   video's text, each with its own switch and strength, applied either
+   to the display text (the name and headings) or to all text.
 6. **Background.** In the Background tab, pick one of eight backdrops
    for the title, collage, message, and closing scenes: five animated
    (Deep Green, Emerald, Midnight, Royal, Sunset), two flat colors
@@ -121,6 +133,30 @@ no environment variables to set, on any platform.
    video, so keep the page open. When it finishes, the video plays right on
    the page and the Download MP4 button saves the file.
 
+## Saved projects
+
+The Projects tab saves the whole editor under a name: every field,
+every photo with its caption and per-photo settings, the music track,
+and the volume. Loading a project brings it all back exactly as it was
+left. Saving with a name that already exists replaces the older copy;
+the page asks first. Each project is a folder in `app/projects/<slug>/`
+holding a `state.json` plus copies of the photos and the music file, so
+projects survive restarts, and you can back one up by copying its
+folder. Projects are your own data on this machine: the projects folder
+is gitignored and nothing in it is uploaded anywhere.
+
+## Message library
+
+The lines Smart generate composes from live in a small SQLite database
+at `app/data/messages.db`, served by the app itself. On first run the
+database is seeded from the curated lines in `app/lib/message-banks.json`
+(four tones, with openers, middles, closers, short lines, and closing
+lines). Later seed updates only add lines that are not already there;
+they never remove anything, so your own additions are safe. Manage the
+library in the Library tab: filter by tone and kind, add your own
+lines, and delete ones you no longer want. The composer uses a new line
+right away.
+
 ## Where things land
 
 - Every run is a **job** in `app/jobs/<job-id>/`, holding the uploaded
@@ -131,6 +167,8 @@ no environment variables to set, on any platform.
 - The exact preview stages into `app/previews/current/`, wiped and rebuilt
   on every preview. It is working state, not a deliverable; delete the
   `previews` folder whenever you like.
+- Saved projects live in `app/projects/<slug>/` (see Saved projects
+  above).
 - Only **one video renders at a time**. If you press Generate while another
   video is rendering, the app says so and asks you to wait.
 

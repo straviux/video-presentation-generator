@@ -15,5 +15,12 @@ renders/
 # Per-job working directories (uploads, logs, job state)
 app/jobs/
 
+# Saved projects and preview staging (user data and scratch, per machine)
+app/projects/
+app/previews/
+
+# Message library database (seeded from app/lib/message-banks.json)
+app/data/
+
 # Logs
 *.log

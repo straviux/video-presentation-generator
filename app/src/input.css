@@ -233,7 +233,14 @@ select {
   height: 14px;
 }
 
-/* Scene summary list (rows built by JS) */
+/* Project rows in the Projects panel (built by JS) */
+.project-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-top: 1px solid #e3e3ea;
+}
 .scene-list li {
   display: flex;
   justify-content: space-between;

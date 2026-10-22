@@ -37,11 +37,16 @@ const TITLE_DUR = clampNum(config.titleDuration, 5, 3, 10);
 const CLOSING_DUR = clampNum(config.closingDuration, 8, 4, 15);
 
 // ----------------------------------------------------------- paper styles --
-// Light paper treatments for the message and closing cards. A card picks
-// one with paper: "<key>" in the config; anything unknown falls back to
-// classic (the original warm gradient plus grain). All six stay light, so
-// the existing dark ink remains valid on every one.
-const PAPER_KEYS = ["classic", "white", "kraft", "blush", "mint", "sky"];
+// Paper treatments for the message and closing cards. A card picks one
+// with paper: "<key>" in the config; anything unknown falls back to
+// classic (the original warm gradient plus grain). Every paper stays
+// light enough for the standard dark ink, except folder (manila), which
+// overrides the ink through the --paper-ink variables (see the paper CSS
+// near the end of the document styles).
+const PAPER_KEYS = [
+  "classic", "white", "kraft", "blush", "mint", "sky",
+  "crumpled", "folder", "asymmetrical", "felt", "specialty",
+];
 function pickPaper(value) {
   return PAPER_KEYS.includes(value) ? value : "classic";
 }
@@ -475,14 +480,111 @@ const BACKGROUND_REGISTRY = {
     orbs: { a: "rgba(255, 255, 255, 0.5)", b: "rgba(255, 255, 255, 0.35)" },
     ink: "#173a52", inkSoft: "#47637a", line: "#256d9e", accent: "#c98f1f" },
 };
-const BACKGROUND = BACKGROUND_REGISTRY[
-  typeof config.background === "string" && BACKGROUND_REGISTRY[config.background] ? config.background : "deep-green"
-];
+const BACKGROUND_KEY =
+  typeof config.background === "string" && BACKGROUND_REGISTRY[config.background]
+    ? config.background
+    : "deep-green";
+const BACKGROUND = BACKGROUND_REGISTRY[BACKGROUND_KEY];
+const BG_IS_LIGHT = BACKGROUND_KEY === "cream" || BACKGROUND_KEY === "sky";
 const HAS_ORBS = BACKGROUND.orbs !== null;
 const ORBS_ANIMATED = HAS_ORBS && BACKGROUND.type === "animated";
 const ORB_A = HAS_ORBS ? `<div class="orb orb-a"></div>` : "";
 const ORB_B = HAS_ORBS ? `<div class="orb orb-b"></div>` : "";
 
+
+
+// ------------------------------------------------------------ text effects --
+// Optional treatment for the video's text, from config.textFx: a soft
+// drop shadow, a warm gold glow, and an outline, each with its own toggle
+// and a 0-100 strength. Scope "display" covers the name and headings
+// slots (title name and greeting, the title and closing eyebrows, the
+// collage headings, the greeting card signers, the closing line); scope
+// "all" adds the captions and messages slots. Everything off (the
+// default) emits no extra CSS at all, so the original look is untouched.
+function fxPart(value) {
+  return value && typeof value === "object" ? value : {};
+}
+const TEXTFX_RAW = fxPart(config.textFx);
+const TEXTFX = {
+  scope: TEXTFX_RAW.scope === "all" ? "all" : "display",
+  shadow: {
+    on: fxPart(TEXTFX_RAW.shadow).on === true,
+    strength: clampNum(fxPart(TEXTFX_RAW.shadow).strength, 50, 0, 100),
+  },
+  glow: {
+    on: fxPart(TEXTFX_RAW.glow).on === true,
+    strength: clampNum(fxPart(TEXTFX_RAW.glow).strength, 50, 0, 100),
+  },
+  outline: {
+    on: fxPart(TEXTFX_RAW.outline).on === true,
+    width: clampNum(fxPart(TEXTFX_RAW.outline).width, 40, 0, 100),
+  },
+};
+
+// The fx CSS hangs on the elements that carry each slot's font, split by
+// what the text sits on: the scene background, or the paper cards and
+// polaroid stock. The split matters for the outline (drawn with
+// -webkit-text-stroke): off-white reads over the dark background
+// presets and deep ink over paper, while the light background presets
+// (cream, sky) take deep ink on the background too. The glow follows the
+// same split: warm gold over dark backdrops, a deeper gold anywhere the
+// backing is light. The name's stroke is clamped to 2px so script faces
+// keep their counters open.
+function buildTextFxCss() {
+  const fx = TEXTFX;
+  if (!fx.shadow.on && !fx.glow.on && !fx.outline.on) return "";
+  const bgSelectors = [".name-line", "#title-eyebrow", "#title-greeting", ".collage-heading"];
+  const paperSelectors = [".scrap-eyebrow", ".closing-line", ".greet-from"];
+  if (fx.scope === "all") {
+    bgSelectors.push(".caption-bar");
+    paperSelectors.push(
+      ".photo-pol-cap", ".polaroid figcaption",
+      ".quote-mark", ".msg-text", ".msg-sign", ".greet-text",
+    );
+  }
+  const rules = [];
+  if (fx.shadow.on || fx.glow.on) {
+    const shadowFor = (glowRgb) => {
+      const layers = [];
+      if (fx.shadow.on) {
+        const s = fx.shadow.strength;
+        const blur = Math.round(4 + s * 0.36);
+        const y = Math.round(2 + s * 0.14);
+        const alpha = (0.35 + (s / 100) * 0.2).toFixed(2);
+        layers.push(`0 ${y}px ${blur}px rgba(8, 18, 12, ${alpha})`);
+      }
+      if (fx.glow.on) {
+        const s = fx.glow.strength;
+        const blur = Math.round(6 + s * 0.5);
+        layers.push(`0 0 ${blur}px rgba(${glowRgb}, 0.75)`);
+        layers.push(`0 0 ${blur * 2}px rgba(${glowRgb}, 0.4)`);
+      }
+      return layers.join(", ");
+    };
+    const GOLD = "243, 201, 107";
+    const DEEP_GOLD = "172, 124, 8";
+    rules.push(`${bgSelectors.join(", ")} { text-shadow: ${shadowFor(BG_IS_LIGHT ? DEEP_GOLD : GOLD)}; }`);
+    rules.push(`${paperSelectors.join(", ")} { text-shadow: ${shadowFor(DEEP_GOLD)}; }`);
+  }
+  if (fx.outline.on) {
+    const w = 0.5 + (fx.outline.width / 100) * 2.5;
+    const wText = String(Math.round(w * 100) / 100);
+    const nameW = String(Math.round(Math.min(w, 2) * 100) / 100);
+    const bgColor = BG_IS_LIGHT ? "#22301f" : "#f7f3e8";
+    rules.push(`.name-line { -webkit-text-stroke: ${nameW}px ${bgColor}; }`);
+    const bgRest = bgSelectors.filter((sel) => sel !== ".name-line");
+    if (bgRest.length) {
+      rules.push(`${bgRest.join(", ")} { -webkit-text-stroke: ${wText}px ${bgColor}; }`);
+    }
+    rules.push(`${paperSelectors.join(", ")} { -webkit-text-stroke: ${wText}px #22301f; }`);
+  }
+  return `
+      /* Text effects from config.textFx (see the generator notes):
+         shadow and glow merge into one text-shadow per surface group,
+         the outline rides on its own property. */
+      ${rules.join("\n      ")}`;
+}
+const TEXT_FX_CSS = buildTextFxCss();
 
 // ------------------------------------------------------------ title card ---
 function buildTitle(s) {
@@ -912,6 +1014,7 @@ const html = `<!doctype html>
       .fx-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
       .fx-piece { position: absolute; display: block; pointer-events: none; }
       .fx-piece svg { display: block; width: 100%; height: 100%; }
+${TEXT_FX_CSS}
       /* Soft edge darkening over photos, faded in by GSAP per scene. */
       .vignette {
         position: absolute; inset: 0; pointer-events: none; opacity: 0;
@@ -1050,6 +1153,26 @@ const html = `<!doctype html>
       .paper-blush { background: var(--paper-grain), linear-gradient(165deg, #fceff1 0%, #f7dee1 58%, #f0cdd2 100%); }
       .paper-mint { background: var(--paper-grain), linear-gradient(165deg, #f0f8ed 0%, #dff0da 58%, #cbe5c6 100%); }
       .paper-sky { background: var(--paper-grain), linear-gradient(165deg, #eef5fc 0%, #dcedf8 58%, #c6dff2 100%); }
+      /* Crumpled: a warm white sheet smoothed back out. The grain rides
+         twice for a heavier tooth, and three soft diagonal crease bands
+         (a dark line with a light shoulder) cross the surface. */
+      .paper-crumpled { background: var(--paper-grain), var(--paper-grain), linear-gradient(37deg, rgba(0, 0, 0, 0) 45%, rgba(122, 100, 58, 0.10) 48.5%, rgba(255, 255, 255, 0.22) 51%, rgba(0, 0, 0, 0) 55%), linear-gradient(143deg, rgba(0, 0, 0, 0) 57%, rgba(122, 100, 58, 0.08) 60.5%, rgba(255, 255, 255, 0.17) 63%, rgba(0, 0, 0, 0) 67%), linear-gradient(96deg, rgba(0, 0, 0, 0) 29%, rgba(122, 100, 58, 0.07) 32.5%, rgba(255, 255, 255, 0.14) 35%, rgba(0, 0, 0, 0) 39%), radial-gradient(ellipse at 28% 18%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%), radial-gradient(ellipse at 76% 86%, rgba(110, 90, 50, 0.13), rgba(110, 90, 50, 0) 60%), linear-gradient(165deg, #faf6ec 0%, #f3edda 58%, #e9e0c6 100%); }
+      /* Folder: manila folder stock. The raised tab along the top edge is
+         drawn by the extras block after the card styles; here the paper
+         carries its own deep brown ink through the --paper-ink vars. */
+      .paper-folder { --paper-ink: #3d2a10; --paper-ink-soft: #68491a; --paper-accent: #8a5a1e; background: var(--paper-grain), linear-gradient(180deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0) 16%), linear-gradient(165deg, #e2b26a 0%, #d9a860 55%, #cd9947 100%); }
+      /* Asymmetrical: the classic warm paper under the closing card's
+         torn, irregular clip-path (applied in the extras block). */
+      .paper-asymmetrical { background: var(--paper-grain), linear-gradient(165deg, #f8f0dc 0%, #f1e5c9 58%, #ecdcba 100%); }
+      /* Felt: muted sage-grey-green fibres. A second, coarser and softer
+         noise layer (lower frequency, gentler alpha) is mixed with the
+         shared grain for a dense, matte tooth. */
+      .paper-felt { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.30 0 0 0 0 0.33 0 0 0 0 0.24 0 0 0 0.06 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>"), var(--paper-grain), linear-gradient(165deg, #edf0e8 0%, #dde3d3 58%, #c8d1ba 100%); }
+      /* Specialty: formal ivory stationery with a fine gold speckle. The
+         double gold border inset is drawn with box-shadow in the extras
+         block; background sizes/offsets keep the two speckle tiles from
+         lining up into a pattern. */
+      .paper-specialty { background: var(--paper-grain), radial-gradient(circle, rgba(160, 118, 26, 0.20) 1.6px, rgba(160, 118, 26, 0) 2.4px), radial-gradient(circle, rgba(160, 118, 26, 0.13) 1.2px, rgba(160, 118, 26, 0) 2px), linear-gradient(165deg, #fdfaf1 0%, #f8f2e0 58%, #f0e6cb 100%); background-size: auto, 92px 92px, 148px 148px, auto; background-position: 0 0, 12px 18px, 48px 70px, 0 0; }
       /* Message cards */
       /* Message cards wear the same paper as the closing scrapbook card:
          warm gradient plus a faint SVG-noise grain, so the text sits on
@@ -1073,12 +1196,12 @@ const html = `<!doctype html>
         background: linear-gradient(100deg, rgba(238, 205, 116, 0.62), rgba(228, 190, 96, 0.5));
         box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
       }
-      .quote-mark { font-family: var(--font-messages); font-size: 96px; line-height: 0.6; color: #ac8a21; margin-bottom: 39px; }
-      .msg-text { font-family: var(--font-messages); font-size: 46.5px; line-height: 1.5; color: #22301f; }
+      .quote-mark { font-family: var(--font-messages); font-size: 96px; line-height: 0.6; color: var(--paper-accent, #ac8a21); margin-bottom: 39px; }
+      .msg-text { font-family: var(--font-messages); font-size: 46.5px; line-height: 1.5; color: var(--paper-ink, #22301f); }
       .msg-sign {
         font-family: var(--font-messages);
         font-size: 28.5px; letter-spacing: 0.08em; text-transform: uppercase;
-        color: #7a6a35; margin-top: 45px;
+        color: var(--paper-ink-soft, #7a6a35); margin-top: 45px;
       }
       /* Closing: scrapbook card with torn edges and tape strips */
       .scrap-wrap {
@@ -1092,13 +1215,13 @@ const html = `<!doctype html>
         padding: 88px 100px 80px;
         text-align: center;
       }
-      .scrap-eyebrow { color: #a07d1e; }
-      .closing-line { font-family: var(--font-headings); font-size: 69px; line-height: 1.3; font-weight: 700; max-width: 1180px; margin: 0 auto; color: #26331f; }
-      .scrap-rule { background: #b08a1e; margin-left: auto; margin-right: auto; }
+      .scrap-eyebrow { color: var(--paper-accent, #a07d1e); }
+      .closing-line { font-family: var(--font-headings); font-size: 69px; line-height: 1.3; font-weight: 700; max-width: 1180px; margin: 0 auto; color: var(--paper-ink, #26331f); }
+      .scrap-rule { background: var(--paper-accent, #b08a1e); margin-left: auto; margin-right: auto; }
       .closing-sign {
         font-family: Georgia, "Times New Roman", serif;
         font-style: italic; font-size: 37.5px; letter-spacing: 0.02em;
-        color: #6d5a22;
+        color: var(--paper-ink-soft, #6d5a22);
       }
       .tape {
         position: absolute; top: -26px; width: 246px; height: 56px;
@@ -1107,6 +1230,34 @@ const html = `<!doctype html>
       }
       .tape-left { left: 46px; }
       .tape-right { right: 46px; }
+      /* Paper extras that need the card rules above to be in place.
+         Folder: a raised tab along the top edge, riding behind the card
+         face. The message card draws its own tab; the closing card is
+         clipped by its torn outline, so its tab hangs on the wrap
+         instead (the wrap paints it behind the card). Both get the
+         darker manila edge line. */
+      .msg-card.paper-folder, .scrap-card.paper-folder { border: 1px solid rgba(96, 64, 18, 0.45); }
+      .msg-card.paper-folder::before,
+      .scrap-wrap:has(> .scrap-card.paper-folder)::before {
+        content: ""; position: absolute; z-index: -1;
+        top: -25px; left: 72px; width: 320px; height: 32px;
+        border-radius: 12px 16px 0 0;
+        background: linear-gradient(180deg, #ecc47c 0%, #e0b26a 100%);
+        border: 1px solid rgba(96, 64, 18, 0.35); border-bottom: none;
+      }
+      /* Specialty: the double gold border inset. The message card needs
+         its outer shadow restated alongside the insets; the closing
+         card takes the insets alone. */
+      .paper-specialty { box-shadow: inset 0 0 0 2px rgba(160, 118, 26, 0.5), inset 0 0 0 11px rgba(253, 250, 241, 0.85), inset 0 0 0 13px rgba(160, 118, 26, 0.35); }
+      .msg-card.paper-specialty { box-shadow: 0 45px 90px rgba(0, 0, 0, 0.4), inset 0 0 0 2px rgba(160, 118, 26, 0.5), inset 0 0 0 11px rgba(253, 250, 241, 0.85), inset 0 0 0 13px rgba(160, 118, 26, 0.35); }
+      /* Asymmetrical: message cards take the closing card's torn
+         outline. A clip-path would also clip the card's own shadow, so
+         the lift comes back as a drop-shadow filter on the silhouette,
+         and the tape strip moves inside the safe area so the torn edge
+         cannot cut it off. (The closing card already wears this
+         outline, so its asymmetrical paper only changes the surface.) */
+      .msg-card.paper-asymmetrical { clip-path: polygon(1% 3%, 6% 1%, 12% 2.4%, 20% 0.8%, 29% 2%, 38% 1%, 47% 2.2%, 56% 0.9%, 65% 2%, 74% 1.1%, 83% 2.3%, 91% 1%, 98.6% 2.6%, 99.4% 12%, 98.7% 24%, 99.5% 38%, 98.8% 52%, 99.4% 66%, 98.7% 80%, 99.3% 92%, 97% 98.6%, 88% 99.3%, 78% 98.5%, 68% 99.4%, 58% 98.6%, 48% 99.5%, 38% 98.7%, 28% 99.3%, 18% 98.5%, 9% 99.4%, 1.6% 98.2%, 0.6% 88%, 1.3% 74%, 0.5% 60%, 1.2% 45%, 0.6% 30%, 1.3% 16%); filter: drop-shadow(0 34px 34px rgba(0, 0, 0, 0.35)); }
+      .msg-card.paper-asymmetrical .msg-tape { top: 14px; }
     </style>
   </head>
   <body>

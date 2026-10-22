@@ -1,0 +1,257 @@
+{
+  "version": 1,
+  "tones": {
+    "warm": {
+      "openers": [
+        {
+          "text": "Happy birthday, {name}!",
+          "usesName": true
+        },
+        {
+          "text": "Happiest of birthdays, {name}!",
+          "usesName": true
+        },
+        {
+          "text": "It is your day, {name}, and we are so glad to celebrate you.",
+          "usesName": true
+        },
+        {
+          "text": "Happy birthday!",
+          "usesName": false
+        },
+        {
+          "text": "Wishing you the happiest of birthdays!",
+          "usesName": false
+        },
+        {
+          "text": "Today we celebrate a truly wonderful person.",
+          "usesName": false
+        }
+      ],
+      "middles": [
+        "You bring so much warmth and light to everyone around you, and the office is a better place because of you.",
+        "Your kindness is the quiet kind that holds everything together, and we notice it every single day.",
+        "Working with you makes the busy days lighter and the ordinary days brighter.",
+        "You lead with patience and heart, and all of us are grateful for it.",
+        "Your good humor and steady presence mean more to this team than you know.",
+        "Thank you for the care you put into everything you do and everyone you work with."
+      ],
+      "closers": [
+        "We hope this year gives back all the kindness you share so freely.",
+        "May your year be filled with good health, good food, and the people you love most.",
+        "Here is to another year of laughter, good work, and small celebrations.",
+        "Enjoy every minute of your day. You have more than earned it.",
+        "We are cheering you on today and always."
+      ],
+      "shorts": [
+        "Happy birthday! Your kindness keeps this whole office going.",
+        "Wishing you a day as warm as the welcome you give everyone.",
+        "Thank you for making this workplace feel like family. Happy birthday!",
+        "May your year be gentle, joyful, and full of good people.",
+        "Happy birthday to someone who makes every day brighter.",
+        "Your warmth is a gift to all of us. Enjoy your special day!",
+        "Here is to good health, good company, and a very happy birthday.",
+        "We are grateful for you today and every day. Happy birthday!",
+        "Wishing you laughter, rest, and everything you love most.",
+        "Happy birthday! The office is warmer because you are in it."
+      ],
+      "closings": [
+        "Wishing you a year as warm and generous as you are.",
+        "May your year ahead be full of the same kindness you share with everyone.",
+        "Here is to a year of good health, good days, and people who love you.",
+        "May every day this year be as bright as you make ours.",
+        "Wishing you all the warmth and happiness you so freely give.",
+        "To another year of laughter, growth, and good company."
+      ]
+    },
+    "grateful": {
+      "openers": [
+        {
+          "text": "Happy birthday, {name}, and thank you for everything.",
+          "usesName": true
+        },
+        {
+          "text": "On your birthday, {name}, we just want to say thank you.",
+          "usesName": true
+        },
+        {
+          "text": "Happiest birthday, {name}. Today is our turn to give back.",
+          "usesName": true
+        },
+        {
+          "text": "Today we celebrate you, with full and grateful hearts.",
+          "usesName": false
+        },
+        {
+          "text": "Happy birthday, and thank you for all that you do.",
+          "usesName": false
+        },
+        {
+          "text": "Some people make everything better just by being there, and today we say thank you to one of them.",
+          "usesName": false
+        }
+      ],
+      "middles": [
+        "Your guidance, patience, and generosity have carried this team through more than you know.",
+        "Every deadline met and every problem solved has your steady hand behind it.",
+        "You give your time, your ideas, and your encouragement without ever asking for anything back.",
+        "The work is better, and the workplace is kinder, because of the way you show up every day.",
+        "Your support lifts the people around you, and your example sets the tone for all of us.",
+        "We have learned so much from working beside you, and we are thankful for every bit of it."
+      ],
+      "closers": [
+        "May this year return to you even a portion of what you have given to us.",
+        "We hope you feel, today, how deeply appreciated you are.",
+        "Wishing you rest, joy, and a year as generous as you are.",
+        "Thank you, and happy birthday. We are lucky to have you.",
+        "Here is to you, with gratitude today and every day."
+      ],
+      "shorts": [
+        "Thank you for leading with patience and heart. Happy birthday!",
+        "Happy birthday, and thank you for all the ways you lift this team.",
+        "Your hard work never goes unnoticed. Thank you, and happy birthday!",
+        "Grateful for your guidance today and always. Happy birthday!",
+        "Thank you for giving so much of yourself to this work. Enjoy your day!",
+        "Happy birthday to a colleague we truly appreciate.",
+        "Your dedication inspires us. Thank you, and happy birthday!",
+        "We owe you many thanks, and today we add one more: happy birthday!",
+        "Thank you for your kindness, your wisdom, and your steady hand.",
+        "Happy birthday! Working with you is something we are thankful for."
+      ],
+      "closings": [
+        "With grateful hearts, we wish you a wonderful year ahead.",
+        "Thank you for everything, and may this year give back to you in kind.",
+        "May you receive this year even a portion of the good you have given.",
+        "Our thanks goes with you into a year that we hope is your best yet.",
+        "Wishing you a year filled with the appreciation you so richly deserve.",
+        "With gratitude today and always, happy birthday and best wishes."
+      ]
+    },
+    "playful": {
+      "openers": [
+        {
+          "text": "Happy birthday, {name}! The cake is officially on us.",
+          "usesName": true
+        },
+        {
+          "text": "It is {name} day, and we have been looking forward to it all week.",
+          "usesName": true
+        },
+        {
+          "text": "Breaking news, {name}: you are another year more awesome.",
+          "usesName": true
+        },
+        {
+          "text": "Happy birthday! Today, the only deadline is the cake.",
+          "usesName": false
+        },
+        {
+          "text": "Another year wiser, and somehow even more fun to work with.",
+          "usesName": false
+        },
+        {
+          "text": "Birthday mode: on. Work mode: see you tomorrow.",
+          "usesName": false
+        }
+      ],
+      "middles": [
+        "You make meetings shorter, coffee breaks longer, and the whole office happier.",
+        "Your laugh should be part of the official office supplies, because we cannot get through the week without it.",
+        "You have a gift for turning stressful days into stories we laugh about later.",
+        "Between your ideas and your jokes, there is never a dull day when you are around.",
+        "You work hard, celebrate harder, and make sure nobody skips the snacks.",
+        "Seriously, the team group chat agrees: work would be far less fun without you."
+      ],
+      "closers": [
+        "May your day be filled with cake, zero emails, and all your favorite people.",
+        "Wishing you a year of wins at work and naps on weekends.",
+        "Enjoy your day off from being the responsible one. We will hold the fort, probably.",
+        "Here is to more laughter, more cake, and fewer surprise meetings.",
+        "Have the happiest birthday. You deserve every slice."
+      ],
+      "shorts": [
+        "Wishing you good health, good food, and zero paperwork today.",
+        "Happy birthday! Cake first, meetings never.",
+        "Another year of being the office favorite. Happy birthday!",
+        "May your inbox be empty and your plate be full. Happy birthday!",
+        "Happy birthday! You do not look a day over fabulous.",
+        "Today we celebrate you, preferably with cake.",
+        "Wishing you a birthday as fun as you make our workdays.",
+        "Happy birthday! Officially too cool for overtime today.",
+        "May your coffee be strong and your birthday cake stronger.",
+        "Cheers to you! Now, who is bringing the cake?"
+      ],
+      "closings": [
+        "May your year be full of cake, confetti, and conveniently short meetings.",
+        "Here is to a year of big wins, long weekends, and extra servings of cake.",
+        "Wishing you twelve months of fun, with meetings that could have been emails.",
+        "May your year sparkle, and may your snacks never go missing from the pantry.",
+        "To a year as fun as you are, and only slightly more chaotic.",
+        "Wishing you a year of laughter, leftovers, and leaving work on time."
+      ]
+    },
+    "formal": {
+      "openers": [
+        {
+          "text": "Warmest birthday greetings, {name}.",
+          "usesName": true
+        },
+        {
+          "text": "On behalf of the whole team, happy birthday, {name}.",
+          "usesName": true
+        },
+        {
+          "text": "It is our pleasure to greet you on your birthday, {name}.",
+          "usesName": true
+        },
+        {
+          "text": "Please accept our warmest greetings on your birthday.",
+          "usesName": false
+        },
+        {
+          "text": "We extend our heartfelt greetings on this special occasion.",
+          "usesName": false
+        },
+        {
+          "text": "Today, we honor a valued colleague on their birthday.",
+          "usesName": false
+        }
+      ],
+      "middles": [
+        "Your professionalism, dedication, and integrity continue to inspire everyone in this office.",
+        "Your leadership and commitment to our shared work set a standard we all strive to meet.",
+        "We recognize and appreciate the excellence you bring to every responsibility entrusted to you.",
+        "Your contributions to our programs and to the people we serve are truly commendable.",
+        "It is a privilege to work alongside someone of your competence and character.",
+        "Your steady dedication strengthens our team and advances our mission every day."
+      ],
+      "closers": [
+        "We wish you continued success, good health, and fulfillment in the year ahead.",
+        "May the coming year bring you well deserved rewards and new milestones.",
+        "Please accept our sincerest wishes for a meaningful and joyful celebration.",
+        "We look forward to another year of working with you. Happy birthday.",
+        "With our highest regard, we wish you a very happy birthday."
+      ],
+      "shorts": [
+        "Warmest greetings on your birthday. We wish you continued success.",
+        "Happy birthday. Your dedication to our work is deeply appreciated.",
+        "Please accept our sincerest birthday wishes and highest regard.",
+        "Wishing you good health and fulfillment in the year ahead.",
+        "Happy birthday to a valued member of our team.",
+        "Your exemplary service is recognized and appreciated. Happy birthday.",
+        "We extend our heartfelt greetings on this special day.",
+        "May your birthday be as commendable as your work. Best wishes.",
+        "Happy birthday. It is an honor to work alongside you.",
+        "With gratitude for your service, we wish you a very happy birthday."
+      ],
+      "closings": [
+        "We wish you continued success and good health in the year ahead.",
+        "May the year ahead bring you fulfillment in all your endeavors.",
+        "Please accept our best wishes for a prosperous and meaningful year.",
+        "We extend our warmest wishes for your continued success and well-being.",
+        "May this new year of your life be marked by achievement and good health.",
+        "With our sincerest regards, we wish you a distinguished year ahead."
+      ]
+    }
+  }
+}
