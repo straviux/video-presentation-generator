@@ -473,6 +473,7 @@ const PHOTO_FRAME_KEYS = ["full", "thin", "polaroid", "rounded", "gold"];
 const PAPER_KEYS = [
   "classic", "white", "kraft", "blush", "mint", "sky",
   "crumpled", "folder", "asymmetrical", "felt", "specialty",
+  "linen", "gingham", "polka", "stripes", "charcoal", "grid", "parchment",
 ];
 const EFFECT_KEYS = ["none", "confetti", "sparkles", "hearts", "petals"];
 // Occasions the Templates panel can pick. Only the Birthday template
@@ -753,7 +754,13 @@ function parseForm(body, photoCount, { requirePhotos }) {
         : "classic",
       titleDate: text(body.titleDate),
       titleEffect: effectPick(body.titleEffect),
+      titleTransition: ["reveal", "fadeup", "typewriter", "letterpop"].includes(text(body.titleTransition))
+        ? text(body.titleTransition)
+        : "reveal",
       closingEffect: effectPick(body.closingEffect),
+      closingStyle: ["card", "minimal", "photo"].includes(text(body.closingStyle))
+        ? text(body.closingStyle)
+        : "card",
       photoCollageEffect: effectPick(body.photoCollageEffect),
       textCollageEffect: effectPick(body.textCollageEffect),
       textFx,
@@ -768,8 +775,10 @@ function buildConfig(values) {
     titleDuration: values.titleDuration,
     titleDate: values.titleDate,
     titleEffect: values.titleEffect,
+    titleTransition: values.titleTransition,
     closingDuration: values.closingDuration,
     closingEffect: values.closingEffect,
+    closingStyle: values.closingStyle,
     closingLine:
       values.closingLine || "Wishing you a year as warm and generous as you are.",
     closingPaper: values.closingPaper,
@@ -1347,8 +1356,10 @@ app.post(
           titleDuration: projectField(body.titleDuration),
           titleDate: projectField(body.titleDate),
           titleEffect: projectField(body.titleEffect),
+          titleTransition: projectField(body.titleTransition),
           closingDuration: projectField(body.closingDuration),
           closingEffect: projectField(body.closingEffect),
+          closingStyle: projectField(body.closingStyle),
           closingLine: projectField(body.closingLine),
           closingSignOff: projectField(body.closingSignOff),
           closingPaper: projectField(body.closingPaper),

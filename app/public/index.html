@@ -340,6 +340,16 @@
             <option value="hearts">Hearts</option>
             <option value="petals">Petals</option>
           </select>
+          <label class="field-label" for="titleTransition">Name transition<button type="button" class="help-btn" aria-expanded="false" aria-controls="helpTitleTransition" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button></label>
+          <select class="field-input" id="titleTransition">
+            <option value="reveal" selected>Reveal, sliding in from the sides</option>
+            <option value="fadeup">Fade up</option>
+            <option value="typewriter">Typewriter</option>
+            <option value="letterpop">Letter pop</option>
+          </select>
+          <div class="help-pop" id="helpTitleTransition" hidden>
+            <p>Changes only how the celebrant name arrives. The greeting, rule, and date keep their timing, and the name looks the same once it has landed.</p>
+          </div>
         </div>
         <div id="closingFieldsHome">
           <label class="field-label" for="closingEyebrow">Closing card top line (optional)<button type="button" class="help-btn" aria-expanded="false" aria-controls="helpClosingEyebrow" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button></label>
@@ -367,7 +377,23 @@
             <option value="asymmetrical">Asymmetrical</option>
             <option value="felt">Felt</option>
             <option value="specialty">Specialty</option>
+            <option value="linen">Linen weave</option>
+            <option value="gingham">Gingham check</option>
+            <option value="polka">Polka dots</option>
+            <option value="stripes">Candy stripe</option>
+            <option value="charcoal">Charcoal</option>
+            <option value="grid">Graph grid</option>
+            <option value="parchment">Parchment</option>
           </select>
+          <label class="field-label" for="closingStyle">Closing style<button type="button" class="help-btn" aria-expanded="false" aria-controls="helpClosingStyle" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button></label>
+          <select class="field-input" id="closingStyle">
+            <option value="card" selected>Card on paper</option>
+            <option value="minimal">Minimal, on the background</option>
+            <option value="photo">Photo backdrop</option>
+          </select>
+          <div class="help-pop" id="helpClosingStyle" hidden>
+            <p>Card shows the closing words on paper as today. Minimal sets them straight on the background. Photo fills the scene with the last photo and sets the words over it. The paper pick only applies to the Card look, and Photo falls back to the Card look when there are no photos.</p>
+          </div>
           <label class="field-label" for="closingEffect">Closing card effect</label>
           <select class="field-input" id="closingEffect">
             <option value="none" selected>None</option>
@@ -616,6 +642,9 @@
         ["blush", "Blush pink"], ["mint", "Mint green"], ["sky", "Sky blue"],
         ["crumpled", "Crumpled"], ["folder", "Folder"], ["asymmetrical", "Asymmetrical"],
         ["felt", "Felt"], ["specialty", "Specialty"],
+        ["linen", "Linen weave"], ["gingham", "Gingham check"], ["polka", "Polka dots"],
+        ["stripes", "Candy stripe"], ["charcoal", "Charcoal"], ["grid", "Graph grid"],
+        ["parchment", "Parchment"],
       ];
       const EFFECT_OPTIONS = [
         ["none", "None"], ["confetti", "Confetti"], ["sparkles", "Sparkles"],
@@ -1170,7 +1199,7 @@
       for (const id of ["collageEnabled", "textCollageEnabled",
         "celebrantName", "titleDate", "closingLine", "closingSignOff",
         "titleEyebrow", "titleGreeting", "closingEyebrow",
-        "titleDuration", "titleEffect", "closingDuration", "closingPaper", "closingEffect",
+        "titleDuration", "titleEffect", "titleTransition", "closingDuration", "closingPaper", "closingEffect", "closingStyle",
         "collageHeading", "textCollageHeading", "photoCollageDuration", "textCollageDuration",
         "photoCollageEffect", "textCollageEffect"]) {
         $(id).addEventListener("input", refreshSummary);
@@ -1475,8 +1504,10 @@
           titleDate: $("titleDate").value,
           titleDuration: $("titleDuration").value,
           titleEffect: $("titleEffect").value,
+          titleTransition: $("titleTransition").value,
           closingDuration: $("closingDuration").value,
           closingEffect: $("closingEffect").value,
+          closingStyle: $("closingStyle").value,
           closingLine: $("closingLine").value,
           closingSignOff: $("closingSignOff").value,
           closingPaper: $("closingPaper").value,
@@ -1544,8 +1575,10 @@
         form.append("titleDate", s.titleDate.trim());
         form.append("titleDuration", s.titleDuration);
         form.append("titleEffect", s.titleEffect);
+        form.append("titleTransition", s.titleTransition);
         form.append("closingDuration", s.closingDuration);
         form.append("closingEffect", s.closingEffect);
+        form.append("closingStyle", s.closingStyle);
         form.append("closingLine", s.closingLine.trim());
         form.append("closingSignOff", s.closingSignOff.trim());
         form.append("closingPaper", s.closingPaper);
@@ -1932,8 +1965,10 @@
         setVal("titleDate", f.titleDate);
         setVal("titleDuration", f.titleDuration);
         setVal("titleEffect", f.titleEffect);
+        setVal("titleTransition", f.titleTransition || "reveal");
         setVal("closingDuration", f.closingDuration);
         setVal("closingEffect", f.closingEffect);
+        setVal("closingStyle", f.closingStyle || "card");
         setVal("closingLine", f.closingLine);
         setVal("closingSignOff", f.closingSignOff);
         setVal("closingPaper", f.closingPaper);

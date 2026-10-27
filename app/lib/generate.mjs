@@ -46,11 +46,13 @@ const CLOSING_DUR = clampNum(config.closingDuration, 8, 4, 15);
 const PAPER_KEYS = [
   "classic", "white", "kraft", "blush", "mint", "sky",
   "crumpled", "folder", "asymmetrical", "felt", "specialty",
+  "linen", "gingham", "polka", "stripes", "charcoal", "grid", "parchment",
 ];
 function pickPaper(value) {
   return PAPER_KEYS.includes(value) ? value : "classic";
 }
 const CLOSING_PAPER = pickPaper(config.closingPaper ?? config.closing?.paper);
+const CLOSING_STYLE = ["card", "minimal", "photo"].includes(config.closingStyle) ? config.closingStyle : "card";
 // Optional date line under the title card's gold rule ("" = no line).
 const TITLE_DATE = String(config.titleDate ?? "").trim();
 // The closing eyebrow greets the celebrant by first name only.
@@ -74,6 +76,7 @@ function pickEffect(value) {
   return EFFECT_KEYS.includes(value) ? value : "none";
 }
 const TITLE_EFFECT = pickEffect(config.titleEffect);
+const TITLE_TRANSITION = ["reveal", "fadeup", "typewriter", "letterpop"].includes(config.titleTransition) ? config.titleTransition : "reveal";
 const CLOSING_EFFECT = pickEffect(config.closingEffect);
 
 // ------------------------------------------------------- collage content ---
@@ -640,7 +643,22 @@ const TEXT_FX_CSS = buildTextFxCss();
 function buildTitle(s) {
   const titleLine1 = wordSpans(TITLE_GREETING || `Happy ${config.occasion},`);
   const nameParts = splitName(config.celebrantName);
-  const titleLine2 = `<span class="name-chunk" id="title-name-left">${esc(nameParts.left)}</span>${nameParts.sep}<span class="name-chunk" id="title-name-right">${esc(nameParts.right)}!</span>`;
+  // Name entrance: reveal keeps the split-chunk slide exactly as before;
+  // fadeup reuses those chunks with a single rise; typewriter and
+  // letterpop spell the full name (plus the usual "!") character by
+  // character. At rest all four render the same name in the same font.
+  const fullName = `${String(config.celebrantName ?? "").trim()}!`;
+  const nameCharTotal = typeCharCount(fullName);
+  const nameTypeSpan = Math.max(0.5, TITLE_DUR - 1.85);
+  const nameTypeStagger = nameCharTotal > 1 ? Number((nameTypeSpan / (nameCharTotal - 1)).toFixed(4)) : 0;
+  let titleLine2;
+  if (TITLE_TRANSITION === "typewriter") {
+    titleLine2 = typewriterSpans(fullName);
+  } else if (TITLE_TRANSITION === "letterpop") {
+    titleLine2 = fullName.split(/\s+/).filter(Boolean).map((w) => `<span class="tw-w">${[...w].map((c) => `<span class="name-letter">${esc(c)}</span>`).join("")}</span>`).join(" ");
+  } else {
+    titleLine2 = `<span class="name-chunk" id="title-name-left">${esc(nameParts.left)}</span>${nameParts.sep}<span class="name-chunk" id="title-name-right">${esc(nameParts.right)}!</span>`;
+  }
   const nameLineClass = FONT_SLOTS.name.script ? "name-line name-script" : "name-line";
   const fx = buildEffect(TITLE_EFFECT, "fx-title", s, TITLE_DUR);
   scenes.push(`
@@ -665,8 +683,16 @@ function buildTitle(s) {
     ] : []),
     `tl.fromTo("#title-eyebrow", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, ${s + 0.15});`,
     `tl.fromTo("#title-greeting .w", { opacity: 0, y: 69, rotation: 4 }, { opacity: 1, y: 0, rotation: 0, duration: 0.7, ease: "power3.out", stagger: 0.12, transformOrigin: "50% 100%" }, ${s + 0.35});`,
-    `tl.fromTo("#title-name-left", { opacity: 0, x: -1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.8});`,
-    `tl.fromTo("#title-name-right", { opacity: 0, x: 1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.87});`,
+    ...(TITLE_TRANSITION === "fadeup" ? [
+      `tl.fromTo("#title-name .name-line", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, ${s + 0.8});`,
+    ] : TITLE_TRANSITION === "typewriter" ? [
+      `tl.fromTo("#title-name .tw-c", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05, ease: "none", stagger: ${nameTypeStagger} }, ${s + 0.8});`,
+    ] : TITLE_TRANSITION === "letterpop" ? [
+      `tl.fromTo("#title-name .name-letter", { autoAlpha: 0, scale: 0.4 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: "back.out(2)", stagger: 0.045 }, ${s + 0.8});`,
+    ] : [
+      `tl.fromTo("#title-name-left", { opacity: 0, x: -1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.8});`,
+      `tl.fromTo("#title-name-right", { opacity: 0, x: 1250 }, { opacity: 1, x: 0, duration: 0.75, ease: "power3.out" }, ${s + 0.87});`,
+    ]),
     `tl.fromTo("#title-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, ${s + 1.8});`,
     ...(TITLE_DATE ? [
       `tl.fromTo("#title-date", { opacity: 0, y: 18 }, { opacity: 0.85, y: 0, duration: 0.45, ease: "power2.out" }, ${s + 2.5});`,
@@ -1033,20 +1059,40 @@ function buildClosing(s) {
   const fx = buildEffect(CLOSING_EFFECT, "fx-closing", s, CLOSING_DUR);
   const topStrip = buildClosingStrip("top", CLOSING_TOP_PHOTOS, s, 0.35);
   const bottomStrip = buildClosingStrip("bottom", CLOSING_BOTTOM_PHOTOS, s, 1.6);
+  // Closing looks: card is today's paper card; minimal sets the words
+  // straight on the background; photo fills the scene with the last
+  // played photo under a dark scrim. Photo with no photos falls back
+  // to the card. All three share the eyebrow/line/rule/sign ids, so
+  // the text tweens and the photo strips ride along unchanged.
+  const lastPhotoKey = [...PLAYED].reverse().find((k) => k.startsWith("photo:"));
+  const lastPhoto = lastPhotoKey ? PHOTOS[Number(lastPhotoKey.slice(6))] : null;
+  const style = CLOSING_STYLE === "photo" && !lastPhoto ? "card" : CLOSING_STYLE;
+  const eyebrowHtml = `<div class="eyebrow scrap-eyebrow" id="closing-eyebrow">${esc(CLOSING_EYEBROW || `Happy ${config.occasion}, ${FIRST_NAME}`)}</div>`;
+  const lineHtml = `<p class="closing-line" id="closing-line">${wordSpans(config.closingLine)}</p>`;
+  const ruleHtml = `<div class="rule scrap-rule" id="closing-rule"></div>`;
+  const signHtml = `<p class="closing-sign" id="closing-sign">${esc(config.closingSignOff)}</p>`;
+  let closingInner;
+  if (style === "minimal") {
+    closingInner = `<div class="closing-minimal" id="closing-text">${eyebrowHtml}${ruleHtml}${lineHtml}${signHtml}</div>`;
+  } else if (style === "photo") {
+    closingInner = `<div class="closing-photo-bg" id="closing-photo-bg"><img src="${esc(lastPhoto.file)}" alt="" /><div class="closing-photo-scrim"></div></div><div class="closing-photo-text" id="closing-text">${eyebrowHtml}${ruleHtml}${lineHtml}${signHtml}</div>`;
+  } else {
+    closingInner = `<div class="scrap-wrap" id="closing-card">
+        <div class="scrap-card paper-${CLOSING_PAPER}">
+          ${eyebrowHtml}
+          ${lineHtml}
+          ${ruleHtml}
+          ${signHtml}
+        </div>
+        <div class="tape tape-left" id="tape-left"></div>
+        <div class="tape tape-right" id="tape-right"></div>
+      </div>`;
+  }
   scenes.push(`
     <section class="clip scene scene-card" id="scene-closing" style="opacity: 0" data-start="${s}" data-duration="${CLOSING_DUR}" data-track-index="${nextTrack()}">
       ${ORB_A}
       ${ORB_B}${fx.html}
-      <div class="scrap-wrap" id="closing-card">
-        <div class="scrap-card paper-${CLOSING_PAPER}">
-          <div class="eyebrow scrap-eyebrow" id="closing-eyebrow">${esc(CLOSING_EYEBROW || `Happy ${config.occasion}, ${FIRST_NAME}`)}</div>
-          <p class="closing-line" id="closing-line">${wordSpans(config.closingLine)}</p>
-          <div class="rule scrap-rule" id="closing-rule"></div>
-          <p class="closing-sign" id="closing-sign">${esc(config.closingSignOff)}</p>
-        </div>
-        <div class="tape tape-left" id="tape-left"></div>
-        <div class="tape tape-right" id="tape-right"></div>
-      </div>${topStrip.html}${bottomStrip.html}
+      ${closingInner}${topStrip.html}${bottomStrip.html}
     </section>`);
   sceneMeta.push({ key: "closing", label: "Closing card", start: s, duration: CLOSING_DUR });
 
@@ -1059,12 +1105,22 @@ function buildClosing(s) {
       `tl.fromTo("#scene-closing .orb-a", { x: 0, y: 0 }, { x: -45, y: 30, duration: ${CLOSING_DUR}, ease: "sine.inOut" }, ${s});`,
       `tl.fromTo("#scene-closing .orb-b", { x: 0, y: 0 }, { x: 36, y: -24, duration: ${CLOSING_DUR}, ease: "sine.inOut" }, ${s});`,
     ] : []),
-    `tl.fromTo("#closing-card", { opacity: 0, y: 72, rotation: -2.4 }, { opacity: 1, y: 0, rotation: -0.7, duration: 0.8, ease: "power3.out" }, ${s + 0.2});`,
-    `tl.fromTo("#tape-left", { opacity: 0, y: -42, rotation: -52 }, { opacity: 1, y: 0, rotation: -38, duration: 0.5, ease: "power2.out" }, ${s + 0.6});`,
-    `tl.fromTo("#tape-right", { opacity: 0, y: -42, rotation: 52 }, { opacity: 1, y: 0, rotation: 38, duration: 0.5, ease: "power2.out" }, ${s + 0.7});`,
-    `tl.fromTo("#closing-eyebrow", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, ${s + 0.75});`,
-    `tl.fromTo("#closing-line .w", { opacity: 0, y: 51, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.65, ease: "power3.out", stagger: 0.07, transformOrigin: "50% 100%" }, ${s + 1.05});`,
-    `tl.fromTo("#closing-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, ${s + 2.1});`,
+    ...(style === "card" ? [
+      `tl.fromTo("#closing-card", { opacity: 0, y: 72, rotation: -2.4 }, { opacity: 1, y: 0, rotation: -0.7, duration: 0.8, ease: "power3.out" }, ${s + 0.2});`,
+      `tl.fromTo("#tape-left", { opacity: 0, y: -42, rotation: -52 }, { opacity: 1, y: 0, rotation: -38, duration: 0.5, ease: "power2.out" }, ${s + 0.6});`,
+      `tl.fromTo("#tape-right", { opacity: 0, y: -42, rotation: 52 }, { opacity: 1, y: 0, rotation: 38, duration: 0.5, ease: "power2.out" }, ${s + 0.7});`,
+      `tl.fromTo("#closing-eyebrow", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, ${s + 0.75});`,
+      `tl.fromTo("#closing-line .w", { opacity: 0, y: 51, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.65, ease: "power3.out", stagger: 0.07, transformOrigin: "50% 100%" }, ${s + 1.05});`,
+      `tl.fromTo("#closing-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, ${s + 2.1});`,
+    ] : [
+      ...(style === "photo" ? [
+        `tl.fromTo("#closing-photo-bg", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power1.out" }, ${s});`,
+      ] : []),
+      `tl.fromTo("#closing-text", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, ${s + 0.2});`,
+      `tl.fromTo("#closing-eyebrow", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, ${s + 0.75});`,
+      `tl.fromTo("#closing-rule", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power2.inOut" }, ${s + 1.0});`,
+      `tl.fromTo("#closing-line .w", { opacity: 0, y: 51, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.65, ease: "power3.out", stagger: 0.07, transformOrigin: "50% 100%" }, ${s + 1.2});`,
+    ]),
     `tl.fromTo("#closing-sign", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8, ease: "power1.out" }, ${s + 2.55});`,
     // Hold the closing card to the exact end of the composition.
     `tl.to("#scene-closing", { opacity: 1, duration: ${TOTAL - (s + 3.0)}, ease: "none" }, ${s + 3.0});`,
@@ -1156,6 +1212,8 @@ const html = `<!doctype html>
       .name-script { font-size: 121px; line-height: 1.3; }
       #title-greeting { font-family: var(--font-headings); }
       .name-chunk { display: inline-block; }
+      /* Letter-pop spans: inline-block so each letter can scale. */
+      .name-letter { display: inline-block; }
       /* Typewriter spans: words are inline-block so wrapping stays between
          words; the characters inside stay inline and only fade in. */
       .tw-w { display: inline-block; }
@@ -1350,6 +1408,26 @@ ${TEXT_FX_CSS}
          extras block; background sizes/offsets keep the two speckle
          tiles from lining up into a pattern. */
       .paper-specialty { background: var(--paper-grain), radial-gradient(circle, rgba(160, 118, 26, 0.34) 2px, rgba(160, 118, 26, 0) 3.2px), radial-gradient(circle, rgba(160, 118, 26, 0.24) 1.5px, rgba(160, 118, 26, 0) 2.6px), linear-gradient(165deg, #fdfaf1 0%, #f8f2e0 58%, #f0e6cb 100%); background-size: auto, 84px 84px, 132px 132px, auto; background-position: 0 0, 12px 18px, 48px 70px, 0 0; }
+      /* Linen: a fine woven cross-hatch over warm white, kept faint so
+         text stays easy to read. */
+      .paper-linen { background: var(--paper-grain), repeating-linear-gradient(0deg, rgba(90, 70, 30, 0.06) 0 2px, rgba(90, 70, 30, 0) 2px 7px), repeating-linear-gradient(90deg, rgba(90, 70, 30, 0.06) 0 2px, rgba(90, 70, 30, 0) 2px 7px), linear-gradient(165deg, #f7f1e2 0%, #efe6cf 58%, #e7dab9 100%); }
+      /* Gingham: a dusty blue check grid over cream. The horizontal and
+         vertical bands cross into darker checks, like picnic cloth. */
+      .paper-gingham { background: var(--paper-grain), repeating-linear-gradient(0deg, rgba(96, 124, 148, 0.20) 0 32px, rgba(96, 124, 148, 0) 32px 64px), repeating-linear-gradient(90deg, rgba(96, 124, 148, 0.20) 0 32px, rgba(96, 124, 148, 0) 32px 64px), linear-gradient(165deg, #fbf7ec 0%, #f3ecd9 58%, #ece2c8 100%); }
+      /* Polka: small soft gold dots on a wide grid over cream. */
+      .paper-polka { background: var(--paper-grain), radial-gradient(circle, rgba(160, 118, 26, 0.20) 3px, rgba(160, 118, 26, 0) 4px), linear-gradient(165deg, #fdf8ec 0%, #f8f0dc 58%, #efe4c6 100%); background-size: auto, 54px 54px, auto; }
+      /* Stripes: a muted diagonal candy stripe over cream. */
+      .paper-stripes { background: var(--paper-grain), repeating-linear-gradient(45deg, rgba(190, 120, 130, 0.16) 0 26px, rgba(190, 120, 130, 0) 26px 52px), linear-gradient(165deg, #fdf6ec 0%, #f6ead2 58%, #efe0bd 100%); }
+      /* Charcoal: the one dark paper. Light ink rides through the same
+         --paper-ink vars folder uses, so card text, signers, and gold
+         accents all stay legible, and the card edge line lightens to
+         match (see the border rule after the closing styles). */
+      .paper-charcoal { --paper-ink: #f5f0e0; --paper-ink-soft: #cfc8b4; --paper-accent: #e8c56e; background: var(--paper-grain), linear-gradient(165deg, #434340 0%, #333332 58%, #232322 100%); }
+      /* Grid: fine graph-paper lines over white cream. */
+      .paper-grid { background: var(--paper-grain), linear-gradient(rgba(90, 110, 130, 0.10) 1px, rgba(90, 110, 130, 0) 1px), linear-gradient(90deg, rgba(90, 110, 130, 0.10) 1px, rgba(90, 110, 130, 0) 1px), linear-gradient(165deg, #fdfbf4 0%, #f7f2e4 58%, #efe8d2 100%); background-size: auto, 36px 36px, 36px 36px, auto; }
+      /* Parchment: aged cream with soft edge darkening and two faint
+         stains, like an old letter. */
+      .paper-parchment { background: var(--paper-grain), radial-gradient(ellipse at 20% 15%, rgba(160, 120, 60, 0.10), rgba(160, 120, 60, 0) 55%), radial-gradient(ellipse at 82% 78%, rgba(140, 100, 50, 0.12), rgba(140, 100, 50, 0) 50%), radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 60%, rgba(101, 82, 44, 0.18) 100%), linear-gradient(165deg, #f6ead0 0%, #eeddc0 58%, #e2cda6 100%); }
       /* Message cards */
       /* Message cards wear the same paper as the closing scrapbook card:
          warm gradient plus a faint SVG-noise grain, so the text sits on
@@ -1439,6 +1517,28 @@ ${TEXT_FX_CSS}
       .strip-photo img { display: block; object-fit: cover; }
       .strip-accent { flex: none; align-self: center; color: var(--accent); }
       .strip-accent svg { display: block; width: 100%; height: 100%; }
+      /* Closing variants that skip the paper card. Minimal sets the
+         words straight on the scene background in the background's ink
+         colors; Photo fills the scene with the last played photo under
+         a dark scrim and sets the words over it in light ink. Both keep
+         the same element ids as the card look, so the text tweens and
+         the photo strips ride along unchanged. */
+      .closing-minimal, .closing-photo-text {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        text-align: center; padding: 96px;
+      }
+      .closing-minimal .closing-line { color: var(--ink); }
+      .closing-minimal .closing-sign { color: var(--ink-soft); }
+      .closing-photo-bg { position: absolute; inset: 0; overflow: hidden; }
+      .closing-photo-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .closing-photo-scrim { position: absolute; inset: 0; background: rgba(10, 14, 10, 0.62); }
+      .closing-photo-text .closing-line { color: #f8f3e4; }
+      .closing-photo-text .closing-sign { color: rgba(248, 243, 228, 0.85); }
+      /* Charcoal paper needs a light edge line on every card size, or
+         the card edge vanishes into the dark stock. */
+      .msg-card.paper-charcoal, .scrap-card.paper-charcoal, .greet-card.paper-charcoal { border-color: rgba(245, 240, 224, 0.28); }
       /* Paper extras that need the card rules above to be in place.
          Folder: a raised tab standing proud of the top edge, riding
          behind the card face. The tab is deliberately lighter than the
