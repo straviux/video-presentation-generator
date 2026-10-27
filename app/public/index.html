@@ -57,7 +57,7 @@
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
           Projects
         </button>
-        <button type="button" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]" data-tab="panelLibrary">
+        <button type="button" id="railLibraryBtn" class="rail-btn border-none bg-transparent cursor-pointer rounded-lg pt-[9px] px-0.5 pb-[7px] flex flex-col items-center gap-1 text-muted text-[10.5px] hover:bg-[#f5f5f8]">
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
           Library
         </button>
@@ -92,6 +92,39 @@
             <button type="button" class="mini-btn" id="inspMoveLater">Move later<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
             <span class="flex-1"></span>
             <button type="button" class="mini-btn" id="newCardBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>New card</button>
+          </div>
+          <div class="border border-line rounded-[10px] p-3 mb-3.5 bg-[#fafafc]">
+            <div class="flex items-center gap-1.5">
+              <h3 class="m-0 text-[13.5px] font-semibold">Scene preset</h3>
+              <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpPreset" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+            </div>
+            <div class="help-pop" id="helpPreset" hidden>
+              <p>A preset sets the order the scenes play in and which collages are on. It never changes your words, photos, papers, or timings. Save the arrangement you have now under a name to reuse it later. Shuffle rolls a new order, new card effects, or both; the title card always opens and the closing card always ends.</p>
+            </div>
+            <div class="flex gap-2 mt-2">
+              <select class="field-input" id="presetSelect" style="flex: 1; min-width: 0; width: auto">
+                <optgroup label="Built-in" id="presetBuiltinGroup">
+                  <option value="builtin:classic" selected>Classic</option>
+                  <option value="builtin:photos-first">Photos first</option>
+                  <option value="builtin:messages-first">Messages first</option>
+                  <option value="builtin:collage-spotlight">Collage spotlight</option>
+                  <option value="builtin:short">Short version</option>
+                </optgroup>
+                <optgroup label="Your presets" id="presetCustomGroup"></optgroup>
+              </select>
+              <button type="button" class="mini-btn flex-none" id="applyPresetBtn">Apply</button>
+              <button type="button" class="mini-btn danger flex-none" id="deletePresetBtn" style="display: none">Delete</button>
+            </div>
+            <div class="flex items-center gap-2 mt-2.5">
+              <button type="button" class="mini-btn flex-none" id="shuffleBtn"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>Shuffle</button>
+              <label class="flex items-center gap-1.5 text-[12.5px] text-muted cursor-pointer"><input type="checkbox" id="shuffleOrder" checked class="w-4 h-4 accent-[#8b3dff]" /> Scene order</label>
+              <label class="flex items-center gap-1.5 text-[12.5px] text-muted cursor-pointer"><input type="checkbox" id="shuffleEffects" checked class="w-4 h-4 accent-[#8b3dff]" /> Card effects</label>
+            </div>
+            <div class="flex gap-2 mt-2.5">
+              <input type="text" class="field-input" id="presetName" style="flex: 1; min-width: 0; width: auto" placeholder="Name for this arrangement" />
+              <button type="button" class="mini-btn flex-none" id="savePresetBtn">Save arrangement</button>
+            </div>
+            <p class="m-0 mt-1.5 text-muted text-[12px] leading-normal" id="presetStatus"></p>
           </div>
           <div id="inspectorBody"></div>
         </section>
@@ -284,61 +317,6 @@
           <div id="projectList"></div>
         </section>
 
-        <section class="panel p-[18px]" id="panelLibrary">
-          <div class="flex items-center gap-1.5 mb-3.5">
-            <h2 class="m-0 text-[15px] font-semibold">Library</h2>
-            <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpLibrary" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
-          </div>
-          <div class="help-pop" id="helpLibrary" hidden>
-            <p>The message library behind Smart generate: ready-made lines in four tones, kept in a small database in the app. Add your own lines here and the composer can use them right away; delete lines you no longer want.</p>
-          </div>
-          <div class="flex gap-2">
-            <select class="field-input" id="libraryToneFilter" style="flex: 1; min-width: 0; width: auto" aria-label="Filter lines by tone">
-              <option value="all" selected>All tones</option>
-              <option value="warm">Warm</option>
-              <option value="grateful">Grateful</option>
-              <option value="playful">Playful</option>
-              <option value="formal">Formal</option>
-            </select>
-            <select class="field-input" id="libraryKindFilter" style="flex: 1; min-width: 0; width: auto" aria-label="Filter lines by kind">
-              <option value="all" selected>All kinds</option>
-              <option value="opener">Opener</option>
-              <option value="middle">Middle</option>
-              <option value="closer">Closer</option>
-              <option value="short">Short line</option>
-              <option value="closing">Closing line</option>
-            </select>
-          </div>
-          <p class="m-0 mt-2.5 text-[12.5px] text-muted leading-normal" id="libraryCount"></p>
-          <div id="libraryList"></div>
-          <h3 class="m-0 mt-4 mb-1 text-[13.5px] font-semibold">Add a line</h3>
-          <label class="field-label" for="libraryAddKind">Kind</label>
-          <select class="field-input" id="libraryAddKind">
-            <option value="opener">Opener</option>
-            <option value="middle">Middle</option>
-            <option value="closer">Closer</option>
-            <option value="short">Short line</option>
-            <option value="closing">Closing line</option>
-          </select>
-          <label class="field-label" for="libraryAddTone">Tone</label>
-          <select class="field-input" id="libraryAddTone">
-            <option value="warm">Warm</option>
-            <option value="grateful">Grateful</option>
-            <option value="playful">Playful</option>
-            <option value="formal">Formal</option>
-          </select>
-          <div class="items-center gap-2.5 mt-3" id="libraryAddUsesNameRow" style="display: flex">
-            <input type="checkbox" id="libraryAddUsesName" class="w-[18px] h-[18px] accent-[#8b3dff]" />
-            <span class="text-[13px] leading-snug">Greets by name (write {name} where the first name goes)</span>
-          </div>
-          <label class="field-label" for="libraryAddText">Line</label>
-          <textarea class="field-input" id="libraryAddText" placeholder="Write the line here"></textarea>
-          <button type="button" id="libraryAddBtn" class="mt-3 w-full flex items-center justify-center gap-2 bg-brand text-white border-none rounded-lg px-4 py-2.5 text-sm font-semibold cursor-pointer hover:bg-brand-dark">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-            Add line
-          </button>
-          <p class="m-0 mt-2.5 text-[12.5px] text-muted leading-normal" id="libraryAddStatus"></p>
-        </section>
       <div id="fieldHome" style="display: none" aria-hidden="true">
         <div id="titleFieldsHome">
           <label class="field-label" for="celebrantName">Celebrant name</label>
@@ -546,6 +524,82 @@
         </div>
       </div>
     </div>
+
+    <!-- The message Library lives in a popup (a DaisyUI dialog), not in
+         the sidebar: the rail button opens it, and it closes with the
+         backdrop, the close button, or Escape. -->
+    <dialog id="libraryDialog" class="modal" aria-labelledby="libraryDialogTitle">
+      <div class="modal-box w-11/12 max-w-3xl">
+        <div class="flex items-center gap-1.5">
+          <h3 class="m-0 text-[17px] font-semibold" id="libraryDialogTitle">Message library</h3>
+          <button type="button" class="help-btn" aria-expanded="false" aria-controls="helpLibrary" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+          <span class="flex-1"></span>
+          <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost" aria-label="Close the library">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </form>
+        </div>
+        <div class="help-pop" id="helpLibrary" hidden>
+          <p>The message library behind Smart generate: ready-made lines in four tones, kept in a small database in the app. Add your own lines here and the composer can use them right away; delete lines you no longer want.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 mt-4">
+          <select class="field-input" id="libraryToneFilter" style="flex: 1 1 150px; width: auto" aria-label="Filter lines by tone">
+            <option value="all" selected>All tones</option>
+            <option value="warm">Warm</option>
+            <option value="grateful">Grateful</option>
+            <option value="playful">Playful</option>
+            <option value="formal">Formal</option>
+          </select>
+          <select class="field-input" id="libraryKindFilter" style="flex: 1 1 150px; width: auto" aria-label="Filter lines by kind">
+            <option value="all" selected>All kinds</option>
+            <option value="opener">Opener</option>
+            <option value="middle">Middle</option>
+            <option value="closer">Closer</option>
+            <option value="short">Short line</option>
+            <option value="closing">Closing line</option>
+          </select>
+          <span class="text-[12.5px] text-muted whitespace-nowrap" id="libraryCount"></span>
+        </div>
+        <div class="lib-list" id="libraryList"></div>
+        <h4 class="m-0 mt-5 mb-1 text-[14px] font-semibold">Add a line</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-3">
+          <div>
+            <label class="field-label" for="libraryAddKind">Kind</label>
+            <select class="field-input" id="libraryAddKind">
+              <option value="opener">Opener</option>
+              <option value="middle">Middle</option>
+              <option value="closer">Closer</option>
+              <option value="short">Short line</option>
+              <option value="closing">Closing line</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="libraryAddTone">Tone</label>
+            <select class="field-input" id="libraryAddTone">
+              <option value="warm">Warm</option>
+              <option value="grateful">Grateful</option>
+              <option value="playful">Playful</option>
+              <option value="formal">Formal</option>
+            </select>
+          </div>
+        </div>
+        <div class="items-center gap-2.5 mt-3" id="libraryAddUsesNameRow" style="display: flex">
+          <input type="checkbox" id="libraryAddUsesName" class="w-[18px] h-[18px] accent-[#8b3dff]" />
+          <span class="text-[13px] leading-snug">Greets by name (write {name} where the first name goes)</span>
+        </div>
+        <label class="field-label" for="libraryAddText">Line</label>
+        <textarea class="field-input" id="libraryAddText" placeholder="Write the line here"></textarea>
+        <button type="button" id="libraryAddBtn" class="mt-3 w-full flex items-center justify-center gap-2 bg-brand text-white border-none rounded-lg px-4 py-2.5 text-sm font-semibold cursor-pointer hover:bg-brand-dark">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          Add line
+        </button>
+        <p class="m-0 mt-2.5 text-[12.5px] text-muted leading-normal" id="libraryAddStatus"></p>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>Close</button>
+      </form>
+    </dialog>
     <script>
       const $ = (id) => document.getElementById(id);
       const photos = []; // { file, url, caption, inCollage, inClosingTop, inClosingBottom, duration, zoom, frame, focusX, focusY, brightness, saturation }
@@ -1172,6 +1226,9 @@
         if (panelId === "panelInspector") renderInspector();
       }
       document.querySelectorAll(".rail-btn").forEach((btn) => {
+        // The Library rail button has no panel anymore: it opens the
+        // library popup instead (wired in the library section below).
+        if (!btn.dataset.tab) return;
         btn.addEventListener("click", () => showPanel(btn.dataset.tab));
       });
 
@@ -1955,10 +2012,12 @@
       }
 
       // ------------------------------------------------------------- library --
-      // The Library panel manages the lines the Smart generate composer
+      // The Library popup manages the lines the Smart generate composer
       // draws from. The list renders from the same fetched bank the
       // composer uses; adding or deleting a line re-fetches the bank,
-      // so the composer picks the change up right away.
+      // so the composer picks the change up right away. The popup is a
+      // DaisyUI dialog opened from the rail; opening it re-fetches the
+      // bank so it always shows the current lines.
       const LIBRARY_KIND_LABELS = { opener: "Opener", middle: "Middle", closer: "Closer", short: "Short line", closing: "Closing line" };
       const LIBRARY_TONE_LABELS = { warm: "Warm", grateful: "Grateful", playful: "Playful", formal: "Formal" };
 
@@ -1986,15 +2045,23 @@
           meta.className = "flex-1 min-w-0";
           const text = document.createElement("div");
           text.className = "text-[13px] leading-snug";
-          text.style.cssText = "overflow: hidden; text-overflow: ellipsis; white-space: nowrap";
           text.textContent = line.text;
-          text.title = line.text;
           const tags = document.createElement("div");
-          tags.className = "text-[11.5px] text-muted";
-          tags.textContent =
-            (LIBRARY_KIND_LABELS[line.kind] || line.kind) + " · " +
-            (LIBRARY_TONE_LABELS[line.tone] || line.tone) +
-            (line.kind === "opener" && line.usesName ? " · greets by name" : "");
+          tags.className = "flex flex-wrap items-center gap-1 mt-1.5";
+          const kindBadge = document.createElement("span");
+          kindBadge.className = "badge badge-sm lib-badge-kind";
+          kindBadge.textContent = LIBRARY_KIND_LABELS[line.kind] || line.kind;
+          tags.appendChild(kindBadge);
+          const toneBadge = document.createElement("span");
+          toneBadge.className = "badge badge-sm lib-badge-tone";
+          toneBadge.textContent = LIBRARY_TONE_LABELS[line.tone] || line.tone;
+          tags.appendChild(toneBadge);
+          if (line.kind === "opener" && line.usesName) {
+            const nameBadge = document.createElement("span");
+            nameBadge.className = "badge badge-sm lib-badge-tone";
+            nameBadge.textContent = "Greets by name";
+            tags.appendChild(nameBadge);
+          }
           meta.appendChild(text);
           meta.appendChild(tags);
           const delBtn = document.createElement("button");
@@ -2014,6 +2081,13 @@
         renderLibraryList();
         return ok;
       }
+
+      function openLibrary() {
+        refreshLibrary();
+        const dlg = $("libraryDialog");
+        if (dlg && !dlg.open) dlg.showModal();
+      }
+      $("railLibraryBtn").addEventListener("click", openLibrary);
 
       async function deleteLibraryLine(line) {
         if (!window.confirm("Delete this library line? Smart generate will no longer use it.")) return;
@@ -2381,6 +2455,214 @@
 
       $("inspMoveEarlier").addEventListener("click", () => moveSelected(-1));
       $("inspMoveLater").addEventListener("click", () => moveSelected(1));
+
+      // ------------------------------------------- scene presets + shuffle --
+      // A preset sets the played order and the two collage switches, and
+      // nothing else: no words, photos, papers, timings, or effects are
+      // touched. Built-ins are computed over the current items (photos
+      // by index, messages by index, both collages as units) and then
+      // sanitized, so a preset applied to a smaller project simply
+      // covers what exists. Custom presets are saved arrangements in
+      // the same SQLite database as the message library.
+      function playedItemKeys() {
+        const out = [];
+        for (const sc of computeScenes()) {
+          if (sc.kind === "photo") out.push("photo:" + sc.index);
+          else if (sc.kind === "message") out.push("message:" + sc.index);
+          else if (sc.kind === "photoCollage") out.push("photoCollage");
+          else if (sc.kind === "textCollage") out.push("textCollage");
+        }
+        return out;
+      }
+
+      function builtinPreset(name) {
+        const photosKeys = [];
+        photos.forEach((_, i) => photosKeys.push("photo:" + i));
+        const messageKeys = [];
+        messagesState.forEach((_, i) => messageKeys.push("message:" + i));
+        const on = { collageEnabled: true, textCollageEnabled: true };
+        switch (name) {
+          case "photos-first":
+            return { sequence: [...photosKeys, ...messageKeys, "photoCollage", "textCollage"], ...on };
+          case "messages-first":
+            return { sequence: [...messageKeys, ...photosKeys, "photoCollage", "textCollage"], ...on };
+          case "collage-spotlight":
+            return { sequence: ["photoCollage", "textCollage", ...photosKeys, ...messageKeys], ...on };
+          case "short":
+            return { sequence: [...photosKeys, ...messageKeys], collageEnabled: false, textCollageEnabled: false };
+          case "classic":
+          default:
+            return { sequence: [...photosKeys, "photoCollage", "textCollage", ...messageKeys], ...on };
+        }
+      }
+
+      function setChecked(id, value) {
+        const el = $(id);
+        if (!el || el.checked === value) return;
+        el.checked = value;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      function applyPresetDef(def) {
+        sceneSeq = sanitizeSequence(def.sequence);
+        setChecked("collageEnabled", def.collageEnabled);
+        setChecked("textCollageEnabled", def.textCollageEnabled);
+        refreshSummary();
+      }
+
+      let customPresets = [];
+      function syncDeletePresetButton() {
+        const value = $("presetSelect").value || "";
+        $("deletePresetBtn").style.display = value.startsWith("custom:") ? "" : "none";
+      }
+
+      async function loadCustomPresets() {
+        try {
+          const resp = await fetch("/api/scene-presets");
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "Presets could not be loaded.");
+          customPresets = Array.isArray(data.presets) ? data.presets : [];
+        } catch {
+          customPresets = [];
+        }
+        const group = $("presetCustomGroup");
+        group.innerHTML = "";
+        for (const p of customPresets) {
+          const opt = document.createElement("option");
+          opt.value = "custom:" + p.id;
+          opt.textContent = p.name;
+          group.appendChild(opt);
+        }
+        syncDeletePresetButton();
+      }
+
+      function applySelectedPreset() {
+        const value = $("presetSelect").value || "";
+        if (value.startsWith("custom:")) {
+          const id = Number(value.slice(7));
+          const preset = customPresets.find((p) => p.id === id);
+          if (!preset) {
+            $("presetStatus").textContent = "That saved arrangement is no longer there.";
+            return;
+          }
+          applyPresetDef({
+            sequence: String(preset.sequence || "").split(",").map((s) => s.trim()).filter(Boolean),
+            collageEnabled: preset.collageEnabled,
+            textCollageEnabled: preset.textCollageEnabled,
+          });
+          $("presetStatus").textContent = "Preset applied: " + preset.name + ".";
+        } else {
+          const name = value.replace("builtin:", "") || "classic";
+          applyPresetDef(builtinPreset(name));
+          const label = $("presetSelect").selectedOptions[0]
+            ? $("presetSelect").selectedOptions[0].textContent
+            : "Classic";
+          $("presetStatus").textContent = "Preset applied: " + label + ".";
+        }
+        syncDeletePresetButton();
+      }
+
+      $("applyPresetBtn").addEventListener("click", applySelectedPreset);
+      $("presetSelect").addEventListener("change", syncDeletePresetButton);
+
+      $("savePresetBtn").addEventListener("click", async () => {
+        const name = $("presetName").value.trim();
+        if (!name) {
+          $("presetStatus").textContent = "Give the arrangement a name first.";
+          return;
+        }
+        $("presetStatus").textContent = "Saving...";
+        try {
+          const resp = await fetch("/api/scene-presets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              sequence: storedSequence().join(","),
+              collageEnabled: $("collageEnabled").checked,
+              textCollageEnabled: $("textCollageEnabled").checked,
+            }),
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "The arrangement could not be saved.");
+          $("presetStatus").textContent = "Saved: " + name + ".";
+          $("presetName").value = "";
+          await loadCustomPresets();
+          $("presetSelect").value = "custom:" + data.id;
+          syncDeletePresetButton();
+        } catch (err) {
+          $("presetStatus").textContent = err.message;
+        }
+      });
+
+      $("deletePresetBtn").addEventListener("click", async () => {
+        const value = $("presetSelect").value || "";
+        if (!value.startsWith("custom:")) return;
+        const id = Number(value.slice(7));
+        const preset = customPresets.find((p) => p.id === id);
+        if (!window.confirm("Delete the preset \"" + (preset ? preset.name : "this arrangement") + "\"?")) return;
+        try {
+          const resp = await fetch("/api/scene-presets/" + id, { method: "DELETE" });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "The preset could not be deleted.");
+          await loadCustomPresets();
+          $("presetSelect").value = "builtin:classic";
+          syncDeletePresetButton();
+          $("presetStatus").textContent = "Preset deleted.";
+        } catch (err) {
+          $("presetStatus").textContent = err.message;
+        }
+      });
+
+      const SHUFFLE_EFFECTS = ["none", "confetti", "sparkles", "hearts", "petals"];
+      function setEffectValue(id, value) {
+        const el = $(id);
+        if (!el) return;
+        el.value = value;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      $("shuffleBtn").addEventListener("click", () => {
+        const doOrder = $("shuffleOrder").checked;
+        const doEffects = $("shuffleEffects").checked;
+        if (!doOrder && !doEffects) {
+          $("presetStatus").textContent = "Tick Scene order, Card effects, or both, then Shuffle.";
+          return;
+        }
+        if (doOrder) {
+          // Only the played cards move, and only into played slots:
+          // unplayed keys (a blank message, a switched-off collage)
+          // stay exactly where they are, so their places are kept.
+          const seq = storedSequence();
+          const played = playedItemKeys();
+          const positions = [];
+          for (const key of played) {
+            const pos = seq.indexOf(key);
+            if (pos >= 0) positions.push(pos);
+          }
+          const shuffled = [...played];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          positions.forEach((pos, i) => { seq[pos] = shuffled[i]; });
+          sceneSeq = seq;
+        }
+        if (doEffects) {
+          const pick = () => SHUFFLE_EFFECTS[Math.floor(Math.random() * SHUFFLE_EFFECTS.length)];
+          setEffectValue("titleEffect", pick());
+          setEffectValue("closingEffect", pick());
+          setEffectValue("photoCollageEffect", pick());
+          setEffectValue("textCollageEffect", pick());
+          messagesState.forEach((m) => { m.effect = pick(); });
+          if ($("panelInspector").classList.contains("active")) renderInspector();
+        }
+        refreshSummary();
+        $("presetStatus").textContent = "Shuffled"
+          + (doOrder && doEffects ? " order and effects." : doOrder ? " order." : " effects.");
+      });
+
+      loadCustomPresets();
 
       // One New Card menu, shared by the Card panel button and the
       // filmstrip's + tile. It lists what can be added right now: a

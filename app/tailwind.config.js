@@ -1,3 +1,5 @@
+import daisyui from "daisyui";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./public/index.html"],
@@ -20,5 +22,14 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [daisyui],
+  // DaisyUI is used structurally (the Library popup's dialog, badges),
+  // not as the app's theme: only the light theme's variables are loaded
+  // and its global base styles stay off, so nothing else is restyled.
+  // The few variables the used components need are pinned in src/input.css.
+  daisyui: {
+    themes: ["light"],
+    base: false,
+    logs: false,
+  },
 };

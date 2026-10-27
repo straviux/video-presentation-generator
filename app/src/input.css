@@ -381,6 +381,28 @@ select {
   padding: 9px 0;
   border-top: 1px solid #e3e3ea;
 }
+
+/* Library popup (a DaisyUI dialog): the line list scrolls inside the
+   popup instead of stretching it, and the DaisyUI badges used for the
+   kind/tone chips are pinned to the app's own tints so they match the
+   editor around them rather than the stock light theme. */
+.lib-list {
+  margin-top: 10px;
+  max-height: 44vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.badge.lib-badge-kind {
+  background: #f1e8ff;
+  border-color: transparent;
+  color: #7329d6;
+  font-weight: 600;
+}
+.badge.lib-badge-tone {
+  background: #ececf1;
+  border-color: transparent;
+  color: #55555f;
+}
 .scene-list li {
   display: flex;
   justify-content: space-between;

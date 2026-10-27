@@ -98,6 +98,10 @@ try {
       ");" +
       "CREATE TABLE IF NOT EXISTS caption_lines (" +
       "id INTEGER PRIMARY KEY, category TEXT, text TEXT" +
+      ");" +
+      "CREATE TABLE IF NOT EXISTS scene_presets (" +
+      "id INTEGER PRIMARY KEY, name TEXT UNIQUE, sequence TEXT, " +
+      "collage_enabled INTEGER, text_collage_enabled INTEGER" +
       ");",
   );
   const countRow = messageDb
@@ -1097,6 +1101,83 @@ app.get("/api/captions", (req, res) => {
       categories[row.category].push({ id: row.id, text: row.text });
     }
     res.json({ categories });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
+// -------------------------------------------------------- scene presets --
+// Saved scene arrangements: a name, the stored sequence of item keys,
+// and the two collage switches. Custom presets live in the same SQLite
+// database as the message and caption libraries; the built-in presets
+// are defined in the client and are not stored here.
+app.get("/api/scene-presets", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "Scene presets are not available." });
+  }
+  try {
+    const rows = messageDb
+      .prepare("SELECT id, name, sequence, collage_enabled, text_collage_enabled FROM scene_presets ORDER BY id")
+      .all();
+    res.json({
+      presets: rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        sequence: row.sequence || "",
+        collageEnabled: Boolean(row.collage_enabled),
+        textCollageEnabled: Boolean(row.text_collage_enabled),
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
+app.post("/api/scene-presets", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "Scene presets are not available." });
+  }
+  const body = req.body || {};
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const sequence = typeof body.sequence === "string" ? body.sequence.trim() : "";
+  if (!name) {
+    return res.status(400).json({ error: "Give the arrangement a name first." });
+  }
+  if (name.length > 80) {
+    return res.status(400).json({ error: "Keep the name under 80 characters." });
+  }
+  try {
+    const existing = messageDb
+      .prepare("SELECT id FROM scene_presets WHERE name = ?")
+      .get(name);
+    if (existing) {
+      return res.status(400).json({ error: "A preset with that name already exists." });
+    }
+    const result = messageDb
+      .prepare("INSERT INTO scene_presets (name, sequence, collage_enabled, text_collage_enabled) VALUES (?, ?, ?, ?)")
+      .run(name, sequence, body.collageEnabled === true ? 1 : 0, body.textCollageEnabled === true ? 1 : 0);
+    res.json({ ok: true, id: Number(result.lastInsertRowid) });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+  }
+});
+
+app.delete("/api/scene-presets/:id", (req, res) => {
+  if (!messageDb) {
+    return res.status(500).json({ error: "Scene presets are not available." });
+  }
+  const id = Number.parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) {
+    return res.status(404).json({ error: "Scene preset not found." });
+  }
+  try {
+    const result = messageDb
+      .prepare("DELETE FROM scene_presets WHERE id = ?")
+      .run(id);
+    if (Number(result.changes) === 0) {
+      return res.status(404).json({ error: "Scene preset not found." });
+    }
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: String(err && err.message ? err.message : err) });
   }
